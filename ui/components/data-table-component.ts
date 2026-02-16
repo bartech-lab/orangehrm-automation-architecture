@@ -15,6 +15,11 @@ export class DataTableComponent extends BaseComponent {
     return false;
   }
 
+  async isReady(): Promise<boolean> {
+    // TODO: Implement ready check
+    return await this.isVisible();
+  }
+
   async getRowCount(): Promise<number> {
     // TODO: Implement row count
     return 0;
