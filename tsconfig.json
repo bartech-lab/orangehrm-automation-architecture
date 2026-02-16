@@ -3,7 +3,8 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -19,13 +20,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": [
-    "tests/**/*",
-    "domain/**/*",
-    "ui/**/*",
-    "data/**/*",
-    "api/**/*",
-    "infra/**/*"
-  ],
+  "include": ["tests/**/*", "domain/**/*", "ui/**/*", "data/**/*", "api/**/*", "infra/**/*"],
   "exclude": ["node_modules", "dist"]
 }

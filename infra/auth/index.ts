@@ -1,1 +1,1 @@
-export { AuthHelper } from './auth-helper';
+export { AuthHelper } from './auth-helper.js';

@@ -1,9 +1,5 @@
 import { faker } from '@faker-js/faker';
-import {
-  Employee,
-  Department,
-  EmploymentStatus,
-} from '../../domain/employee/types';
+import { Employee, Department, EmploymentStatus } from '../../domain/employee/types.js';
 
 type WritableEmployee = {
   -readonly [K in keyof Employee]: Employee[K];
@@ -90,7 +86,9 @@ export class EmployeeBuilder {
     return this;
   }
 
-  withMaritalStatus(status: 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Other'): EmployeeBuilder {
+  withMaritalStatus(
+    status: 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Other'
+  ): EmployeeBuilder {
     this.employee.maritalStatus = status;
     return this;
   }
@@ -144,11 +142,7 @@ export class EmployeeBuilder {
       'Widowed',
       'Other',
     ];
-    const workLocations: Array<'Onsite' | 'Remote' | 'Hybrid'> = [
-      'Onsite',
-      'Remote',
-      'Hybrid',
-    ];
+    const workLocations: Array<'Onsite' | 'Remote' | 'Hybrid'> = ['Onsite', 'Remote', 'Hybrid'];
 
     this.employee = {
       id: faker.string.uuid(),
@@ -175,7 +169,13 @@ export class EmployeeBuilder {
       },
       emergencyContact: {
         name: faker.person.fullName(),
-        relationship: faker.helpers.arrayElement(['Spouse', 'Parent', 'Sibling', 'Friend', 'Other']),
+        relationship: faker.helpers.arrayElement([
+          'Spouse',
+          'Parent',
+          'Sibling',
+          'Friend',
+          'Other',
+        ]),
         phone: faker.phone.number(),
       },
       workLocation: faker.helpers.arrayElement(workLocations),

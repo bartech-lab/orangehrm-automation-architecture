@@ -1,5 +1,5 @@
 import { test as base, type Page } from '@playwright/test';
-import { AuthHelper } from '../auth/auth-helper';
+import { AuthHelper } from '../auth/auth-helper.js';
 
 export interface TestFixtures {
   authenticatedPage: Page;
@@ -17,10 +17,7 @@ export interface TestOptions {
 
 export const test = base.extend<TestFixtures & TestOptions>({
   baseUrl: ['https://opensource-demo.orangehrmlive.com', { option: true }],
-  credentials: [
-    { username: 'Admin', password: 'admin123' },
-    { option: true },
-  ],
+  credentials: [{ username: 'Admin', password: 'admin123' }, { option: true }],
 
   authHelper: async ({ page, baseUrl, credentials }, use) => {
     const authHelper = new AuthHelper(page, baseUrl, credentials);

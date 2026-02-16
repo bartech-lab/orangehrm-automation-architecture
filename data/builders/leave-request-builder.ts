@@ -6,7 +6,7 @@ import {
   LeaveBalance,
   LeaveEntitlement,
   LeaveRequestCalculator,
-} from '../../domain/leave/types';
+} from '../../domain/leave/types.js';
 
 type WritableLeaveRequest = {
   -readonly [K in keyof LeaveRequest]: LeaveRequest[K];
@@ -178,9 +178,7 @@ export class LeaveRequestBuilder {
       }
     }
 
-    if (
-      this.leaveRequest.startDate! > this.leaveRequest.endDate!
-    ) {
+    if (this.leaveRequest.startDate! > this.leaveRequest.endDate!) {
       throw new Error('Validation failed: startDate must be before or equal to endDate');
     }
 

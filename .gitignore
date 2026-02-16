@@ -47,3 +47,9 @@ coverage/
 tmp/
 temp/
 *.tmp
+
+# Sisyphus work tracking
+.sisyphus/
+
+# Exploration artifacts
+orangehrm-explore/

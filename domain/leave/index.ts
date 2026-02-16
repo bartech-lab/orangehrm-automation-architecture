@@ -7,12 +7,12 @@ export type {
   WorkWeek,
   LeaveRequestFilters,
   LeaveAssignment,
-} from './types';
+} from './types.js';
 export {
   LeaveStatus,
   PartialDayType,
   LeaveDuration,
   WorkDayType,
   LeaveRequestCalculator,
-} from './types';
-export type { LeaveBalance } from './types';
+} from './types.js';
+export type { LeaveBalance } from './types.js';

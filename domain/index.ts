@@ -1,3 +1,3 @@
-export * from './employee';
-export * from './leave';
-export * from './auth';
+export * from './employee/index.js';
+export * from './leave/index.js';
+export * from './auth/index.js';

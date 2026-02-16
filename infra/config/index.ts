@@ -1,2 +1,2 @@
-export { defaultConfig, selectors } from './test-config';
-export type { TestConfig } from './test-config';
+export { defaultConfig, selectors } from './test-config.js';
+export type { TestConfig } from './test-config.js';

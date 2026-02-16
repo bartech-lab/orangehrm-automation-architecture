@@ -9,6 +9,6 @@ export type {
   JobDetails,
   SalaryComponent,
   EmployeeSearchFilters,
-} from './types';
-export { Department } from './types';
-export type { EmployeeSummary } from './types';
+} from './types.js';
+export { Department } from './types.js';
+export type { EmployeeSummary } from './types.js';

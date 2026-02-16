@@ -1,3 +1,3 @@
-export * from './test-runner';
-export * from './config';
-export * from './auth';
+export * from './test-runner/index.js';
+export * from './config/index.js';
+export * from './auth/index.js';

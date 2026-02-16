@@ -1,0 +1,250 @@
+import { test, expect } from '../../../infra/test-runner/index.js';
+import { ToastComponent } from '../../../ui/components/index.js';
+
+test.describe('Toast Component', () => {
+  let toast: ToastComponent;
+
+  test.beforeEach(async ({ hrmPage }) => {
+    // Initialize toast component with the OrangeHRM toast selector
+    toast = new ToastComponent(hrmPage, '.oxd-toast');
+  });
+
+  test.describe('Success Toast', () => {
+    test('success toast appears after saving user data', async ({ hrmPage, testData }) => {
+      // Navigate to PIM module where we can add an employee
+      await hrmPage.goto('/web/index.php/pim/viewEmployeeList');
+      await hrmPage.waitForLoadState('networkidle');
+
+      // Click Add button to trigger add employee form
+      await hrmPage.locator('button:has-text("Add")').first().click();
+      await hrmPage.waitForURL(/addEmployee/);
+
+      // Fill in employee form with unique data
+      const employee = testData.createEmployee();
+      await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
+      await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
+
+      // Save the employee - this should trigger a success toast
+      await hrmPage.locator('button[type="submit"]').click();
+
+      // Wait for toast to appear and verify it's visible
+      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+      const isVisible = await toast.isVisible();
+      expect(isVisible).toBe(true);
+
+      // Verify toast type is success
+      const toastType = await toast.getType();
+      expect(toastType).toBe('success');
+
+      // Verify toast contains success message
+      const message = await toast.getMessage();
+      expect(message.toLowerCase()).toContain('success');
+    });
+
+    test('success toast appears after delete action', async ({ hrmPage }) => {
+      // Navigate to PIM module
+      await hrmPage.goto('/web/index.php/pim/viewEmployeeList');
+      await hrmPage.waitForLoadState('networkidle');
+
+      // Wait for employee list to load
+      await hrmPage.locator('.oxd-table-body').waitFor({ state: 'visible' });
+
+      // Get first employee checkbox and delete button
+      const firstRow = hrmPage.locator('.oxd-table-card').first();
+
+      // Check if there are employees to delete
+      const rowCount = await hrmPage.locator('.oxd-table-card').count();
+      test.skip(rowCount === 0, 'No employees available to delete');
+
+      // Click on the first row's checkbox
+      await firstRow.locator('.oxd-checkbox-wrapper').first().click();
+
+      // Click delete selected button
+      await hrmPage.locator('button:has-text("Delete Selected")').click();
+
+      // Confirm deletion in modal
+      await hrmPage.locator('.oxd-dialog-container .oxd-button--label-danger').click();
+
+      // Wait for toast to appear and verify it's visible
+      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+      const isVisible = await toast.isVisible();
+      expect(isVisible).toBe(true);
+
+      // Verify toast type is success
+      const toastType = await toast.getType();
+      expect(toastType).toBe('success');
+
+      // Verify toast contains delete-related message
+      const message = await toast.getMessage();
+      expect(message.toLowerCase()).toMatch(/deleted|successfully/);
+    });
+  });
+
+  test.describe('Error Toast', () => {
+    test('error toast appears when submitting invalid form', async ({ hrmPage }) => {
+      // Navigate to add employee page
+      await hrmPage.goto('/web/index.php/pim/addEmployee');
+      await hrmPage.waitForLoadState('networkidle');
+
+      // Try to submit form without filling required fields
+      await hrmPage.locator('button[type="submit"]').click();
+
+      // Wait for validation/toast to appear
+      await hrmPage.waitForTimeout(500);
+
+      // Check for error toast or validation messages
+      const errorToast = hrmPage.locator('.oxd-toast--error');
+      const validationErrors = hrmPage.locator('.oxd-input-field-error-message');
+
+      // Either an error toast or validation errors should be present
+      const hasErrorToast = await errorToast.isVisible().catch(() => false);
+      const hasValidationErrors = await validationErrors.isVisible().catch(() => false);
+
+      expect(hasErrorToast || hasValidationErrors).toBe(true);
+
+      // If error toast exists, verify its properties
+      if (hasErrorToast) {
+        const toastType = await toast.getType();
+        expect(toastType).toBe('error');
+
+        const message = await toast.getMessage();
+        expect(message.length).toBeGreaterThan(0);
+      }
+    });
+  });
+
+  test.describe('Toast Auto-dismiss', () => {
+    test('toast auto-dismisses after timeout', async ({ hrmPage, testData }) => {
+      // Navigate to PIM and add an employee to trigger toast
+      await hrmPage.goto('/web/index.php/pim/addEmployee');
+      await hrmPage.waitForLoadState('networkidle');
+
+      const employee = testData.createEmployee();
+      await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
+      await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
+
+      // Save to trigger toast
+      await hrmPage.locator('button[type="submit"]').click();
+
+      // Wait for toast to appear
+      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+      expect(await toast.isVisible()).toBe(true);
+
+      // Wait for toast to disappear (auto-dismiss)
+      await toast.waitForDisappearance();
+
+      // Verify toast is no longer visible
+      expect(await toast.isVisible()).toBe(false);
+    });
+
+    test('toast can be manually closed', async ({ hrmPage, testData }) => {
+      // Navigate to PIM and add an employee to trigger toast
+      await hrmPage.goto('/web/index.php/pim/addEmployee');
+      await hrmPage.waitForLoadState('networkidle');
+
+      const employee = testData.createEmployee();
+      await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
+      await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
+
+      // Save to trigger toast
+      await hrmPage.locator('button[type="submit"]').click();
+
+      // Wait for toast to appear
+      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+      expect(await toast.isVisible()).toBe(true);
+
+      // Check if toast is dismissible
+      const isDismissible = await toast.isDismissible();
+
+      if (isDismissible) {
+        // Close the toast manually
+        await toast.close();
+
+        // Verify toast is closed
+        await hrmPage.waitForTimeout(500);
+        expect(await toast.isVisible()).toBe(false);
+      } else {
+        // If not dismissible, test passes as it's expected behavior
+        test.skip();
+      }
+    });
+  });
+
+  test.describe('Toast Type Detection', () => {
+    test('correctly identifies success toast type', async ({ hrmPage, testData }) => {
+      // Trigger a success toast by adding employee
+      await hrmPage.goto('/web/index.php/pim/addEmployee');
+      await hrmPage.waitForLoadState('networkidle');
+
+      const employee = testData.createEmployee();
+      await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
+      await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
+
+      await hrmPage.locator('button[type="submit"]').click();
+
+      // Wait for toast and verify type
+      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+
+      const toastType = await toast.getType();
+      expect(toastType).toBe('success');
+      expect(['success', 'error', 'warning', 'info']).toContain(toastType);
+    });
+
+    test('toast message is retrievable', async ({ hrmPage, testData }) => {
+      // Trigger a toast
+      await hrmPage.goto('/web/index.php/pim/addEmployee');
+      await hrmPage.waitForLoadState('networkidle');
+
+      const employee = testData.createEmployee();
+      await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
+      await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
+
+      await hrmPage.locator('button[type="submit"]').click();
+
+      // Wait for toast
+      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+
+      // Get and verify message
+      const message = await toast.getMessage();
+      expect(message).toBeTruthy();
+      expect(message.length).toBeGreaterThan(0);
+      expect(typeof message).toBe('string');
+    });
+
+    test('handles multiple toasts sequentially', async ({ hrmPage, testData }) => {
+      // Navigate to PIM
+      await hrmPage.goto('/web/index.php/pim/addEmployee');
+      await hrmPage.waitForLoadState('networkidle');
+
+      // Add first employee
+      const employee1 = testData.createEmployee();
+      await hrmPage.locator('input[name="firstName"]').fill(employee1.firstName);
+      await hrmPage.locator('input[name="lastName"]').fill(employee1.lastName);
+      await hrmPage.locator('button[type="submit"]').click();
+
+      // Wait for first toast
+      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+
+      const firstToastType = await toast.getType();
+      expect(firstToastType).toBe('success');
+
+      // Wait for toast to disappear
+      await toast.waitForDisappearance();
+
+      // Add another employee
+      await hrmPage.goto('/web/index.php/pim/addEmployee');
+      await hrmPage.waitForLoadState('networkidle');
+
+      const employee2 = testData.createEmployee();
+      await hrmPage.locator('input[name="firstName"]').fill(employee2.firstName);
+      await hrmPage.locator('input[name="lastName"]').fill(employee2.lastName);
+      await hrmPage.locator('button[type="submit"]').click();
+
+      // Wait for second toast
+      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+
+      const secondToastType = await toast.getType();
+      expect(secondToastType).toBe('success');
+    });
+  });
+});

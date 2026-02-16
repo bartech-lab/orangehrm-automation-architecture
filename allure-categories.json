@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Product Defects",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*Expected.*but received.*|.*toBe.*|.*toHave.*|.*toContain.*"
+  },
+  {
+    "name": "Test Defects",
+    "matchedStatuses": ["broken"],
+    "messageRegex": ".*selector.*not found.*|.*timeout.*|.*locator.*|.*element not found.*|.*TypeError.*|.*ReferenceError.*"
+  },
+  {
+    "name": "Infrastructure Issues",
+    "matchedStatuses": ["broken"],
+    "messageRegex": ".*net::ERR_.*|.*ECONNREFUSED.*|.*ECONNRESET.*|.*ETIMEDOUT.*|.*Network.*"
+  },
+  {
+    "name": "Timeout Issues",
+    "matchedStatuses": ["broken"],
+    "messageRegex": ".*Timeout.*|.*timeout of.*|.*exceeded.*"
+  },
+  {
+    "name": "Known Issues",
+    "matchedStatuses": ["failed"],
+    "messageRegex": "\\[KNOWN-ISSUE\\]"
+  },
+  {
+    "name": "Flaky Tests",
+    "matchedStatuses": ["failed"],
+    "flaky": true
+  }
+]

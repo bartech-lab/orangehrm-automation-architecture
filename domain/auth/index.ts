@@ -7,7 +7,7 @@ export type {
   LoginAttempt,
   PasswordPolicy,
   AuthState,
-} from './types';
-export { UserStatus, UserRole, PermissionAction, AuthValidator } from './types';
-export type { Credentials } from './types';
-export type { AuthenticatedUser } from './types';
+} from './types.js';
+export { UserStatus, UserRole, PermissionAction, AuthValidator } from './types.js';
+export type { Credentials } from './types.js';
+export type { AuthenticatedUser } from './types.js';

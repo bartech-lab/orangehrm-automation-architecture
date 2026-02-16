@@ -1,12 +1,18 @@
 import { test as baseTest, expect } from '@playwright/test';
-import type { Page, TestInfo } from '@playwright/test';
-import { AuthHelper } from '../auth/auth-helper';
+import type { Page } from '@playwright/test';
+import { AuthHelper } from '../auth/auth-helper.js';
+
+declare const process: {
+  stdout: { write: (message: string) => void };
+};
 
 // Types for fixture definitions
 export interface TestFixtures {
   auth: Page;
   hrmPage: Page;
   testData: TestDataFactory;
+  failureCapture: void;
+  testLogger: void;
 }
 
 export interface WorkerFixtures {
@@ -77,15 +83,15 @@ export const test = baseTest.extend<TestFixtures & WorkerFixtures>({
   auth: async ({ page }, use, testInfo) => {
     const baseUrl = testInfo.project.use?.baseURL || 'https://opensource-demo.orangehrmlive.com';
     const credentials = {
-      username: process.env.TEST_USERNAME || 'Admin',
-      password: process.env.TEST_PASSWORD || 'admin123',
+      username: 'Admin',
+      password: 'admin123',
     };
 
     const authHelper = new AuthHelper(page, baseUrl, credentials);
     await authHelper.login();
-    
+
     await use(page);
-    
+
     // Cleanup: logout after test
     await authHelper.logout();
   },
@@ -97,7 +103,7 @@ export const test = baseTest.extend<TestFixtures & WorkerFixtures>({
   hrmPage: async ({ auth: page }, use) => {
     // Additional HRM-specific setup could go here
     // e.g., setting default timeouts, HRM-specific headers
-    
+
     await use(page);
   },
 
@@ -140,14 +146,16 @@ export const test = baseTest.extend<TestFixtures & WorkerFixtures>({
    */
   testLogger: [
     async ({}, use, testInfo) => {
+      const testName = testInfo.titlePath.join(' > ');
       const startTime = Date.now();
-      console.log(`[TEST START] ${testInfo.titlePath.join(' > ')}`);
-      
+
+      process.stdout.write(`[TEST START] ${testName}\n`);
+
       await use(undefined);
-      
+
       const duration = Date.now() - startTime;
       const status = testInfo.status === testInfo.expectedStatus ? 'PASSED' : 'FAILED';
-      console.log(`[TEST ${status}] ${testInfo.titlePath.join(' > ')} (${duration}ms)`);
+      process.stdout.write(`[TEST ${status}] ${testName} (${duration}ms)\n`);
     },
     { auto: true },
   ],
