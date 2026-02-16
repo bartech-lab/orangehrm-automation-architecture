@@ -1,12 +1,14 @@
 import { faker } from '@faker-js/faker';
 import { Employee, Department, EmploymentStatus } from '../../domain/employee/types.js';
 
+export type EmployeeType = 'admin' | 'regular' | 'contractor' | 'manager' | 'hr';
+
 type WritableEmployee = {
   -readonly [K in keyof Employee]: Employee[K];
 };
 
 export class EmployeeBuilder {
-  private employee: Partial<WritableEmployee> = {};
+  private employee: Partial<WritableEmployee> & { employeeType?: EmployeeType } = {};
 
   constructor() {
     this.reset();
@@ -199,6 +201,110 @@ export class EmployeeBuilder {
   withInactiveStatus(): EmployeeBuilder {
     this.employee.employmentStatus = EmploymentStatus.INACTIVE;
     return this;
+  }
+
+  asAdmin(): EmployeeBuilder {
+    this.employee.employeeType = 'admin';
+    this.employee.jobTitle = faker.helpers.arrayElement([
+      'System Administrator',
+      'IT Manager',
+      'Security Administrator',
+      'Database Administrator',
+      'DevOps Engineer',
+    ]);
+    this.employee.department = Department.ENGINEERING;
+    this.employee.salary = {
+      amount: faker.number.int({ min: 80000, max: 150000 }),
+      currency: 'USD',
+      frequency: 'Yearly',
+    };
+    return this;
+  }
+
+  asRegular(): EmployeeBuilder {
+    this.employee.employeeType = 'regular';
+    this.employee.jobTitle = faker.person.jobTitle();
+    this.employee.department = faker.helpers.arrayElement(Object.values(Department));
+    this.employee.salary = {
+      amount: faker.number.int({ min: 40000, max: 90000 }),
+      currency: 'USD',
+      frequency: 'Yearly',
+    };
+    return this;
+  }
+
+  asContractor(): EmployeeBuilder {
+    this.employee.employeeType = 'contractor';
+    this.employee.jobTitle = faker.helpers.arrayElement([
+      'Contract Developer',
+      'Consultant',
+      'Freelance Designer',
+      'Contract Project Manager',
+      'Temporary Staff',
+    ]);
+    this.employee.salary = {
+      amount: faker.number.int({ min: 50, max: 150 }),
+      currency: 'USD',
+      frequency: 'Hourly',
+    };
+    return this;
+  }
+
+  asManager(): EmployeeBuilder {
+    this.employee.employeeType = 'manager';
+    this.employee.jobTitle = faker.helpers.arrayElement([
+      'Engineering Manager',
+      'Product Manager',
+      'Sales Manager',
+      'Marketing Manager',
+      'HR Manager',
+      'Finance Manager',
+      'Operations Manager',
+    ]);
+    this.employee.department = faker.helpers.arrayElement(Object.values(Department));
+    this.employee.salary = {
+      amount: faker.number.int({ min: 90000, max: 160000 }),
+      currency: 'USD',
+      frequency: 'Yearly',
+    };
+    return this;
+  }
+
+  asHR(): EmployeeBuilder {
+    this.employee.employeeType = 'hr';
+    this.employee.department = Department.HR;
+    this.employee.jobTitle = faker.helpers.arrayElement([
+      'HR Specialist',
+      'HR Generalist',
+      'Recruiter',
+      'HR Coordinator',
+      'Benefits Administrator',
+      'HR Business Partner',
+    ]);
+    this.employee.salary = {
+      amount: faker.number.int({ min: 50000, max: 110000 }),
+      currency: 'USD',
+      frequency: 'Yearly',
+    };
+    return this;
+  }
+
+  withRandomDataForType(type: EmployeeType): EmployeeBuilder {
+    this.withRandomData();
+    switch (type) {
+      case 'admin':
+        return this.asAdmin();
+      case 'regular':
+        return this.asRegular();
+      case 'contractor':
+        return this.asContractor();
+      case 'manager':
+        return this.asManager();
+      case 'hr':
+        return this.asHR();
+      default:
+        return this;
+    }
   }
 
   validate(): void {

@@ -1,0 +1,186 @@
+{
+  "departments": [
+    {
+      "id": "dept-001",
+      "code": "ENG",
+      "name": "Engineering",
+      "description": "Responsible for product development, technical infrastructure, and engineering excellence.",
+      "managerId": "emp-010",
+      "managerName": "Michael Chen",
+      "location": "San Francisco, CA",
+      "budget": 4500000,
+      "employeeCount": 45,
+      "teams": [
+        "Platform Engineering",
+        "Frontend Development",
+        "Backend Development",
+        "DevOps",
+        "QA Engineering"
+      ],
+      "createdAt": "2014-01-15T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "dept-002",
+      "code": "SAL",
+      "name": "Sales",
+      "description": "Drives revenue growth through customer acquisition and relationship management.",
+      "managerId": "emp-012",
+      "managerName": "Robert Davis",
+      "location": "Chicago, IL",
+      "budget": 2800000,
+      "employeeCount": 32,
+      "teams": ["Enterprise Sales", "SMB Sales", "Sales Development", "Account Management"],
+      "createdAt": "2014-02-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "dept-003",
+      "code": "MKT",
+      "name": "Marketing",
+      "description": "Builds brand awareness and generates demand through strategic campaigns.",
+      "managerId": "emp-011",
+      "managerName": "Emily Thompson",
+      "location": "New York, NY",
+      "budget": 2200000,
+      "employeeCount": 28,
+      "teams": [
+        "Brand Marketing",
+        "Digital Marketing",
+        "Content Marketing",
+        "Product Marketing",
+        "Events"
+      ],
+      "createdAt": "2014-03-10T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "dept-004",
+      "code": "HR",
+      "name": "Human Resources",
+      "description": "Manages talent acquisition, employee relations, and organizational development.",
+      "managerId": "emp-013",
+      "managerName": "Lisa Johnson",
+      "location": "Austin, TX",
+      "budget": 1500000,
+      "employeeCount": 18,
+      "teams": [
+        "Talent Acquisition",
+        "Employee Relations",
+        "Compensation & Benefits",
+        "Learning & Development",
+        "HR Operations"
+      ],
+      "createdAt": "2014-01-05T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "dept-005",
+      "code": "FIN",
+      "name": "Finance",
+      "description": "Oversees financial planning, accounting, and fiscal management.",
+      "managerId": "emp-014",
+      "managerName": "Kevin Brown",
+      "location": "Boston, MA",
+      "budget": 1200000,
+      "employeeCount": 15,
+      "teams": ["Accounting", "Financial Planning & Analysis", "Treasury", "Payroll", "Tax"],
+      "createdAt": "2014-01-20T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "dept-006",
+      "code": "OPS",
+      "name": "Operations",
+      "description": "Ensures smooth day-to-day business operations and process optimization.",
+      "managerId": "emp-017",
+      "managerName": "Daniel Martinez",
+      "location": "Phoenix, AZ",
+      "budget": 2000000,
+      "employeeCount": 38,
+      "teams": [
+        "Facilities",
+        "Vendor Management",
+        "Business Operations",
+        "Process Improvement",
+        "Supply Chain"
+      ],
+      "createdAt": "2014-04-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "dept-007",
+      "code": "PRO",
+      "name": "Product",
+      "description": "Defines product strategy, roadmap, and user experience.",
+      "managerId": "emp-019",
+      "managerName": "Andrew Scott",
+      "location": "Seattle, WA",
+      "budget": 1800000,
+      "employeeCount": 22,
+      "teams": ["Product Management", "Product Strategy", "User Research", "Product Analytics"],
+      "createdAt": "2015-06-15T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "dept-008",
+      "code": "DES",
+      "name": "Design",
+      "description": "Creates visual designs, user interfaces, and brand assets.",
+      "managerId": "emp-015",
+      "managerName": "Anna White",
+      "location": "Portland, OR",
+      "budget": 1400000,
+      "employeeCount": 16,
+      "teams": ["UX Design", "UI Design", "Brand Design", "Design Systems", "Motion Design"],
+      "createdAt": "2016-02-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "dept-009",
+      "code": "LEG",
+      "name": "Legal",
+      "description": "Manages legal compliance, contracts, and risk mitigation.",
+      "managerId": "emp-021",
+      "managerName": "Jonathan Reed",
+      "location": "Washington, DC",
+      "budget": 1600000,
+      "employeeCount": 10,
+      "teams": [
+        "Corporate Legal",
+        "Contracts",
+        "Compliance",
+        "Intellectual Property",
+        "Litigation"
+      ],
+      "createdAt": "2015-01-10T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "dept-010",
+      "code": "CS",
+      "name": "Customer Success",
+      "description": "Ensures customer satisfaction, retention, and success.",
+      "managerId": "emp-016",
+      "managerName": "Rachel Green",
+      "location": "Denver, CO",
+      "budget": 1900000,
+      "employeeCount": 35,
+      "teams": [
+        "Customer Support",
+        "Customer Success Management",
+        "Technical Support",
+        "Customer Education",
+        "Customer Experience"
+      ],
+      "createdAt": "2017-08-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    }
+  ],
+  "metadata": {
+    "totalCount": 10,
+    "generatedAt": "2024-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "description": "Sample department data for testing purposes. All data is fictional."
+  }
+}

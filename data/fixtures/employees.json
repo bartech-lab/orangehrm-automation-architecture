@@ -1,0 +1,954 @@
+{
+  "employees": [
+    {
+      "id": "emp-001",
+      "employeeId": "EMP001",
+      "firstName": "James",
+      "lastName": "Wilson",
+      "email": "james.wilson@company.com",
+      "phone": "+1-555-0101",
+      "department": "Engineering",
+      "jobTitle": "Senior Software Engineer",
+      "employmentStatus": "Active",
+      "hireDate": "2019-03-15T00:00:00.000Z",
+      "dateOfBirth": "1985-07-20T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "123 Tech Boulevard",
+        "city": "San Francisco",
+        "state": "CA",
+        "zipCode": "94105",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Sarah Wilson",
+        "relationship": "Spouse",
+        "phone": "+1-555-0199"
+      },
+      "supervisorId": "emp-010",
+      "supervisorName": "Michael Chen",
+      "workLocation": "Hybrid",
+      "salary": {
+        "amount": 145000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2019-03-15T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-002",
+      "employeeId": "EMP002",
+      "firstName": "Maria",
+      "middleName": "Elena",
+      "lastName": "Rodriguez",
+      "email": "maria.rodriguez@company.com",
+      "phone": "+1-555-0102",
+      "department": "Marketing",
+      "jobTitle": "Marketing Manager",
+      "employmentStatus": "Active",
+      "hireDate": "2020-06-01T00:00:00.000Z",
+      "dateOfBirth": "1988-11-12T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "United States",
+      "maritalStatus": "Single",
+      "address": {
+        "street": "456 Market Street",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Carlos Rodriguez",
+        "relationship": "Parent",
+        "phone": "+1-555-0198"
+      },
+      "supervisorId": "emp-011",
+      "supervisorName": "Emily Thompson",
+      "workLocation": "Remote",
+      "salary": {
+        "amount": 110000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2020-06-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-003",
+      "employeeId": "EMP003",
+      "firstName": "David",
+      "lastName": "Kim",
+      "email": "david.kim@company.com",
+      "phone": "+1-555-0103",
+      "department": "Sales",
+      "jobTitle": "Account Executive",
+      "employmentStatus": "Active",
+      "hireDate": "2021-01-10T00:00:00.000Z",
+      "dateOfBirth": "1990-03-25T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "789 Sales Avenue",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "60601",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Jennifer Kim",
+        "relationship": "Spouse",
+        "phone": "+1-555-0197"
+      },
+      "supervisorId": "emp-012",
+      "supervisorName": "Robert Davis",
+      "workLocation": "Onsite",
+      "salary": {
+        "amount": 85000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2021-01-10T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-004",
+      "employeeId": "EMP004",
+      "firstName": "Aisha",
+      "lastName": "Patel",
+      "email": "aisha.patel@company.com",
+      "phone": "+1-555-0104",
+      "department": "Human Resources",
+      "jobTitle": "HR Specialist",
+      "employmentStatus": "Active",
+      "hireDate": "2018-09-05T00:00:00.000Z",
+      "dateOfBirth": "1987-09-18T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "United States",
+      "maritalStatus": "Single",
+      "address": {
+        "street": "321 HR Lane",
+        "city": "Austin",
+        "state": "TX",
+        "zipCode": "78701",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Priya Patel",
+        "relationship": "Sibling",
+        "phone": "+1-555-0196"
+      },
+      "supervisorId": "emp-013",
+      "supervisorName": "Lisa Johnson",
+      "workLocation": "Hybrid",
+      "salary": {
+        "amount": 72000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2018-09-05T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-005",
+      "employeeId": "EMP005",
+      "firstName": "Thomas",
+      "lastName": "Anderson",
+      "email": "thomas.anderson@company.com",
+      "phone": "+1-555-0105",
+      "department": "Finance",
+      "jobTitle": "Financial Analyst",
+      "employmentStatus": "Active",
+      "hireDate": "2022-02-28T00:00:00.000Z",
+      "dateOfBirth": "1992-12-05T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "United States",
+      "maritalStatus": "Single",
+      "address": {
+        "street": "654 Finance Plaza",
+        "city": "Boston",
+        "state": "MA",
+        "zipCode": "02101",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Mary Anderson",
+        "relationship": "Parent",
+        "phone": "+1-555-0195"
+      },
+      "supervisorId": "emp-014",
+      "supervisorName": "Kevin Brown",
+      "workLocation": "Onsite",
+      "salary": {
+        "amount": 78000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2022-02-28T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-006",
+      "employeeId": "EMP006",
+      "firstName": "Sophie",
+      "middleName": "Marie",
+      "lastName": "Martin",
+      "email": "sophie.martin@company.com",
+      "phone": "+1-555-0106",
+      "department": "Design",
+      "jobTitle": "Senior UX Designer",
+      "employmentStatus": "Active",
+      "hireDate": "2019-07-15T00:00:00.000Z",
+      "dateOfBirth": "1989-04-30T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "Canada",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "987 Design Drive",
+        "city": "Portland",
+        "state": "OR",
+        "zipCode": "97201",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Luc Martin",
+        "relationship": "Spouse",
+        "phone": "+1-555-0194"
+      },
+      "supervisorId": "emp-015",
+      "supervisorName": "Anna White",
+      "workLocation": "Remote",
+      "salary": {
+        "amount": 125000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2019-07-15T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-007",
+      "employeeId": "EMP007",
+      "firstName": "Rajesh",
+      "lastName": "Kumar",
+      "email": "rajesh.kumar@company.com",
+      "phone": "+1-555-0107",
+      "department": "Engineering",
+      "jobTitle": "DevOps Engineer",
+      "employmentStatus": "Active",
+      "hireDate": "2020-11-20T00:00:00.000Z",
+      "dateOfBirth": "1986-08-14T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "India",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "147 Cloud Way",
+        "city": "Seattle",
+        "state": "WA",
+        "zipCode": "98101",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Priya Kumar",
+        "relationship": "Spouse",
+        "phone": "+1-555-0193"
+      },
+      "supervisorId": "emp-010",
+      "supervisorName": "Michael Chen",
+      "workLocation": "Hybrid",
+      "salary": {
+        "amount": 135000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2020-11-20T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-008",
+      "employeeId": "EMP008",
+      "firstName": "Emma",
+      "lastName": "Johnson",
+      "email": "emma.johnson@company.com",
+      "phone": "+1-555-0108",
+      "department": "Customer Success",
+      "jobTitle": "Customer Success Manager",
+      "employmentStatus": "Active",
+      "hireDate": "2021-05-10T00:00:00.000Z",
+      "dateOfBirth": "1991-01-22T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "United Kingdom",
+      "maritalStatus": "Single",
+      "address": {
+        "street": "753 Success Street",
+        "city": "Denver",
+        "state": "CO",
+        "zipCode": "80202",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Oliver Johnson",
+        "relationship": "Sibling",
+        "phone": "+1-555-0192"
+      },
+      "supervisorId": "emp-016",
+      "supervisorName": "Rachel Green",
+      "workLocation": "Remote",
+      "salary": {
+        "amount": 88000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2021-05-10T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-009",
+      "employeeId": "EMP009",
+      "firstName": "Carlos",
+      "lastName": "Garcia",
+      "email": "carlos.garcia@company.com",
+      "phone": "+1-555-0109",
+      "department": "Operations",
+      "jobTitle": "Operations Manager",
+      "employmentStatus": "Active",
+      "hireDate": "2017-04-12T00:00:00.000Z",
+      "dateOfBirth": "1983-06-08T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "Mexico",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "369 Operations Blvd",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "85001",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Isabella Garcia",
+        "relationship": "Spouse",
+        "phone": "+1-555-0191"
+      },
+      "supervisorId": "emp-017",
+      "supervisorName": "Daniel Martinez",
+      "workLocation": "Hybrid",
+      "salary": {
+        "amount": 105000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2017-04-12T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-010",
+      "employeeId": "EMP010",
+      "firstName": "Michael",
+      "lastName": "Chen",
+      "email": "michael.chen@company.com",
+      "phone": "+1-555-0110",
+      "department": "Engineering",
+      "jobTitle": "Engineering Manager",
+      "employmentStatus": "Active",
+      "hireDate": "2016-01-05T00:00:00.000Z",
+      "dateOfBirth": "1980-10-15T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "159 Engineering Way",
+        "city": "San Francisco",
+        "state": "CA",
+        "zipCode": "94105",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Jennifer Chen",
+        "relationship": "Spouse",
+        "phone": "+1-555-0190"
+      },
+      "workLocation": "Hybrid",
+      "salary": {
+        "amount": 180000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "subordinates": ["emp-001", "emp-007"],
+      "createdAt": "2016-01-05T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-011",
+      "employeeId": "EMP011",
+      "firstName": "Emily",
+      "lastName": "Thompson",
+      "email": "emily.thompson@company.com",
+      "phone": "+1-555-0111",
+      "department": "Marketing",
+      "jobTitle": "Director of Marketing",
+      "employmentStatus": "Active",
+      "hireDate": "2015-08-20T00:00:00.000Z",
+      "dateOfBirth": "1978-02-28T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "951 Marketing Ave",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Mark Thompson",
+        "relationship": "Spouse",
+        "phone": "+1-555-0189"
+      },
+      "workLocation": "Remote",
+      "salary": {
+        "amount": 195000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "subordinates": ["emp-002"],
+      "createdAt": "2015-08-20T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-012",
+      "employeeId": "EMP012",
+      "firstName": "Robert",
+      "lastName": "Davis",
+      "email": "robert.davis@company.com",
+      "phone": "+1-555-0112",
+      "department": "Sales",
+      "jobTitle": "Sales Manager",
+      "employmentStatus": "Active",
+      "hireDate": "2017-09-01T00:00:00.000Z",
+      "dateOfBirth": "1982-05-12T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "United States",
+      "maritalStatus": "Divorced",
+      "address": {
+        "street": "357 Sales Street",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "60601",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Susan Davis",
+        "relationship": "Parent",
+        "phone": "+1-555-0188"
+      },
+      "workLocation": "Onsite",
+      "salary": {
+        "amount": 140000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "subordinates": ["emp-003"],
+      "createdAt": "2017-09-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-013",
+      "employeeId": "EMP013",
+      "firstName": "Lisa",
+      "lastName": "Johnson",
+      "email": "lisa.johnson@company.com",
+      "phone": "+1-555-0113",
+      "department": "Human Resources",
+      "jobTitle": "HR Manager",
+      "employmentStatus": "Active",
+      "hireDate": "2016-03-10T00:00:00.000Z",
+      "dateOfBirth": "1981-09-03T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "852 HR Boulevard",
+        "city": "Austin",
+        "state": "TX",
+        "zipCode": "78701",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "David Johnson",
+        "relationship": "Spouse",
+        "phone": "+1-555-0187"
+      },
+      "workLocation": "Hybrid",
+      "salary": {
+        "amount": 115000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "subordinates": ["emp-004"],
+      "createdAt": "2016-03-10T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-014",
+      "employeeId": "EMP014",
+      "firstName": "Kevin",
+      "lastName": "Brown",
+      "email": "kevin.brown@company.com",
+      "phone": "+1-555-0114",
+      "department": "Finance",
+      "jobTitle": "Finance Director",
+      "employmentStatus": "Active",
+      "hireDate": "2015-06-15T00:00:00.000Z",
+      "dateOfBirth": "1975-12-18T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "159 Finance Lane",
+        "city": "Boston",
+        "state": "MA",
+        "zipCode": "02101",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Amanda Brown",
+        "relationship": "Spouse",
+        "phone": "+1-555-0186"
+      },
+      "workLocation": "Onsite",
+      "salary": {
+        "amount": 175000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "subordinates": ["emp-005"],
+      "createdAt": "2015-06-15T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-015",
+      "employeeId": "EMP015",
+      "firstName": "Anna",
+      "lastName": "White",
+      "email": "anna.white@company.com",
+      "phone": "+1-555-0115",
+      "department": "Design",
+      "jobTitle": "Design Director",
+      "employmentStatus": "Active",
+      "hireDate": "2018-02-01T00:00:00.000Z",
+      "dateOfBirth": "1984-07-07T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "United States",
+      "maritalStatus": "Single",
+      "address": {
+        "street": "753 Design Court",
+        "city": "Portland",
+        "state": "OR",
+        "zipCode": "97201",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Christopher White",
+        "relationship": "Parent",
+        "phone": "+1-555-0185"
+      },
+      "workLocation": "Remote",
+      "salary": {
+        "amount": 165000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "subordinates": ["emp-006"],
+      "createdAt": "2018-02-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-016",
+      "employeeId": "EMP016",
+      "firstName": "Rachel",
+      "lastName": "Green",
+      "email": "rachel.green@company.com",
+      "phone": "+1-555-0116",
+      "department": "Customer Success",
+      "jobTitle": "Director of Customer Success",
+      "employmentStatus": "Active",
+      "hireDate": "2019-11-15T00:00:00.000Z",
+      "dateOfBirth": "1983-04-22T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "357 Customer Way",
+        "city": "Denver",
+        "state": "CO",
+        "zipCode": "80202",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Steven Green",
+        "relationship": "Spouse",
+        "phone": "+1-555-0184"
+      },
+      "workLocation": "Remote",
+      "salary": {
+        "amount": 155000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "subordinates": ["emp-008"],
+      "createdAt": "2019-11-15T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-017",
+      "employeeId": "EMP017",
+      "firstName": "Daniel",
+      "lastName": "Martinez",
+      "email": "daniel.martinez@company.com",
+      "phone": "+1-555-0117",
+      "department": "Operations",
+      "jobTitle": "VP of Operations",
+      "employmentStatus": "Active",
+      "hireDate": "2014-05-20T00:00:00.000Z",
+      "dateOfBirth": "1972-08-30T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "951 Operations Plaza",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "85001",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Maria Martinez",
+        "relationship": "Spouse",
+        "phone": "+1-555-0183"
+      },
+      "workLocation": "Hybrid",
+      "salary": {
+        "amount": 220000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "subordinates": ["emp-009"],
+      "createdAt": "2014-05-20T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-018",
+      "employeeId": "EMP018",
+      "firstName": "Jessica",
+      "lastName": "Taylor",
+      "email": "jessica.taylor@company.com",
+      "phone": "+1-555-0118",
+      "department": "Product",
+      "jobTitle": "Product Manager",
+      "employmentStatus": "Active",
+      "hireDate": "2020-09-14T00:00:00.000Z",
+      "dateOfBirth": "1988-11-05T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "United States",
+      "maritalStatus": "Single",
+      "address": {
+        "street": "159 Product Road",
+        "city": "San Francisco",
+        "state": "CA",
+        "zipCode": "94105",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Richard Taylor",
+        "relationship": "Parent",
+        "phone": "+1-555-0182"
+      },
+      "supervisorId": "emp-019",
+      "supervisorName": "Andrew Scott",
+      "workLocation": "Hybrid",
+      "salary": {
+        "amount": 135000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2020-09-14T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-019",
+      "employeeId": "EMP019",
+      "firstName": "Andrew",
+      "lastName": "Scott",
+      "email": "andrew.scott@company.com",
+      "phone": "+1-555-0119",
+      "department": "Product",
+      "jobTitle": "Director of Product",
+      "employmentStatus": "Active",
+      "hireDate": "2016-08-10T00:00:00.000Z",
+      "dateOfBirth": "1979-03-14T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "753 Product Blvd",
+        "city": "Seattle",
+        "state": "WA",
+        "zipCode": "98101",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Michelle Scott",
+        "relationship": "Spouse",
+        "phone": "+1-555-0181"
+      },
+      "workLocation": "Hybrid",
+      "salary": {
+        "amount": 190000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "subordinates": ["emp-018"],
+      "createdAt": "2016-08-10T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-020",
+      "employeeId": "EMP020",
+      "firstName": "Michelle",
+      "middleName": "Lynn",
+      "lastName": "Wang",
+      "email": "michelle.wang@company.com",
+      "phone": "+1-555-0120",
+      "department": "Legal",
+      "jobTitle": "Corporate Counsel",
+      "employmentStatus": "Active",
+      "hireDate": "2019-04-22T00:00:00.000Z",
+      "dateOfBirth": "1986-12-01T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "357 Legal Avenue",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Robert Wang",
+        "relationship": "Spouse",
+        "phone": "+1-555-0180"
+      },
+      "supervisorId": "emp-021",
+      "supervisorName": "Jonathan Reed",
+      "workLocation": "Onsite",
+      "salary": {
+        "amount": 165000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2019-04-22T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-021",
+      "employeeId": "EMP021",
+      "firstName": "Jonathan",
+      "lastName": "Reed",
+      "email": "jonathan.reed@company.com",
+      "phone": "+1-555-0121",
+      "department": "Legal",
+      "jobTitle": "General Counsel",
+      "employmentStatus": "Active",
+      "hireDate": "2015-01-12T00:00:00.000Z",
+      "dateOfBirth": "1970-06-25T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "United States",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "852 Legal Plaza",
+        "city": "Washington",
+        "state": "DC",
+        "zipCode": "20001",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Catherine Reed",
+        "relationship": "Spouse",
+        "phone": "+1-555-0179"
+      },
+      "workLocation": "Onsite",
+      "salary": {
+        "amount": 280000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "subordinates": ["emp-020"],
+      "createdAt": "2015-01-12T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-022",
+      "employeeId": "EMP022",
+      "firstName": "Ryan",
+      "lastName": "O\'Connor",
+      "email": "ryan.oconnor@company.com",
+      "phone": "+1-555-0122",
+      "department": "Engineering",
+      "jobTitle": "Contract Developer",
+      "employmentStatus": "Active",
+      "hireDate": "2023-06-01T00:00:00.000Z",
+      "dateOfBirth": "1993-09-17T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "Ireland",
+      "maritalStatus": "Single",
+      "address": {
+        "street": "951 Contract Lane",
+        "city": "Austin",
+        "state": "TX",
+        "zipCode": "78701",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Sean O\'Connor",
+        "relationship": "Parent",
+        "phone": "+1-555-0178"
+      },
+      "supervisorId": "emp-010",
+      "supervisorName": "Michael Chen",
+      "workLocation": "Remote",
+      "salary": {
+        "amount": 85,
+        "currency": "USD",
+        "frequency": "Hourly"
+      },
+      "createdAt": "2023-06-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-023",
+      "employeeId": "EMP023",
+      "firstName": "Alex",
+      "lastName": "Johnson",
+      "email": "alex.johnson@company.com",
+      "phone": "+1-555-0123",
+      "department": "Human Resources",
+      "jobTitle": "HR Coordinator",
+      "employmentStatus": "Inactive",
+      "hireDate": "2022-01-15T00:00:00.000Z",
+      "terminationDate": "2023-12-31T00:00:00.000Z",
+      "dateOfBirth": "1994-02-08T00:00:00.000Z",
+      "gender": "Non-Binary",
+      "nationality": "United States",
+      "maritalStatus": "Single",
+      "address": {
+        "street": "753 Inactive Street",
+        "city": "Denver",
+        "state": "CO",
+        "zipCode": "80202",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Jordan Johnson",
+        "relationship": "Parent",
+        "phone": "+1-555-0177"
+      },
+      "supervisorId": "emp-013",
+      "supervisorName": "Lisa Johnson",
+      "workLocation": "Remote",
+      "salary": {
+        "amount": 52000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2022-01-15T00:00:00.000Z",
+      "updatedAt": "2023-12-31T00:00:00.000Z"
+    },
+    {
+      "id": "emp-024",
+      "employeeId": "EMP024",
+      "firstName": "Fatima",
+      "lastName": "Al-Rashid",
+      "email": "fatima.alrashid@company.com",
+      "phone": "+1-555-0124",
+      "department": "Engineering",
+      "jobTitle": "Database Administrator",
+      "employmentStatus": "On Probation",
+      "hireDate": "2023-11-01T00:00:00.000Z",
+      "dateOfBirth": "1990-05-20T00:00:00.000Z",
+      "gender": "Female",
+      "nationality": "Jordan",
+      "maritalStatus": "Married",
+      "address": {
+        "street": "159 Database Drive",
+        "city": "Seattle",
+        "state": "WA",
+        "zipCode": "98101",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Omar Al-Rashid",
+        "relationship": "Spouse",
+        "phone": "+1-555-0176"
+      },
+      "supervisorId": "emp-010",
+      "supervisorName": "Michael Chen",
+      "workLocation": "Hybrid",
+      "salary": {
+        "amount": 125000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2023-11-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "emp-025",
+      "employeeId": "EMP025",
+      "firstName": "Tyler",
+      "lastName": "Brooks",
+      "email": "tyler.brooks@company.com",
+      "phone": "+1-555-0125",
+      "department": "Sales",
+      "jobTitle": "Sales Development Rep",
+      "employmentStatus": "Active",
+      "hireDate": "2023-08-14T00:00:00.000Z",
+      "dateOfBirth": "1996-10-30T00:00:00.000Z",
+      "gender": "Male",
+      "nationality": "United States",
+      "maritalStatus": "Single",
+      "address": {
+        "street": "357 SDR Boulevard",
+        "city": "Chicago",
+        "state": "IL",
+        "zipCode": "60601",
+        "country": "United States"
+      },
+      "emergencyContact": {
+        "name": "Nicole Brooks",
+        "relationship": "Sibling",
+        "phone": "+1-555-0175"
+      },
+      "supervisorId": "emp-012",
+      "supervisorName": "Robert Davis",
+      "workLocation": "Onsite",
+      "salary": {
+        "amount": 48000,
+        "currency": "USD",
+        "frequency": "Yearly"
+      },
+      "createdAt": "2023-08-14T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    }
+  ],
+  "metadata": {
+    "totalCount": 25,
+    "generatedAt": "2024-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "description": "Sample employee data for testing purposes. All data is fictional."
+  }
+}

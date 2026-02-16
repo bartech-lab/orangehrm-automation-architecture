@@ -158,6 +158,101 @@ export class LeaveRequestBuilder {
     return this;
   }
 
+  withDateRange(startDate: Date, endDate: Date): LeaveRequestBuilder {
+    this.leaveRequest.startDate = startDate;
+    this.leaveRequest.endDate = endDate;
+    this.leaveRequest.daysRequested = LeaveRequestCalculator.calculateDuration(startDate, endDate);
+    return this;
+  }
+
+  withDatesInFuture(daysFromNow: number = 1, durationDays: number = 5): LeaveRequestBuilder {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + daysFromNow);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + durationDays);
+    return this.withDateRange(startDate, endDate);
+  }
+
+  withDatesInPast(daysAgo: number = 30, durationDays: number = 5): LeaveRequestBuilder {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysAgo);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + durationDays);
+    return this.withDateRange(startDate, endDate);
+  }
+
+  withDatesThisWeek(): LeaveRequestBuilder {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() + daysUntilMonday);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + faker.number.int({ min: 1, max: 4 }));
+    return this.withDateRange(startDate, endDate);
+  }
+
+  withDatesNextWeek(): LeaveRequestBuilder {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const daysUntilNextMonday = dayOfWeek === 0 ? 8 : 15 - dayOfWeek;
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() + daysUntilNextMonday);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + faker.number.int({ min: 1, max: 4 }));
+    return this.withDateRange(startDate, endDate);
+  }
+
+  withDatesThisMonth(): LeaveRequestBuilder {
+    const today = new Date();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const remainingDays = daysInMonth - today.getDate();
+    if (remainingDays > 1) {
+      const startOffset = faker.number.int({ min: 1, max: Math.min(remainingDays - 1, 10) });
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() + startOffset);
+      const endDate = new Date(startDate);
+      endDate.setDate(
+        startDate.getDate() +
+          faker.number.int({ min: 1, max: Math.min(remainingDays - startOffset, 5) })
+      );
+      return this.withDateRange(startDate, endDate);
+    }
+    return this.withDatesInFuture(1, 3);
+  }
+
+  withDatesNextMonth(): LeaveRequestBuilder {
+    const today = new Date();
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const daysInNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0).getDate();
+    const startDay = faker.number.int({ min: 1, max: 15 });
+    const startDate = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), startDay);
+    const duration = faker.number.int({ min: 1, max: Math.min(daysInNextMonth - startDay, 5) });
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + duration);
+    return this.withDateRange(startDate, endDate);
+  }
+
+  withSingleDay(date: Date): LeaveRequestBuilder {
+    return this.withDateRange(date, date);
+  }
+
+  withBusinessDaysOnly(): LeaveRequestBuilder {
+    if (this.leaveRequest.startDate && this.leaveRequest.endDate) {
+      let businessDays = 0;
+      const current = new Date(this.leaveRequest.startDate);
+      while (current <= this.leaveRequest.endDate) {
+        const dayOfWeek = current.getDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+          businessDays++;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      this.leaveRequest.daysRequested = businessDays;
+    }
+    return this;
+  }
+
   validate(): void {
     const requiredFields: Array<keyof LeaveRequest> = [
       'id',
