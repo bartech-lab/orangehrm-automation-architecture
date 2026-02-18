@@ -1,0 +1,8 @@
+- textbox "Username" [ref=e1]
+- textbox "Password" [ref=e2]
+- button "Login" [ref=e3]
+- link [ref=e4]
+- link [ref=e5] [nth=1]
+- link [ref=e6] [nth=2]
+- link [ref=e7] [nth=3]
+- link "OrangeHRM, Inc" [ref=e8]
