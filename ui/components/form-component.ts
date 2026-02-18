@@ -82,36 +82,12 @@ export class FormComponent extends BaseComponent {
 
   async isFieldValid(fieldName: string): Promise<boolean> {
     const pattern = toFlexiblePattern(fieldName);
+    const input = this.root.getByPlaceholder(pattern);
 
-    const byPlaceholder = this.root.getByPlaceholder(pattern);
-    const byName = this.root.locator(`input[name="${fieldName}"]`);
-    const byNameContains = this.root.locator(`input[name*="${fieldName}" i]`);
-    const byInputLabel = this.root
-      .locator('.oxd-input-group')
-      .filter({ has: this.root.getByPlaceholder(pattern) })
-      .locator('input');
-
-    let field = byPlaceholder;
-
-    const hasPlaceholder = await byPlaceholder.count().catch(() => 0);
-    if (hasPlaceholder === 0) {
-      const hasName = await byName.count().catch(() => 0);
-      if (hasName > 0) {
-        field = byName;
-      } else {
-        const hasNameContains = await byNameContains.count().catch(() => 0);
-        if (hasNameContains > 0) {
-          field = byNameContains;
-        } else {
-          field = byInputLabel;
-        }
-      }
-    }
-
-    const classes = (await field.getAttribute('class').catch(() => '')) ?? '';
+    const classes = (await input.getAttribute('class').catch(() => '')) ?? '';
     if (classes.includes('oxd-input--error')) return false;
 
-    const inputGroup = field.locator('xpath=ancestor::div[contains(@class, "oxd-input-group")][1]');
+    const inputGroup = input.locator('xpath=ancestor::div[contains(@class, "oxd-input-group")][1]');
     const errorEl = inputGroup.locator('.oxd-input-field-error-message');
     return !(await errorEl.isVisible().catch(() => false));
   }
