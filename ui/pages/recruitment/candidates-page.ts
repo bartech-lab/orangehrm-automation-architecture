@@ -28,14 +28,23 @@ export class CandidatesPage extends BasePage {
     email: string;
     vacancy?: string;
   }): Promise<void> {
-    await this.page.click('.oxd-button:has-text("Add")');
-    await this.page.fill('input[name="firstName"]', candidate.firstName);
-    await this.page.fill('input[name="lastName"]', candidate.lastName);
-    await this.page.fill('input[name="email"]', candidate.email);
+    await this.page.getByRole('button', { name: 'Add' }).click();
+    await this.page.waitForLoadState('networkidle');
+
+    await this.page.getByPlaceholder('First Name').fill(candidate.firstName);
+    await this.page.getByPlaceholder('Last Name').fill(candidate.lastName);
+    await this.page
+      .getByPlaceholder(/email/i)
+      .or(this.page.locator('input[type="email"]'))
+      .fill(candidate.email);
+
     if (candidate.vacancy) {
-      await this.page.selectOption('select[name="vacancy"]', candidate.vacancy);
+      const vacancyGroup = this.page.locator('.oxd-input-group').filter({ hasText: 'Vacancy' });
+      await vacancyGroup.locator('.oxd-select-text').click();
+      await this.page.getByRole('option', { name: new RegExp(candidate.vacancy, 'i') }).click();
     }
-    await this.page.click('.oxd-button:has-text("Save")');
+
+    await this.page.getByRole('button', { name: 'Save' }).click();
   }
 
   async searchCandidate(name: string): Promise<void> {
@@ -44,12 +53,17 @@ export class CandidatesPage extends BasePage {
 
   async viewCandidateDetails(name: string): Promise<void> {
     await this.searchCandidate(name);
-    await this.page.click('.oxd-table-cell-action-view');
+    await this.page.locator('.oxd-table-cell-action-view').first().click();
+    await this.page.waitForLoadState('networkidle');
   }
 
   async changeCandidateStatus(name: string, status: string): Promise<void> {
     await this.viewCandidateDetails(name);
-    await this.page.selectOption('select[name="status"]', status);
-    await this.page.click('.oxd-button:has-text("Save")');
+
+    const statusGroup = this.page.locator('.oxd-input-group').filter({ hasText: /status/i });
+    await statusGroup.locator('.oxd-select-text').click();
+    await this.page.getByRole('option', { name: new RegExp(status, 'i') }).click();
+
+    await this.page.getByRole('button', { name: 'Save' }).click();
   }
 }

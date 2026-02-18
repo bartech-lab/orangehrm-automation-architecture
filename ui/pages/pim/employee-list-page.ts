@@ -23,7 +23,14 @@ export class EmployeeListPage extends BasePage {
   }
 
   async searchEmployee(query: string): Promise<void> {
-    await this.dataTable.search(query);
+    const empNameGroup = this.page.locator('.oxd-input-group').filter({ hasText: 'Employee Name' });
+    const empNameInput = empNameGroup.getByPlaceholder(/type for hints/i);
+    await empNameInput.clear();
+    await empNameInput.fill(query);
+    await this.page.waitForTimeout(500);
+
+    await this.page.getByRole('button', { name: 'Search' }).click();
+    await this.page.waitForLoadState('networkidle');
   }
 
   async getEmployeeCount(): Promise<number> {
@@ -32,10 +39,12 @@ export class EmployeeListPage extends BasePage {
 
   async navigateToEmployee(name: string): Promise<void> {
     await this.searchEmployee(name);
-    await this.page.click('.oxd-table-card:has-text("' + name + '")');
+    const row = this.page.locator('.oxd-table-card').filter({ hasText: name });
+    await row.click();
   }
 
   async resetFilters(): Promise<void> {
-    await this.page.click('.oxd-button:has-text("Reset")');
+    await this.page.getByRole('button', { name: 'Reset' }).click();
+    await this.page.waitForLoadState('networkidle');
   }
 }

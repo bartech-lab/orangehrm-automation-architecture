@@ -23,19 +23,31 @@ export class LeaveListPage extends BasePage {
   }
 
   async filterByStatus(status: string): Promise<void> {
-    await this.page.selectOption('.oxd-select:has-text("Status") select', status);
+    const statusGroup = this.page.locator('.oxd-input-group').filter({ hasText: 'Status' });
+    await statusGroup.locator('.oxd-select-text').click();
+    await this.page.getByRole('option', { name: new RegExp(status, 'i') }).click();
   }
 
   async filterByType(type: string): Promise<void> {
-    await this.page.selectOption('.oxd-select:has-text("Leave Type") select', type);
+    const typeGroup = this.page.locator('.oxd-input-group').filter({ hasText: 'Leave Type' });
+    await typeGroup.locator('.oxd-select-text').click();
+    await this.page.getByRole('option', { name: new RegExp(type, 'i') }).click();
   }
 
   async searchEmployee(name: string): Promise<void> {
-    await this.page.fill('input[placeholder="Type for hints..."]', name);
-    await this.page.click('.oxd-autocomplete-dropdown-option');
+    const hintInput = this.page.getByPlaceholder(/type for hints/i).first();
+    await hintInput.fill(name);
+    await this.page.waitForTimeout(500);
+    const option = this.page.locator('.oxd-autocomplete-option, .oxd-dropdown-option').first();
+    await option.click();
   }
 
   async viewLeaveDetails(row: number): Promise<void> {
     await this.dataTable.clickRow(row);
+  }
+
+  async approveLeave(row: number): Promise<void> {
+    await this.viewLeaveDetails(row);
+    await this.page.getByRole('button', { name: /approve/i }).click();
   }
 }

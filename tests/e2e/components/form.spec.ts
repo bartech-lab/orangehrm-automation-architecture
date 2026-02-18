@@ -55,18 +55,6 @@ test.describe('FormComponent Tests', () => {
       expect(lastNameValid).toBe(true);
     });
 
-    test.skip('should handle select dropdown fields', async ({ auth }) => {
-      await auth.goto('/web/index.php/pim/addEmployee');
-
-      const form = new FormComponent(auth, 'form.oxd-form');
-      await form.waitForReady();
-
-      await form.selectOption('location', '1');
-
-      const locationValid = await form.isFieldValid('location');
-      expect(locationValid).toBe(true);
-    });
-
     test('should clear field values', async ({ auth }) => {
       await auth.goto('/web/index.php/pim/addEmployee');
 

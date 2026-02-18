@@ -11,36 +11,45 @@ export class EmployeeDetailsPage extends BasePage {
   }
 
   async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('.oxd-form');
+    await this.page.locator('.oxd-form').waitFor({ state: 'visible' });
   }
 
   async isReady(): Promise<boolean> {
-    return await this.page.isVisible('.oxd-form');
+    return await this.page
+      .locator('.oxd-form')
+      .isVisible()
+      .catch(() => false);
   }
 
   async navigateToTab(tabName: string): Promise<void> {
-    await this.page.click(`.oxd-tab:has-text("${tabName}")`);
+    await this.page.getByRole('tab', { name: new RegExp(tabName, 'i') }).click();
+    await this.page.waitForLoadState('networkidle');
   }
 
   async editPersonalDetails(details: { firstName?: string; lastName?: string }): Promise<void> {
     if (details.firstName) {
-      await this.page.fill('input[name="firstName"]', details.firstName);
+      await this.page.getByPlaceholder('First Name').fill(details.firstName);
     }
     if (details.lastName) {
-      await this.page.fill('input[name="lastName"]', details.lastName);
+      await this.page.getByPlaceholder('Last Name').fill(details.lastName);
     }
-    await this.page.click('.oxd-button:has-text("Save")');
+    await this.page.getByRole('button', { name: 'Save' }).first().click();
   }
 
   async editContactDetails(contact: { email?: string; phone?: string }): Promise<void> {
     await this.navigateToTab('Contact Details');
+
     if (contact.email) {
-      await this.page.fill('input[name="contact[workEmail]"]', contact.email);
+      const emailGroup = this.page.locator('.oxd-input-group').filter({ hasText: /email/i });
+      await emailGroup.getByRole('textbox').fill(contact.email);
     }
     if (contact.phone) {
-      await this.page.fill('input[name="contact[workTelephone]"]', contact.phone);
+      const phoneGroup = this.page
+        .locator('.oxd-input-group')
+        .filter({ hasText: /phone|telephone/i });
+      await phoneGroup.getByRole('textbox').fill(contact.phone);
     }
-    await this.page.click('.oxd-button:has-text("Save")');
+    await this.page.getByRole('button', { name: 'Save' }).first().click();
   }
 
   async viewJobInformation(): Promise<void> {
