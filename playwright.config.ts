@@ -1,22 +1,15 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 import dotenv from 'dotenv';
-import path from 'path';
 import os from 'os';
+import { fileURLToPath } from 'url';
 
-/**
- * Get environment info for Allure reporting
- */
 const getAllureEnvironmentInfo = () => ({
   OS: `${os.platform()} ${os.release()}`,
   'Node Version': process.version,
-  'Playwright Version': require('@playwright/test/package.json').version,
   'Test Environment': process.env.NODE_ENV || 'development',
 });
 
-/**
- * Read environment variables from .env file
- */
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: fileURLToPath(new URL('.env', import.meta.url)) });
 
 /**
  * Determine if running in CI environment
@@ -48,7 +41,7 @@ export default defineConfig({
   workers: isCI ? 1 : 4,
 
   /* Timeout for each test */
-  timeout: 60000,
+  timeout: 45000,
 
   /* Reporter to use */
   reporter: [

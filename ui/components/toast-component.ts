@@ -7,34 +7,41 @@ export class ToastComponent extends BaseComponent {
   }
 
   async waitForReady(): Promise<void> {
-    // TODO: Implement wait for toast to be ready
+    await this.root.getByRole('alert').or(this.root).waitFor({ state: 'visible' });
   }
 
   async isVisible(): Promise<boolean> {
-    // TODO: Implement visibility check
-    return false;
+    return this.root
+      .getByRole('alert')
+      .or(this.root)
+      .isVisible()
+      .catch(() => false);
   }
 
   async getMessage(): Promise<string> {
-    // TODO: Implement message retrieval
-    return '';
+    const alert = this.root.getByRole('alert').or(this.root);
+    return (await alert.textContent()) ?? '';
   }
 
   async getType(): Promise<'success' | 'error' | 'warning' | 'info'> {
-    // TODO: Implement toast type retrieval
+    const classes = (await this.root.getAttribute('class')) ?? '';
+    if (classes.includes('success')) return 'success';
+    if (classes.includes('error') || classes.includes('danger')) return 'error';
+    if (classes.includes('warning')) return 'warning';
     return 'info';
   }
 
   async close(): Promise<void> {
-    // TODO: Implement toast close
+    const closeBtn = this.root.getByRole('button', { name: /close|dismiss/i });
+    await closeBtn.click();
   }
 
   async waitForDisappearance(): Promise<void> {
-    // TODO: Implement wait for toast to disappear
+    await this.root.getByRole('alert').or(this.root).waitFor({ state: 'hidden' });
   }
 
   async isDismissible(): Promise<boolean> {
-    // TODO: Implement dismissible check
-    return false;
+    const closeBtn = this.root.getByRole('button', { name: /close|dismiss/i });
+    return closeBtn.isVisible().catch(() => false);
   }
 }

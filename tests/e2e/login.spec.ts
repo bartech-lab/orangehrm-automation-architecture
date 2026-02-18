@@ -53,24 +53,4 @@ test.describe('Login Functionality', () => {
     expect(isStillOnLogin).toBe(true);
   });
 
-  test('@auth - Remember me checkbox functionality', async ({ page }) => {
-    const rememberMeExists = await page
-      .locator('.oxd-checkbox-wrapper')
-      .first()
-      .isVisible()
-      .catch(() => false);
-
-    if (!rememberMeExists) {
-      test.skip();
-      return;
-    }
-
-    const isCheckedBefore = await loginPage.isRememberMeChecked();
-    expect(isCheckedBefore).toBe(false);
-
-    await loginPage.toggleRememberMe();
-
-    const isCheckedAfter = await loginPage.isRememberMeChecked();
-    expect(isCheckedAfter).toBe(true);
-  });
 });

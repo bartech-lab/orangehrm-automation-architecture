@@ -2,48 +2,65 @@ import type { Locator, Page } from '@playwright/test';
 import { BaseComponent } from './base-component.js';
 
 export class FileUploadComponent extends BaseComponent {
+  private uploadArea: Locator;
+
   constructor(page: Page, selector: string | Locator) {
     super(page, selector);
+    this.uploadArea = typeof selector === 'string' ? page.locator(selector) : selector;
   }
 
   async waitForReady(): Promise<void> {
-    // TODO: Implement wait for file upload to be ready
+    const fileInput = this.uploadArea.locator('input[type="file"]');
+    await fileInput.waitFor({ state: 'attached' });
   }
 
   async isVisible(): Promise<boolean> {
-    // TODO: Implement visibility check
-    return false;
+    const uploadBtn = this.uploadArea.getByRole('button', { name: /browse|upload|choose/i });
+    return uploadBtn.isVisible().catch(() => false);
   }
 
-  async uploadFile(_filePath: string): Promise<void> {
-    // TODO: Implement file upload
+  async uploadFile(filePath: string): Promise<void> {
+    const fileInput = this.uploadArea.locator('input[type="file"]');
+    await fileInput.setInputFiles(filePath);
   }
 
-  async uploadMultipleFiles(_filePaths: string[]): Promise<void> {
-    // TODO: Implement multiple file upload
+  async uploadMultipleFiles(filePaths: string[]): Promise<void> {
+    const fileInput = this.uploadArea.locator('input[type="file"]');
+    await fileInput.setInputFiles(filePaths);
   }
 
   async clearSelection(): Promise<void> {
-    // TODO: Implement selection clearing
+    const fileInput = this.uploadArea.locator('input[type="file"]');
+    await fileInput.setInputFiles([]);
   }
 
   async getSelectedFileName(): Promise<string> {
-    // TODO: Implement file name retrieval
-    return '';
+    const fileName = this.uploadArea.getByText(/\.[a-z]{2,4}$/).first();
+    return (await fileName.textContent()) ?? '';
   }
 
   async getSelectedFileNames(): Promise<string[]> {
-    // TODO: Implement file names retrieval
-    return [];
+    const fileNames = this.uploadArea.getByText(/\.[a-z]{2,4}$/);
+    const count = await fileNames.count();
+    const result: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const text = await fileNames.nth(i).textContent();
+      if (text) result.push(text);
+    }
+    return result;
   }
 
   async isValidFileType(): Promise<boolean> {
-    // TODO: Implement file type validation check
-    return false;
+    const error = this.uploadArea
+      .getByRole('alert')
+      .or(this.uploadArea.getByText(/invalid|not allowed/i));
+    return !(await error.isVisible().catch(() => false));
   }
 
   async getValidationMessage(): Promise<string> {
-    // TODO: Implement validation message retrieval
-    return '';
+    const error = this.uploadArea
+      .getByRole('alert')
+      .or(this.uploadArea.locator('[class*="error"]'));
+    return (await error.textContent()) ?? '';
   }
 }

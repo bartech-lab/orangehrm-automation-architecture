@@ -28,9 +28,10 @@ test.describe('FormComponent Tests', () => {
       await form.waitForReady();
 
       await form.fillField('firstName', '');
+      await form.submit();
 
       const errors = await form.getValidationErrors();
-      expect(errors).toContain(expect.stringContaining('Required'));
+      expect(errors.some((e) => e.includes('Required'))).toBe(true);
     });
   });
 
@@ -162,6 +163,7 @@ test.describe('FormComponent Tests', () => {
       await auth.goto('/web/index.php/pim/addEmployee');
 
       const form = new FormComponent(auth, 'form.oxd-form');
+      await form.waitForReady();
 
       const isVisible = await form.isVisible();
       expect(isVisible).toBe(true);

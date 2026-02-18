@@ -7,43 +7,79 @@ export class DataTableComponent extends BaseComponent {
   }
 
   async waitForReady(): Promise<void> {
-    // TODO: Implement wait for table to be ready
+    await this.root.waitFor({ state: 'visible' });
   }
 
   async isVisible(): Promise<boolean> {
-    // TODO: Implement visibility check
-    return false;
+    await this.root.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+    return this.root.isVisible().catch(() => false);
   }
 
   async isReady(): Promise<boolean> {
-    // TODO: Implement ready check
-    return await this.isVisible();
+    return this.isVisible();
+  }
+
+  private async waitForTableBody(): Promise<void> {
+    await this.page
+      .locator('.oxd-table-card')
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .catch(() => {});
+  }
+
+  private async waitForTableHeader(): Promise<void> {
+    await this.page
+      .locator('.oxd-table-header-cell')
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .catch(() => {});
   }
 
   async getRowCount(): Promise<number> {
-    // TODO: Implement row count
-    return 0;
+    await this.waitForTableBody();
+    const rows = this.page.locator('.oxd-table-card');
+    return rows.count();
   }
 
-  async getCellText(_row: number, _column: number): Promise<string> {
-    // TODO: Implement cell text retrieval
-    return '';
+  async getCellText(row: number, column: number): Promise<string> {
+    await this.waitForTableBody();
+    const rows = this.page.locator('.oxd-table-card');
+    const cells = rows.nth(row).locator('.oxd-table-cell');
+    const text = await cells.nth(column).textContent();
+    return text ?? '';
   }
 
-  async clickRow(_row: number): Promise<void> {
-    // TODO: Implement row click
+  async clickRow(row: number): Promise<void> {
+    await this.waitForTableBody();
+    const rows = this.page.locator('.oxd-table-card');
+    const targetRow = rows.nth(row);
+    await targetRow.scrollIntoViewIfNeeded();
+    await targetRow.click();
   }
 
-  async sortByColumn(_column: number): Promise<void> {
-    // TODO: Implement column sorting
+  async sortByColumn(column: number): Promise<void> {
+    await this.waitForTableHeader();
+    const headers = this.page.locator('.oxd-table-header-cell');
+    await headers.nth(column).click();
   }
 
-  async search(_query: string): Promise<void> {
-    // TODO: Implement search functionality
+  async search(query: string): Promise<void> {
+    const searchInput = this.page
+      .getByRole('searchbox')
+      .or(this.page.getByPlaceholder(/search/i))
+      .or(this.page.locator('.oxd-input').first());
+    await searchInput.fill(query);
   }
 
   async getHeaders(): Promise<string[]> {
-    // TODO: Implement header retrieval
-    return [];
+    await this.waitForTableHeader();
+    const headers = this.page.locator('.oxd-table-header-cell');
+    const count = await headers.count();
+    const result: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const text = await headers.nth(i).textContent();
+      if (text) result.push(text.trim());
+    }
+    return result;
   }
 }
