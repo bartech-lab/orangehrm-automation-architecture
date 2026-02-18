@@ -1,5 +1,0 @@
-- textbox [ref=e1] [disabled]: Admin
-- textbox [ref=e2] [nth=1]
-- button "Cancel" [ref=e3]
-- button "Confirm" [ref=e4]
-- link "OrangeHRM, Inc" [ref=e5]

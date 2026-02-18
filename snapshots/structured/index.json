@@ -1,0 +1,138 @@
+{
+  "generated": "2026-02-18T21:11:27.841Z",
+  "baseUrl": "https://opensource-demo.orangehrmlive.com",
+  "pages": [
+    {
+      "name": "login",
+      "file": "login.json",
+      "url": "/web/index.php/auth/login",
+      "needsAuth": false
+    },
+    {
+      "name": "dashboard",
+      "file": "dashboard.json",
+      "url": "/web/index.php/dashboard/index",
+      "needsAuth": true
+    },
+    {
+      "name": "admin-user-management",
+      "file": "admin-user-management.json",
+      "url": "/web/index.php/admin/viewSystemUsers",
+      "needsAuth": true
+    },
+    {
+      "name": "admin-add-user",
+      "file": "admin-add-user.json",
+      "url": "/web/index.php/admin/saveSystemUser",
+      "needsAuth": true
+    },
+    {
+      "name": "pim-employee-list",
+      "file": "pim-employee-list.json",
+      "url": "/web/index.php/pim/viewEmployeeList",
+      "needsAuth": true
+    },
+    {
+      "name": "pim-add-employee",
+      "file": "pim-add-employee.json",
+      "url": "/web/index.php/pim/addEmployee",
+      "needsAuth": true
+    },
+    {
+      "name": "leave-list",
+      "file": "leave-list.json",
+      "url": "/web/index.php/leave/viewLeaveList",
+      "needsAuth": true
+    },
+    {
+      "name": "leave-apply",
+      "file": "leave-apply.json",
+      "url": "/web/index.php/leave/applyLeave",
+      "needsAuth": true
+    },
+    {
+      "name": "leave-assign",
+      "file": "leave-assign.json",
+      "url": "/web/index.php/leave/assignLeave",
+      "needsAuth": true
+    },
+    {
+      "name": "time-timesheet",
+      "file": "time-timesheet.json",
+      "url": "/web/index.php/time/viewEmployeeTimesheet",
+      "needsAuth": true
+    },
+    {
+      "name": "recruitment-candidates",
+      "file": "recruitment-candidates.json",
+      "url": "/web/index.php/recruitment/viewCandidates",
+      "needsAuth": true
+    },
+    {
+      "name": "recruitment-add-candidate",
+      "file": "recruitment-add-candidate.json",
+      "url": "/web/index.php/recruitment/addCandidate",
+      "needsAuth": true
+    },
+    {
+      "name": "recruitment-vacancies",
+      "file": "recruitment-vacancies.json",
+      "url": "/web/index.php/recruitment/viewJobVacancy",
+      "needsAuth": true
+    },
+    {
+      "name": "my-info",
+      "file": "my-info.json",
+      "url": "/web/index.php/pim/viewMyDetails",
+      "needsAuth": true
+    },
+    {
+      "name": "performance",
+      "file": "performance.json",
+      "url": "/web/index.php/performance/searchEvaluatePerformance",
+      "needsAuth": true
+    },
+    {
+      "name": "directory",
+      "file": "directory.json",
+      "url": "/web/index.php/directory/viewDirectory",
+      "needsAuth": true
+    },
+    {
+      "name": "maintenance",
+      "file": "maintenance.json",
+      "url": "/web/index.php/maintenance/purgeCandidates",
+      "needsAuth": true
+    },
+    {
+      "name": "claim",
+      "file": "claim.json",
+      "url": "/web/index.php/claim/assignClaim",
+      "needsAuth": true
+    },
+    {
+      "name": "buzz",
+      "file": "buzz.json",
+      "url": "/web/index.php/buzz/viewBuzz",
+      "needsAuth": true
+    },
+    {
+      "name": "admin-job-titles",
+      "file": "admin-job-titles.json",
+      "url": "/web/index.php/admin/viewJobTitleList",
+      "needsAuth": true
+    },
+    {
+      "name": "admin-add-job-title",
+      "file": "admin-add-job-title.json",
+      "url": "/web/index.php/admin/saveJobTitle",
+      "needsAuth": true
+    },
+    {
+      "name": "admin-nationalities",
+      "file": "admin-nationalities.json",
+      "url": "/web/index.php/admin/nationality",
+      "needsAuth": true
+    }
+  ]
+}
