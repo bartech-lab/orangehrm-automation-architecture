@@ -46,6 +46,7 @@ export default defineConfig({
   /* Reporter to use */
   reporter: [
     ['line'],
+    ['json', { outputFile: 'playwright-report.json' }],
     ['html'],
     [
       'allure-playwright',

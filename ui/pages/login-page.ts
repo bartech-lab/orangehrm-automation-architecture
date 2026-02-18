@@ -14,13 +14,13 @@ export class LoginPage extends BasePage {
   constructor(page: Page, baseUrl: string = 'https://opensource-demo.orangehrmlive.com') {
     super(page, baseUrl);
 
-    this.usernameInput = page.locator('.oxd-input[name="username"]');
-    this.passwordInput = page.locator('.oxd-input[name="password"]');
-    this.loginButton = page.locator('.oxd-button[type="submit"]');
+    this.usernameInput = page.getByPlaceholder('Username');
+    this.passwordInput = page.getByPlaceholder('Password');
+    this.loginButton = page.locator('.orangehrm-login-button');
     this.errorMessage = page.locator('.oxd-alert-content-text');
-    this.errorAlert = page.locator('.oxd-alert--error');
-    this.rememberMeCheckbox = page.locator('.oxd-checkbox-wrapper');
-    this.forgotPasswordLink = page.locator('text=Forgot your password?');
+    this.errorAlert = page.getByRole('alert');
+    this.rememberMeCheckbox = page.getByLabel(/remember me/i);
+    this.forgotPasswordLink = page.getByRole('link', { name: /forgot password/i });
   }
 
   async navigate(): Promise<void> {

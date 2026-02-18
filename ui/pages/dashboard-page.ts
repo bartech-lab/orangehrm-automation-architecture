@@ -28,15 +28,15 @@ export class DashboardPage extends BasePage {
   constructor(page: Page, baseUrl: string) {
     super(page, baseUrl);
 
-    this.welcomeMessage = this.page.locator('.oxd-topbar-header-title h6');
+    this.topbarHeader = this.page.getByRole('banner');
+    this.welcomeMessage = this.page.locator('.oxd-topbar-header-title').getByRole('heading');
     this.quickActionButtons = this.page.locator('.oxd-icon-button');
-    this.sidebar = this.page.locator('.oxd-sidepanel');
-    this.sidebarMenuItems = this.page.locator('.oxd-sidepanel-body .oxd-main-menu-item');
+    this.sidebar = this.page.locator('aside.oxd-sidepanel');
+    this.sidebarMenuItems = this.sidebar.getByRole('link');
     this.userDropdown = this.page.locator('.oxd-userdropdown');
-    this.userDropdownMenu = this.page.locator('.oxd-dropdown-menu');
-    this.logoutLink = this.page.locator('.oxd-userdropdown-link:has-text("Logout")');
+    this.userDropdownMenu = this.page.getByRole('menu');
+    this.logoutLink = this.page.getByRole('menuitem', { name: /logout/i });
     this.userNameText = this.page.locator('.oxd-userdropdown-name');
-    this.topbarHeader = this.page.locator('.oxd-topbar-header');
   }
 
   async navigate(): Promise<void> {
@@ -64,9 +64,7 @@ export class DashboardPage extends BasePage {
   }
 
   async navigateTo(moduleName: ModuleName): Promise<void> {
-    const menuItem = this.sidebar.locator('.oxd-main-menu-item', {
-      hasText: moduleName,
-    });
+    const menuItem = this.sidebar.getByRole('link', { name: moduleName });
 
     await menuItem.waitFor({ state: 'visible' });
     await menuItem.click();
@@ -91,9 +89,7 @@ export class DashboardPage extends BasePage {
   }
 
   async isModuleVisible(moduleName: ModuleName): Promise<boolean> {
-    const menuItem = this.sidebar.locator('.oxd-main-menu-item', {
-      hasText: moduleName,
-    });
+    const menuItem = this.sidebar.getByRole('link', { name: moduleName });
     return menuItem.isVisible().catch(() => false);
   }
 

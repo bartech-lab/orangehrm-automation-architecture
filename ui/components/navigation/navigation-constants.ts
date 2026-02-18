@@ -1,7 +1,4 @@
-/**
- * Navigation module constants for OrangeHRM
- * Centralized location for all module names and routes
- */
+import type { Page } from '@playwright/test';
 
 /**
  * Module names for navigation
@@ -73,12 +70,17 @@ export const SIDEBAR_SELECTORS = {
 /**
  * OrangeHRM-specific CSS selectors
  * Based on the oxd-* class pattern used in the application
+ *
+ * Note: CSS selectors are kept as fallback for compatibility
+ * Prefer semantic locators where available (getByRole, getByText, etc.)
  */
 export const OXD_SELECTORS = {
-  // Sidebar
+  // Sidebar - prefer: page.locator('aside') or getByRole('navigation', { name: /side/i })
   SIDEBAR: '.oxd-sidepanel',
+  SIDEBAR_ASIDE: 'aside.oxd-sidepanel',
   SIDEBAR_MENU: '.oxd-main-menu',
   SIDEBAR_MENU_ITEM: '.oxd-main-menu-item',
+  SIDEBAR_MENU_ITEM_LINK: '.oxd-main-menu-item a, .oxd-main-menu-item > a',
   SIDEBAR_TOGGLE: '.oxd-sidepanel-header .oxd-icon-button',
 
   // Topbar
@@ -99,4 +101,43 @@ export const OXD_SELECTORS = {
   MODAL: '.oxd-dialog',
   BUTTON: '.oxd-button',
   FORM: '.oxd-form',
+} as const;
+
+/**
+ * Semantic locators for OrangeHRM navigation components
+ * Uses Playwright's semantic locator APIs for better accessibility
+ * These should be preferred over CSS selectors where possible
+ */
+export const SEMANTIC_LOCATORS = {
+  // Topbar - uses banner role for main header
+  TOPBAR: {
+    root: () => (page: Page) => page.getByRole('banner'),
+  },
+
+  // Search input - uses placeholder text
+  SEARCH: {
+    input:
+      (placeholder: string = 'Search') =>
+      (page: Page) =>
+        page.getByPlaceholder(placeholder, { exact: false }),
+  },
+
+  // User dropdown menu trigger
+  USER_DROPDOWN: {
+    trigger: () => (page: Page) => page.locator('.oxd-userdropdown').getByRole('button'),
+  },
+
+  // User name display
+  USER_NAME: {
+    text: () => (page: Page) => page.locator('.oxd-userdropdown').getByText(/./),
+  },
+
+  // User dropdown menu
+  USER_MENU: {
+    menu: () => (page: Page) => page.getByRole('menu'),
+    menuitem: (name?: string) => (page: Page) =>
+      name ? page.getByRole('menuitem', { name }) : page.getByRole('menuitem'),
+    link: (name?: string) => (page: Page) =>
+      name ? page.getByRole('link', { name }) : page.getByRole('link'),
+  },
 } as const;

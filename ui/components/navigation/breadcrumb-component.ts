@@ -1,19 +1,16 @@
 import type { Locator, Page } from '@playwright/test';
 import { BaseComponent } from '../base-component.js';
-import { OXD_SELECTORS } from './navigation-constants.js';
 
-/**
- * Breadcrumb navigation component for OrangeHRM
- * Handles breadcrumb trail display and navigation
- */
 export class BreadcrumbComponent extends BaseComponent {
   readonly breadcrumbItems: Locator;
   readonly headerTitle: Locator;
 
   constructor(page: Page) {
-    super(page, OXD_SELECTORS.BREADCRUMB);
-    this.breadcrumbItems = page.locator(OXD_SELECTORS.BREADCRUMB_ITEM);
-    this.headerTitle = page.locator('.oxd-topbar-header-title h6');
+    super(page, page.locator('.oxd-topbar-header-breadcrumb'));
+    this.breadcrumbItems = this.root
+      .locator('.oxd-topbar-header-breadcrumb-item')
+      .getByRole('link');
+    this.headerTitle = page.locator('.oxd-topbar-header-title').getByRole('heading');
   }
 
   async waitForReady(): Promise<void> {

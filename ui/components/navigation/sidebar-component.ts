@@ -13,9 +13,9 @@ export class SidebarComponent extends BaseComponent {
   readonly toggleButton: Locator;
 
   constructor(page: Page) {
-    super(page, OXD_SELECTORS.SIDEBAR);
-    this.menuItems = page.locator(OXD_SELECTORS.SIDEBAR_MENU_ITEM);
-    this.toggleButton = page.locator(OXD_SELECTORS.SIDEBAR_TOGGLE);
+    super(page, OXD_SELECTORS.SIDEBAR_ASIDE);
+    this.menuItems = page.locator(OXD_SELECTORS.SIDEBAR_MENU_ITEM).getByRole('link');
+    this.toggleButton = page.locator(OXD_SELECTORS.SIDEBAR_TOGGLE).getByRole('button');
   }
 
   async waitForReady(): Promise<void> {
@@ -37,7 +37,7 @@ export class SidebarComponent extends BaseComponent {
       throw new Error(`Unknown module: ${moduleName}`);
     }
 
-    const menuItem = this.page.locator(selector);
+    const menuItem = this.page.locator(selector).getByRole('link');
     await menuItem.click();
     await this.page.waitForLoadState('networkidle');
   }
@@ -100,16 +100,16 @@ export class SidebarComponent extends BaseComponent {
     if (!selector) {
       return false;
     }
-    return this.page.locator(selector).isVisible();
+    return this.page.locator(selector).getByRole('link').isVisible();
   }
 
   /**
    * Get the currently active module name
    */
   async getActiveModule(): Promise<string | null> {
-    const activeItem = this.page.locator(
-      `${OXD_SELECTORS.SIDEBAR_MENU_ITEM}--active, .oxd-main-menu-item.active`
-    );
+    const activeItem = this.page
+      .locator(`${OXD_SELECTORS.SIDEBAR_MENU_ITEM}--active, .oxd-main-menu-item.active`)
+      .getByRole('link');
     if (await activeItem.isVisible().catch(() => false)) {
       return activeItem.textContent();
     }
