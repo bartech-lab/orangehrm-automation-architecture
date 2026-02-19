@@ -11,16 +11,29 @@ export class TimesheetsPage extends BasePage {
   }
 
   async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('.oxd-table');
+    await this.page
+      .getByRole('table')
+      .or(this.page.locator('.oxd-table'))
+      .first()
+      .waitFor({ state: 'visible' });
   }
 
   async isReady(): Promise<boolean> {
-    return await this.page.isVisible('.oxd-table');
+    return this.page
+      .getByRole('table')
+      .or(this.page.locator('.oxd-table'))
+      .first()
+      .isVisible()
+      .catch(() => false);
   }
 
   async selectWeek(date: string): Promise<void> {
-    await this.page.fill('input[name="date"]', date);
-    await this.page.click('.oxd-button:has-text("View")');
+    await this.page
+      .getByRole('textbox', { name: /date/i })
+      .or(this.page.locator('input[name="date"]'))
+      .first()
+      .fill(date);
+    await this.page.getByRole('button', { name: /view/i }).click();
   }
 
   async enterHours(project: string, hours: string): Promise<void> {
@@ -28,10 +41,10 @@ export class TimesheetsPage extends BasePage {
   }
 
   async submitTimesheet(): Promise<void> {
-    await this.page.click('.oxd-button:has-text("Submit")');
+    await this.page.getByRole('button', { name: /submit/i }).click();
   }
 
   async approveTimesheet(): Promise<void> {
-    await this.page.click('.oxd-button:has-text("Approve")');
+    await this.page.getByRole('button', { name: /approve/i }).click();
   }
 }

@@ -7,7 +7,10 @@ export class JobTitlesPage extends BasePage {
 
   constructor(page: Page) {
     super(page, '/web/index.php/admin/viewJobTitleList');
-    this.dataTable = new DataTableComponent(page, '.oxd-table');
+    this.dataTable = new DataTableComponent(
+      page,
+      page.getByRole('table').or(page.locator('.oxd-table'))
+    );
   }
 
   async navigate(): Promise<void> {
@@ -23,24 +26,44 @@ export class JobTitlesPage extends BasePage {
   }
 
   async addJobTitle(title: string, description?: string): Promise<void> {
-    await this.page.click('.oxd-button:has-text("Add")');
-    await this.page.fill('input[name="jobTitle[jobTitle]"]', title);
+    await this.page.getByRole('button', { name: /add/i }).click();
+    await this.page
+      .getByRole('textbox', { name: /job title/i })
+      .or(this.page.locator('input[name="jobTitle[jobTitle]"]'))
+      .fill(title);
     if (description) {
-      await this.page.fill('textarea[name="jobTitle[description]"]', description);
+      await this.page
+        .getByRole('textbox', { name: /description/i })
+        .or(this.page.locator('textarea[name="jobTitle[description]"]'))
+        .fill(description);
     }
-    await this.page.click('.oxd-button:has-text("Save")');
+    await this.page.getByRole('button', { name: /save/i }).click();
   }
 
   async editJobTitle(oldTitle: string, newTitle: string): Promise<void> {
     await this.dataTable.search(oldTitle);
-    await this.page.click('.oxd-table-cell-action-edit');
-    await this.page.fill('input[name="jobTitle[jobTitle]"]', newTitle);
-    await this.page.click('.oxd-button:has-text("Save")');
+    await this.page
+      .getByRole('button', { name: /edit/i })
+      .or(this.page.locator('.oxd-table-cell-action-edit'))
+      .first()
+      .click();
+    await this.page
+      .getByRole('textbox', { name: /job title/i })
+      .or(this.page.locator('input[name="jobTitle[jobTitle]"]'))
+      .fill(newTitle);
+    await this.page.getByRole('button', { name: /save/i }).click();
   }
 
   async deleteJobTitle(title: string): Promise<void> {
     await this.dataTable.search(title);
-    await this.page.click('.oxd-table-cell-action-delete');
-    await this.page.click('.oxd-button:has-text("Yes, Delete")');
+    await this.page
+      .getByRole('button', { name: /delete/i })
+      .or(this.page.locator('.oxd-table-cell-action-delete'))
+      .first()
+      .click();
+    await this.page
+      .getByRole('button', { name: /yes,?\s*delete/i })
+      .or(this.page.locator('.oxd-dialog-container .oxd-button--label-danger'))
+      .click();
   }
 }

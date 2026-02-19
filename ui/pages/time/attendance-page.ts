@@ -11,19 +11,28 @@ export class AttendancePage extends BasePage {
   }
 
   async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('.oxd-form');
+    await this.page
+      .getByRole('heading', { name: /punch/i })
+      .or(this.page.locator('.oxd-form'))
+      .first()
+      .waitFor({ state: 'visible' });
   }
 
   async isReady(): Promise<boolean> {
-    return await this.page.isVisible('.oxd-form');
+    return this.page
+      .getByRole('heading', { name: /punch/i })
+      .or(this.page.locator('.oxd-form'))
+      .first()
+      .isVisible()
+      .catch(() => false);
   }
 
   async punchIn(): Promise<void> {
-    await this.page.click('.oxd-button:has-text("In")');
+    await this.page.getByRole('button', { name: /^in$/i }).click();
   }
 
   async punchOut(): Promise<void> {
-    await this.page.click('.oxd-button:has-text("Out")');
+    await this.page.getByRole('button', { name: /^out$/i }).click();
   }
 
   async viewAttendanceRecords(): Promise<void> {
@@ -32,7 +41,11 @@ export class AttendancePage extends BasePage {
 
   async editRecord(date: string): Promise<void> {
     await this.viewAttendanceRecords();
-    await this.page.fill('input[name="date"]', date);
-    await this.page.click('.oxd-button:has-text("View")');
+    await this.page
+      .getByRole('textbox', { name: /date/i })
+      .or(this.page.locator('input[name="date"]'))
+      .first()
+      .fill(date);
+    await this.page.getByRole('button', { name: /view/i }).click();
   }
 }

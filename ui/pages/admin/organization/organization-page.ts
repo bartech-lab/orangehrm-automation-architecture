@@ -11,20 +11,48 @@ export class OrganizationPage extends BasePage {
   }
 
   async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('.oxd-form');
+    await this.page
+      .getByRole('heading', { name: /general information|organization/i })
+      .or(this.page.locator('.oxd-form'))
+      .first()
+      .waitFor({ state: 'visible' });
   }
 
   async isReady(): Promise<boolean> {
-    return await this.page.isVisible('.oxd-form');
+    return this.page
+      .getByRole('heading', { name: /general information|organization/i })
+      .or(this.page.locator('.oxd-form'))
+      .first()
+      .isVisible()
+      .catch(() => false);
   }
 
   async editOrganizationName(name: string): Promise<void> {
-    await this.page.fill('input[name="organization[name]"]', name);
-    await this.page.click('.oxd-button:has-text("Save")');
+    const editButton = this.page.getByRole('button', { name: /edit/i });
+    if (
+      await editButton
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
+      await editButton.first().click();
+    }
+    await this.page
+      .getByRole('textbox', { name: /organization name|name/i })
+      .or(this.page.locator('input[name="organization[name]"]'))
+      .first()
+      .fill(name);
+    await this.page.getByRole('button', { name: /save/i }).click();
   }
 
   async getOrganizationName(): Promise<string> {
-    return (await this.page.inputValue('input[name="organization[name]"]')) || '';
+    return (
+      (await this.page
+        .getByRole('textbox', { name: /organization name|name/i })
+        .or(this.page.locator('input[name="organization[name]"]'))
+        .first()
+        .inputValue()) || ''
+    );
   }
 
   async navigateToLocations(): Promise<void> {
@@ -32,10 +60,33 @@ export class OrganizationPage extends BasePage {
   }
 
   async addLocation(location: { name: string; city: string; country: string }): Promise<void> {
-    await this.page.click('.oxd-button:has-text("Add")');
-    await this.page.fill('input[name="location[name]"]', location.name);
-    await this.page.fill('input[name="location[city]"]', location.city);
-    await this.page.selectOption('select[name="location[country]"]', location.country);
-    await this.page.click('.oxd-button:has-text("Save")');
+    await this.page.getByRole('button', { name: /add/i }).click();
+    await this.page
+      .getByRole('textbox', { name: /name/i })
+      .or(this.page.locator('input[name="location[name]"]'))
+      .first()
+      .fill(location.name);
+    await this.page
+      .getByRole('textbox', { name: /city/i })
+      .or(this.page.locator('input[name="location[city]"]'))
+      .first()
+      .fill(location.city);
+
+    const countryField = this.page
+      .getByRole('combobox', { name: /country/i })
+      .or(this.page.locator('select[name="location[country]"]'));
+    await countryField.first().click();
+    await this.page
+      .getByRole('option', { name: new RegExp(location.country, 'i') })
+      .or(this.page.locator(`option[value="${location.country}"]`))
+      .or(
+        this.page
+          .locator('.oxd-select-option')
+          .filter({ hasText: new RegExp(location.country, 'i') })
+      )
+      .first()
+      .click();
+
+    await this.page.getByRole('button', { name: /save/i }).click();
   }
 }

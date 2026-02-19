@@ -7,7 +7,28 @@ export class ReportsPage extends BasePage {
 
   constructor(page: Page) {
     super(page, '/web/index.php/pim/viewDefinedPredefinedReports');
-    this.dataTable = new DataTableComponent(page, '.oxd-table');
+    this.dataTable = new DataTableComponent(
+      page,
+      page.getByRole('table').or(page.locator('.oxd-table'))
+    );
+  }
+
+  private async selectDropdownOption(field: RegExp, option: string): Promise<void> {
+    const dropdown = this.page
+      .getByRole('combobox', { name: field })
+      .or(
+        this.page.locator('.oxd-input-group').filter({ hasText: field }).locator('.oxd-select-text')
+      );
+    await dropdown.first().click();
+    await this.page
+      .getByRole('option', { name: new RegExp(option, 'i') })
+      .or(
+        this.page
+          .locator('.oxd-select-option, .oxd-dropdown-option')
+          .filter({ hasText: new RegExp(option, 'i') })
+      )
+      .first()
+      .click();
   }
 
   async navigate(): Promise<void> {
@@ -28,13 +49,21 @@ export class ReportsPage extends BasePage {
 
   async runReport(reportName: string): Promise<void> {
     await this.searchReport(reportName);
-    await this.page.click('.oxd-table-cell-action-run');
+    await this.page
+      .getByRole('button', { name: /run|view/i })
+      .or(this.page.locator('.oxd-table-cell-action-run'))
+      .first()
+      .click();
   }
 
   async configureReport(config: { name: string; criteria: string }): Promise<void> {
-    await this.page.click('.oxd-button:has-text("Add")');
-    await this.page.fill('input[name="report[name]"]', config.name);
-    await this.page.selectOption('select[name="report[criteria]"]', config.criteria);
-    await this.page.click('.oxd-button:has-text("Save")');
+    await this.page.getByRole('button', { name: /add/i }).click();
+    await this.page
+      .getByRole('textbox', { name: /report name|name/i })
+      .or(this.page.locator('input[name="report[name]"]'))
+      .first()
+      .fill(config.name);
+    await this.selectDropdownOption(/criteria/i, config.criteria);
+    await this.page.getByRole('button', { name: /save/i }).click();
   }
 }

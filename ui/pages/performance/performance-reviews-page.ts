@@ -11,17 +11,33 @@ export class PerformanceReviewsPage extends BasePage {
   }
 
   async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('.oxd-form');
+    await this.page
+      .getByRole('heading', { name: /performance|review/i })
+      .or(this.page.locator('.oxd-form'))
+      .first()
+      .waitFor({ state: 'visible' });
   }
 
   async isReady(): Promise<boolean> {
-    return await this.page.isVisible('.oxd-form');
+    return this.page
+      .getByRole('heading', { name: /performance|review/i })
+      .or(this.page.locator('.oxd-form'))
+      .first()
+      .isVisible()
+      .catch(() => false);
   }
 
   async searchReview(employeeName: string): Promise<void> {
-    await this.page.fill('input[placeholder="Type for hints..."]', employeeName);
-    await this.page.click('.oxd-autocomplete-dropdown-option');
-    await this.page.click('.oxd-button:has-text("Search")');
+    await this.page
+      .getByPlaceholder(/type for hints/i)
+      .first()
+      .fill(employeeName);
+    await this.page
+      .getByRole('option', { name: new RegExp(employeeName, 'i') })
+      .or(this.page.locator('.oxd-autocomplete-option, .oxd-autocomplete-dropdown-option').first())
+      .first()
+      .click();
+    await this.page.getByRole('button', { name: /search/i }).click();
   }
 
   async addReview(review: {
@@ -31,20 +47,52 @@ export class PerformanceReviewsPage extends BasePage {
     reviewPeriodEnd: string;
     dueDate: string;
   }): Promise<void> {
-    await this.page.click('.oxd-button:has-text("Add")');
-    await this.page.fill('input[name="review[employeeName]"]', review.employee);
-    await this.page.fill('input[name="review[reviewerName]"]', review.reviewer);
-    await this.page.fill('input[name="review[reviewPeriodStartDate]"]', review.reviewPeriodStart);
-    await this.page.fill('input[name="review[reviewPeriodEndDate]"]', review.reviewPeriodEnd);
-    await this.page.fill('input[name="review[dueDate]"]', review.dueDate);
-    await this.page.click('.oxd-button:has-text("Save")');
+    await this.page.getByRole('button', { name: /add/i }).click();
+    await this.page
+      .getByRole('textbox', { name: /employee name/i })
+      .or(this.page.locator('input[name="review[employeeName]"]'))
+      .first()
+      .fill(review.employee);
+    await this.page
+      .getByRole('textbox', { name: /supervisor reviewer|reviewer/i })
+      .or(this.page.locator('input[name="review[reviewerName]"]'))
+      .first()
+      .fill(review.reviewer);
+    await this.page
+      .getByRole('textbox', { name: /from/i })
+      .or(this.page.locator('input[name="review[reviewPeriodStartDate]"]'))
+      .first()
+      .fill(review.reviewPeriodStart);
+    await this.page
+      .getByRole('textbox', { name: /to/i })
+      .or(this.page.locator('input[name="review[reviewPeriodEndDate]"]'))
+      .first()
+      .fill(review.reviewPeriodEnd);
+    await this.page
+      .getByRole('textbox', { name: /due date/i })
+      .or(this.page.locator('input[name="review[dueDate]"]'))
+      .first()
+      .fill(review.dueDate);
+    await this.page.getByRole('button', { name: /save/i }).click();
   }
 
   async evaluateReview(employeeName: string, rating: number, comments: string): Promise<void> {
     await this.searchReview(employeeName);
-    await this.page.click('.oxd-table-cell-action-edit');
-    await this.page.fill('input[name="rating"]', rating.toString());
-    await this.page.fill('textarea[name="comments"]', comments);
-    await this.page.click('.oxd-button:has-text("Complete")');
+    await this.page
+      .getByRole('button', { name: /edit/i })
+      .or(this.page.locator('.oxd-table-cell-action-edit'))
+      .first()
+      .click();
+    await this.page
+      .getByRole('spinbutton', { name: /rating/i })
+      .or(this.page.locator('input[name="rating"]'))
+      .first()
+      .fill(rating.toString());
+    await this.page
+      .getByRole('textbox', { name: /comment/i })
+      .or(this.page.locator('textarea[name="comments"]'))
+      .first()
+      .fill(comments);
+    await this.page.getByRole('button', { name: /complete/i }).click();
   }
 }
