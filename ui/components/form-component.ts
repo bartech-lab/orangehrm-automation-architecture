@@ -11,62 +11,74 @@ export class FormComponent extends BaseComponent {
     super(page, selector);
   }
 
+  private getFormRoot(): Locator {
+    return this.root.getByRole('form').or(this.root).first();
+  }
+
+  private getFieldLocator(fieldName: string): Locator {
+    const pattern = toFlexiblePattern(fieldName);
+    const formRoot = this.getFormRoot();
+    const byRole = formRoot.getByRole('textbox', { name: pattern });
+    const bySpinbutton = formRoot.getByRole('spinbutton', { name: pattern });
+    const byLabel = formRoot.getByLabel(pattern);
+    const byPlaceholder = formRoot.getByPlaceholder(pattern);
+    const byName = formRoot.locator(`input[name="${fieldName}"]`);
+    const byNameContains = formRoot.locator(`input[name*="${fieldName}" i]`);
+    const byNearbyText = formRoot.getByText(pattern).first().locator('xpath=following::input[1]');
+
+    return byRole
+      .or(bySpinbutton)
+      .or(byLabel)
+      .or(byPlaceholder)
+      .or(byName)
+      .or(byNameContains)
+      .or(byNearbyText);
+  }
+
   async waitForReady(): Promise<void> {
-    await this.root.waitFor({ state: 'visible' });
+    await this.getFormRoot().waitFor({ state: 'visible' });
   }
 
   async isVisible(): Promise<boolean> {
-    return this.root.isVisible().catch(() => false);
+    return this.getFormRoot()
+      .isVisible()
+      .catch(() => false);
   }
 
   async fillField(fieldName: string, value: string): Promise<void> {
-    const pattern = toFlexiblePattern(fieldName);
-    const byPlaceholder = this.root.getByPlaceholder(pattern);
-    const byName = this.root.locator(`input[name="${fieldName}"]`);
-    const byNameContains = this.root.locator(`input[name*="${fieldName}" i]`);
-    const byInputLabel = this.root
-      .locator('.oxd-input-group')
-      .filter({ hasText: pattern })
-      .locator('input');
-
-    const input = byPlaceholder.or(byName).or(byNameContains).or(byInputLabel);
-
+    const input = this.getFieldLocator(fieldName);
     await input.fill(value);
   }
 
   async selectOption(fieldName: string, option: string): Promise<void> {
     const pattern = toFlexiblePattern(fieldName);
-    const dropdown = this.root
-      .locator('.oxd-input-group')
-      .filter({ hasText: pattern })
-      .locator('.oxd-select-text');
+    const formRoot = this.getFormRoot();
+    const dropdown = formRoot
+      .getByRole('combobox', { name: pattern })
+      .or(formRoot.getByRole('button', { name: pattern }).first())
+      .or(formRoot.getByText(pattern).first());
 
     await dropdown.click();
     await this.page.getByRole('option', { name: new RegExp(option, 'i') }).click();
   }
 
   async submit(): Promise<void> {
-    const submitBtn = this.root.locator('button[type="submit"]');
+    const formRoot = this.getFormRoot();
+    const submitBtn = formRoot
+      .getByRole('button', { name: /save|submit|add/i })
+      .first()
+      .or(formRoot.locator('button[type="submit"]').first());
     await submitBtn.click();
   }
 
   async clearField(fieldName: string): Promise<void> {
-    const pattern = toFlexiblePattern(fieldName);
-    const byPlaceholder = this.root.getByPlaceholder(pattern);
-    const byName = this.root.locator(`input[name="${fieldName}"]`);
-    const byNameContains = this.root.locator(`input[name*="${fieldName}" i]`);
-    const byInputLabel = this.root
-      .locator('.oxd-input-group')
-      .filter({ hasText: pattern })
-      .locator('input');
-
-    const input = byPlaceholder.or(byName).or(byNameContains).or(byInputLabel);
-
+    const input = this.getFieldLocator(fieldName);
     await input.clear();
   }
 
   async getValidationErrors(): Promise<string[]> {
-    const errors = this.root.locator('.oxd-input-field-error-message');
+    const formRoot = this.getFormRoot();
+    const errors = formRoot.getByRole('alert').or(formRoot.getByText(/required|invalid/i));
     await errors
       .first()
       .waitFor({ state: 'visible', timeout: 5000 })
@@ -81,14 +93,39 @@ export class FormComponent extends BaseComponent {
   }
 
   async isFieldValid(fieldName: string): Promise<boolean> {
-    const pattern = toFlexiblePattern(fieldName);
-    const input = this.root.getByPlaceholder(pattern);
+    const input = this.getFieldLocator(fieldName);
+    const value = await input.inputValue().catch(() => '');
 
-    const classes = (await input.getAttribute('class').catch(() => '')) ?? '';
-    if (classes.includes('oxd-input--error')) return false;
+    if (!value.trim()) {
+      const errors = await this.getValidationErrors();
+      if (errors.length > 0) return false;
+    }
 
-    const inputGroup = input.locator('xpath=ancestor::div[contains(@class, "oxd-input-group")][1]');
-    const errorEl = inputGroup.locator('.oxd-input-field-error-message');
-    return !(await errorEl.isVisible().catch(() => false));
+    const ariaInvalid = await input.getAttribute('aria-invalid').catch(() => null);
+    if (ariaInvalid === 'true') return false;
+
+    const describedBy = await input.getAttribute('aria-describedby').catch(() => null);
+    if (describedBy) {
+      const ids = describedBy.split(/\s+/).filter(Boolean);
+      for (const id of ids) {
+        const describedError = this.page
+          .locator(`#${id}`)
+          .getByText(/required|invalid/i)
+          .first();
+        if (await describedError.isVisible().catch(() => false)) return false;
+      }
+    }
+
+    const fieldError = input
+      .locator('xpath=ancestor::*[self::div or self::fieldset][1]')
+      .getByRole('alert')
+      .first()
+      .or(
+        input
+          .locator('xpath=ancestor::*[self::div or self::fieldset][1]')
+          .getByText(/required|invalid/i)
+          .first()
+      );
+    return !(await fieldError.isVisible().catch(() => false));
   }
 }
