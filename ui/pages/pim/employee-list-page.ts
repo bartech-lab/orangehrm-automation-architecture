@@ -23,8 +23,7 @@ export class EmployeeListPage extends BasePage {
   }
 
   async searchEmployee(query: string): Promise<void> {
-    const empNameGroup = this.page.locator('.oxd-input-group').filter({ hasText: 'Employee Name' });
-    const empNameInput = empNameGroup.getByPlaceholder(/type for hints/i);
+    const empNameInput = this.page.getByRole('textbox', { name: /type for hints/i }).first();
     await empNameInput.clear();
     await empNameInput.fill(query);
     await this.page.waitForTimeout(500);
@@ -39,7 +38,12 @@ export class EmployeeListPage extends BasePage {
 
   async navigateToEmployee(name: string): Promise<void> {
     await this.searchEmployee(name);
-    const row = this.page.locator('.oxd-table-card').filter({ hasText: name });
+    const row = this.page
+      .getByRole('row')
+      .filter({ hasText: new RegExp(name, 'i') })
+      .first();
+    await row.waitFor({ state: 'visible' });
+    await row.scrollIntoViewIfNeeded();
     await row.click();
   }
 

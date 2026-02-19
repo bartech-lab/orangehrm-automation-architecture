@@ -16,10 +16,10 @@ export class LoginPage extends BasePage {
 
     this.usernameInput = page.getByPlaceholder('Username');
     this.passwordInput = page.getByPlaceholder('Password');
-    this.loginButton = page.locator('.orangehrm-login-button');
+    this.loginButton = page.getByRole('button', { name: /login/i });
     this.errorMessage = page.locator('.oxd-alert-content-text');
-    this.errorAlert = page.getByRole('alert');
-    this.rememberMeCheckbox = page.getByLabel(/remember me/i);
+    this.errorAlert = page.locator('.oxd-alert-content-text');
+    this.rememberMeCheckbox = page.getByRole('checkbox', { name: /remember me/i });
     this.forgotPasswordLink = page.getByRole('link', { name: /forgot password/i });
   }
 
