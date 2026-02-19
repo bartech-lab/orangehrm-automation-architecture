@@ -29,14 +29,14 @@ export class DashboardPage extends BasePage {
     super(page, baseUrl);
 
     this.topbarHeader = this.page.getByRole('banner');
-    this.welcomeMessage = this.page.locator('.oxd-topbar-header-title').getByRole('heading');
-    this.quickActionButtons = this.page.locator('.oxd-icon-button');
-    this.sidebar = this.page.locator('aside.oxd-sidepanel');
+    this.welcomeMessage = this.page.getByRole('heading', { name: /welcome/i });
+    this.quickActionButtons = this.page.getByRole('button');
+    this.sidebar = this.page.getByRole('navigation', { name: /sidepanel/i });
     this.sidebarMenuItems = this.sidebar.getByRole('link');
-    this.userDropdown = this.page.locator('.oxd-userdropdown');
+    this.userDropdown = this.page.locator('.oxd-userdropdown').getByRole('button');
     this.userDropdownMenu = this.page.getByRole('menu');
     this.logoutLink = this.page.getByRole('menuitem', { name: /logout/i });
-    this.userNameText = this.page.locator('.oxd-userdropdown-name');
+    this.userNameText = this.page.locator('.oxd-userdropdown').getByText(/./);
   }
 
   async navigate(): Promise<void> {
