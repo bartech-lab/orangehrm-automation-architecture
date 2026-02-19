@@ -14,14 +14,7 @@ export class UserManagementPage extends BasePage {
   }
 
   private async selectCustomOption(fieldLabel: RegExp, option: string): Promise<void> {
-    const dropdown = this.page
-      .getByRole('combobox', { name: fieldLabel })
-      .or(
-        this.page
-          .locator('.oxd-input-group')
-          .filter({ hasText: fieldLabel })
-          .locator('.oxd-select-text')
-      );
+    const dropdown = this.page.getByRole('combobox', { name: fieldLabel });
     await dropdown.first().click();
     await this.page
       .getByRole('option', { name: new RegExp(option, 'i') })
@@ -72,28 +65,24 @@ export class UserManagementPage extends BasePage {
 
     await this.selectCustomOption(/status/i, user.status ?? 'Enabled');
 
-    await this.page
-      .getByRole('textbox', { name: /username/i })
-      .or(this.page.locator('input[name="username"]'))
-      .fill(user.username);
-    await this.page
-      .getByLabel(/^password$/i)
-      .or(this.page.locator('input[name="password"]'))
-      .fill(user.password);
-    await this.page
-      .getByLabel(/confirm password/i)
-      .or(this.page.locator('input[name="confirmPassword"]'))
-      .fill(user.password);
+    await this.page.getByRole('textbox', { name: /username/i }).fill(user.username);
+    await this.page.getByLabel(/^password$/i).fill(user.password);
+    await this.page.getByLabel(/confirm password/i).fill(user.password);
     await this.page.getByRole('button', { name: /save/i }).click();
   }
 
   async deleteUser(username: string): Promise<void> {
     await this.searchUser(username);
-    await this.page
-      .getByRole('button', { name: /delete/i })
-      .or(this.page.locator('.oxd-table-cell-action-delete'))
-      .first()
-      .click();
+    const userRow = this.page
+      .getByRole('row')
+      .filter({ hasText: new RegExp(username, 'i') })
+      .or(this.page.locator('.oxd-table-card').filter({ hasText: new RegExp(username, 'i') }))
+      .first();
+    await userRow.scrollIntoViewIfNeeded();
+
+    const deleteButton = userRow.getByRole('button', { name: /delete/i }).first();
+    await deleteButton.scrollIntoViewIfNeeded();
+    await deleteButton.click();
     await this.page
       .getByRole('button', { name: /yes,?\s*delete/i })
       .or(this.page.locator('.oxd-dialog-container .oxd-button--label-danger'))
@@ -102,11 +91,16 @@ export class UserManagementPage extends BasePage {
 
   async editUser(username: string, changes: Partial<{ role: string }>): Promise<void> {
     await this.searchUser(username);
-    await this.page
-      .getByRole('button', { name: /edit/i })
-      .or(this.page.locator('.oxd-table-cell-action-edit'))
-      .first()
-      .click();
+    const userRow = this.page
+      .getByRole('row')
+      .filter({ hasText: new RegExp(username, 'i') })
+      .or(this.page.locator('.oxd-table-card').filter({ hasText: new RegExp(username, 'i') }))
+      .first();
+    await userRow.scrollIntoViewIfNeeded();
+
+    const editButton = userRow.getByRole('button', { name: /edit/i }).first();
+    await editButton.scrollIntoViewIfNeeded();
+    await editButton.click();
     if (changes.role) {
       await this.selectCustomOption(/user role/i, changes.role);
     }
