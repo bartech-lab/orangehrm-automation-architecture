@@ -11,12 +11,18 @@ export class EmployeeDetailsPage extends BasePage {
   }
 
   async waitForReady(): Promise<void> {
-    await this.page.locator('.oxd-form').waitFor({ state: 'visible' });
+    await this.page
+      .getByRole('form')
+      .or(this.page.locator('.oxd-form'))
+      .first()
+      .waitFor({ state: 'visible' });
   }
 
   async isReady(): Promise<boolean> {
     return await this.page
-      .locator('.oxd-form')
+      .getByRole('form')
+      .or(this.page.locator('.oxd-form'))
+      .first()
       .isVisible()
       .catch(() => false);
   }
@@ -40,14 +46,10 @@ export class EmployeeDetailsPage extends BasePage {
     await this.navigateToTab('Contact Details');
 
     if (contact.email) {
-      const emailGroup = this.page.locator('.oxd-input-group').filter({ hasText: /email/i });
-      await emailGroup.getByRole('textbox').fill(contact.email);
+      await this.page.getByLabel(/email/i).fill(contact.email);
     }
     if (contact.phone) {
-      const phoneGroup = this.page
-        .locator('.oxd-input-group')
-        .filter({ hasText: /phone|telephone/i });
-      await phoneGroup.getByRole('textbox').fill(contact.phone);
+      await this.page.getByLabel(/phone|telephone/i).fill(contact.phone);
     }
     await this.page.getByRole('button', { name: 'Save' }).first().click();
   }
