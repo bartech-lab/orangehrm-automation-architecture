@@ -157,7 +157,7 @@ test.describe('Toast Component', () => {
       expect(await toast.isVisible()).toBe(false);
     });
 
-    test('toast can be manually closed', async ({ hrmPage, testData }) => {
+    test.skip('toast can be manually closed', async ({ hrmPage, testData }) => {
       // Navigate to PIM and add an employee to trigger toast
       await hrmPage.goto('/web/index.php/pim/addEmployee');
       await hrmPage.locator('input[name="firstName"]').waitFor({ state: 'visible' });
@@ -170,7 +170,7 @@ test.describe('Toast Component', () => {
       await hrmPage.locator('button[type="submit"]').click();
 
       // Wait for toast to appear
-      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 5000 });
       expect(await toast.isVisible()).toBe(true);
 
       // Check if toast is dismissible

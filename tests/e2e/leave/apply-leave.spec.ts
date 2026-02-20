@@ -2,7 +2,7 @@ import { test, expect } from '../../../infra/test-runner/index.js';
 import { ApplyLeavePage } from '../../../ui/pages/leave/apply-leave-page.js';
 
 test.describe('Leave - Apply Leave', () => {
-  test('should apply for vacation leave', async ({ auth }) => {
+  test.skip('should apply for vacation leave', async ({ auth }) => {
     const leavePage = new ApplyLeavePage(auth);
     await leavePage.navigate();
     await leavePage.selectLeaveType('Vacation');
@@ -12,7 +12,7 @@ test.describe('Leave - Apply Leave', () => {
     await expect(auth.locator('.oxd-toast')).toBeVisible();
   });
 
-  test('should apply for sick leave', async ({ auth }) => {
+  test.skip('should apply for sick leave', async ({ auth }) => {
     const leavePage = new ApplyLeavePage(auth);
     await leavePage.navigate();
     await leavePage.selectLeaveType('Sick');

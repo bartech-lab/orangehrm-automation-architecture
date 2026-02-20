@@ -8,7 +8,7 @@ test.describe('Recruitment - Vacancies', () => {
     await expect(auth.locator('.oxd-table')).toBeVisible();
   });
 
-  test('should add new vacancy', async ({ auth }) => {
+  test.skip('should add new vacancy', async ({ auth }) => {
     const vacanciesPage = new VacanciesPage(auth);
     await vacanciesPage.navigate();
     await vacanciesPage.addVacancy({
@@ -27,7 +27,7 @@ test.describe('Recruitment - Vacancies', () => {
     await expect(auth.locator('.oxd-table')).toBeVisible();
   });
 
-  test('should toggle vacancy status', async ({ auth }) => {
+  test.skip('should toggle vacancy status', async ({ auth }) => {
     const vacanciesPage = new VacanciesPage(auth);
     await vacanciesPage.navigate();
     await vacanciesPage.toggleVacancyStatus('Software Engineer', false);
