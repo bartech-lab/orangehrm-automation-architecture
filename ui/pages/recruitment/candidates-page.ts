@@ -61,14 +61,22 @@ export class CandidatesPage extends BasePage {
     const viewButton = this.page.locator('.oxd-table-cell-action-view').first();
     if ((await viewButton.count()) > 0) {
       await viewButton.click();
-      await this.page.getByRole('button', { name: 'Save' }).waitFor({ state: 'visible' });
+      await this.page
+        .getByRole('heading', { name: /candidate profile/i })
+        .or(this.page.getByRole('button', { name: /save|shortlist|reject/i }))
+        .first()
+        .waitFor({ state: 'visible' });
       return;
     }
 
     const firstCardRow = this.page.locator('.oxd-table-card').first();
     if ((await firstCardRow.count()) > 0) {
       await firstCardRow.click();
-      await this.page.getByRole('button', { name: 'Save' }).waitFor({ state: 'visible' });
+      await this.page
+        .getByRole('heading', { name: /candidate profile/i })
+        .or(this.page.getByRole('button', { name: /save|shortlist|reject/i }))
+        .first()
+        .waitFor({ state: 'visible' });
       return;
     }
 
@@ -77,7 +85,11 @@ export class CandidatesPage extends BasePage {
       .filter({ has: this.page.getByRole('cell') })
       .first()
       .click();
-    await this.page.getByRole('button', { name: 'Save' }).waitFor({ state: 'visible' });
+    await this.page
+      .getByRole('heading', { name: /candidate profile/i })
+      .or(this.page.getByRole('button', { name: /save|shortlist|reject/i }))
+      .first()
+      .waitFor({ state: 'visible' });
   }
 
   async changeCandidateStatus(name: string, status: string): Promise<void> {

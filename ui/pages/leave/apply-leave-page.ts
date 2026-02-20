@@ -23,14 +23,39 @@ export class ApplyLeavePage extends BasePage {
 
   async hasLeaveTypes(): Promise<boolean> {
     const noLeaveText = this.page.getByText('No Leave Types with Leave Balance');
-    return !(await noLeaveText.isVisible().catch(() => false));
+    const noLeaveVisible = await noLeaveText
+      .first()
+      .isVisible()
+      .catch(() => false);
+    return !noLeaveVisible;
   }
 
   async selectLeaveType(type: string): Promise<void> {
     const form = this.page.locator('.oxd-form');
     const leaveTypeGroup = form.locator('.oxd-input-group').filter({ hasText: 'Leave Type' });
     const dropdown = leaveTypeGroup.locator('.oxd-select-text');
-    await dropdown.click();
+    await dropdown.waitFor({ state: 'visible', timeout: 5000 });
+    const loader = this.page.locator('.oxd-form-loader');
+    await loader.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        await dropdown.click({ timeout: 5000 });
+        break;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const isTransientUiState =
+          message.includes('intercepts pointer events') ||
+          message.includes('Element is not attached') ||
+          message.includes('element was detached');
+        if (!isTransientUiState || attempt === 1) {
+          throw error;
+        }
+
+        await loader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+      }
+    }
+
     await this.page.getByRole('option', { name: new RegExp(type, 'i') }).click();
   }
 
