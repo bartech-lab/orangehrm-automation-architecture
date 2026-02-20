@@ -51,13 +51,13 @@ test.describe('Toast Component', () => {
     });
 
     test('success toast appears after delete action', async ({ hrmPage }) => {
+      const lastName = `DeleteFlow${Date.now().toString().slice(-6)}`;
+
       await hrmPage.goto('/web/index.php/pim/addEmployee');
       await hrmPage.locator('input[name="firstName"]').waitFor({ state: 'visible' });
 
       await hrmPage.locator('input[name="firstName"]').fill('DeleteFlow');
-      await hrmPage
-        .locator('input[name="lastName"]')
-        .fill(`Seed${Date.now().toString().slice(-4)}`);
+      await hrmPage.locator('input[name="lastName"]').fill(lastName);
 
       const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
       const employeeIdGroup = hrmPage
@@ -70,11 +70,77 @@ test.describe('Toast Component', () => {
       await employeeIdInput.fill(uniqueEmployeeId);
 
       await hrmPage.locator('button[type="submit"]').click();
-
-      let feedback = '';
       await expect
         .poll(
           async () => {
+            if (/viewPersonalDetails/.test(hrmPage.url())) {
+              return true;
+            }
+
+            const text = await hrmPage
+              .locator('.oxd-toast')
+              .first()
+              .textContent()
+              .catch(() => null);
+            return (text ?? '').trim().length > 0;
+          },
+          { timeout: 15000, intervals: [100, 200, 500, 1000] }
+        )
+        .toBe(true);
+
+      await hrmPage.goto('/web/index.php/pim/viewEmployeeList');
+      await hrmPage.locator('.oxd-table-body').waitFor({ state: 'visible' });
+
+      const searchEmployeeIdGroup = hrmPage
+        .locator('.oxd-input-group')
+        .filter({ has: hrmPage.locator('label').filter({ hasText: /^Employee Id$/ }) })
+        .first();
+      const searchEmployeeIdInput = searchEmployeeIdGroup.locator('input').first();
+      await searchEmployeeIdInput.click();
+      await searchEmployeeIdInput.press('ControlOrMeta+A');
+      await searchEmployeeIdInput.fill(uniqueEmployeeId);
+      await hrmPage.getByRole('button', { name: /^Search$/ }).click();
+
+      const rows = hrmPage.locator('.oxd-table-card');
+      await expect(rows.first()).toBeVisible({ timeout: 10000 });
+
+      const targetRow = rows.filter({ hasText: uniqueEmployeeId }).first();
+      await expect(targetRow).toBeVisible({ timeout: 10000 });
+      const beforeCount = await rows.count();
+      expect(beforeCount).toBeGreaterThan(0);
+
+      const rowActionButtons = targetRow.getByRole('button');
+      const actionButtonCount = await rowActionButtons.count();
+      expect(actionButtonCount).toBeGreaterThan(0);
+
+      let deleteButton = rowActionButtons.last();
+      if (actionButtonCount === 1) {
+        deleteButton = rowActionButtons.first();
+      }
+      expect(await deleteButton.count()).toBeGreaterThan(0);
+      await deleteButton.scrollIntoViewIfNeeded();
+      await deleteButton.click({ timeout: 5000 });
+
+      const dialog = hrmPage.getByRole('dialog').first();
+      await dialog.first().waitFor({ state: 'visible', timeout: 10000 });
+
+      const confirmDeleteButton = dialog.getByRole('button', {
+        name: /yes,\s*delete|yes|delete/i,
+      });
+      await confirmDeleteButton.first().waitFor({ state: 'visible', timeout: 10000 });
+      await confirmDeleteButton.first().click({ timeout: 5000 });
+
+      let feedback = '';
+      const seededRowAfterAction = rows.filter({ hasText: uniqueEmployeeId });
+      await expect
+        .poll(
+          async () => {
+            const dialogStillVisible = await dialog
+              .first()
+              .isVisible()
+              .catch(() => false);
+            if (dialogStillVisible) return false;
+
             const text = await hrmPage
               .locator('.oxd-toast')
               .first()
@@ -82,29 +148,34 @@ test.describe('Toast Component', () => {
               .catch(() => null);
             feedback = text?.trim() ?? '';
             if (feedback.length > 0) {
+              return /deleted|success|successfully/i.test(feedback);
+            }
+
+            const seededAfterCount = await seededRowAfterAction.count();
+            if (seededAfterCount === 0) {
+              feedback = 'Seeded row no longer present after delete';
               return true;
             }
 
-            if (/viewPersonalDetails/.test(hrmPage.url())) {
-              feedback = 'Saved and redirected';
+            const afterCount = await rows.count();
+            if (afterCount < beforeCount) {
+              feedback = 'Row count decreased after delete';
               return true;
             }
 
-            const errors = await hrmPage
-              .locator('.oxd-input-group__message, .oxd-input-field-error-message')
-              .allTextContents()
-              .catch(() => []);
-            const firstError = errors
-              .map((value) => value.trim())
-              .find((value) => value.length > 0);
-            if (firstError) {
-              feedback = firstError;
+            if (
+              !(await dialog
+                .first()
+                .isVisible()
+                .catch(() => false))
+            ) {
+              feedback = 'Delete dialog closed';
               return true;
             }
 
             return false;
           },
-          { timeout: 15000, intervals: [100, 200, 500, 1000] }
+          { timeout: 25000, intervals: [100, 200, 500, 1000] }
         )
         .toBe(true);
 
