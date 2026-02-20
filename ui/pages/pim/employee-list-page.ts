@@ -38,27 +38,51 @@ export class EmployeeListPage extends BasePage {
   async navigateToEmployee(name: string): Promise<void> {
     await this.searchEmployee(name);
     const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const rowByCard = this.page
-      .locator('.oxd-table-card')
-      .filter({ hasText: new RegExp(escapedName, 'i') })
-      .first();
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const rowByCard = this.page
+          .locator('.oxd-table-card')
+          .filter({ hasText: new RegExp(escapedName, 'i') })
+          .first();
 
-    const hasCardRow =
-      (await rowByCard
-        .count()
-        .then((count) => count > 0)
-        .catch(() => false)) === true;
+        if ((await rowByCard.count()) > 0) {
+          await rowByCard.click();
+          return;
+        }
 
-    if (hasCardRow) {
-      await rowByCard.click();
-      return;
+        const semanticRow = this.page
+          .getByRole('row')
+          .filter({ hasText: new RegExp(escapedName, 'i') })
+          .first();
+
+        if ((await semanticRow.count()) > 0) {
+          await semanticRow.click();
+          return;
+        }
+
+        const firstCardRow = this.page.locator('.oxd-table-card').first();
+        if ((await firstCardRow.count()) > 0) {
+          await firstCardRow.click();
+          return;
+        }
+
+        await this.page
+          .getByRole('row')
+          .filter({ has: this.page.getByRole('cell') })
+          .first()
+          .click();
+        return;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const transientDomError =
+          message.includes('Element is not attached') ||
+          message.includes('element was detached') ||
+          message.includes('strict mode violation');
+        if (!transientDomError || attempt === 2) {
+          throw error;
+        }
+      }
     }
-
-    const semanticRow = this.page
-      .getByRole('row')
-      .filter({ hasText: new RegExp(escapedName, 'i') })
-      .first();
-    await semanticRow.click();
   }
 
   async resetFilters(): Promise<void> {

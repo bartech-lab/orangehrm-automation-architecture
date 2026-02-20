@@ -47,7 +47,33 @@ export class ApplyLeavePage extends BasePage {
   }
 
   async apply(): Promise<void> {
-    await this.page.getByRole('button', { name: /apply/i }).click();
+    const loader = this.page.locator('.oxd-form-loader');
+    await loader.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+
+    const applyButton = this.page
+      .locator('.oxd-form')
+      .getByRole('button', { name: /apply/i })
+      .first()
+      .or(this.page.locator('.oxd-form button[type="submit"]').first());
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        await applyButton.click();
+        break;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const isTransientUiState =
+          message.includes('intercepts pointer events') ||
+          message.includes('Element is not attached') ||
+          message.includes('element was detached');
+        if (!isTransientUiState || attempt === 1) {
+          throw error;
+        }
+
+        await loader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+      }
+    }
+
+    await loader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
   }
 
   async getBalance(): Promise<string> {

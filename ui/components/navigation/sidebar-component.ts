@@ -14,7 +14,12 @@ export class SidebarComponent extends BaseComponent {
 
   constructor(page: Page) {
     super(page, OXD_SELECTORS.SIDEBAR_ASIDE);
-    this.menuItems = page.locator(OXD_SELECTORS.SIDEBAR_MENU_ITEM).getByRole('link');
+    this.menuItems = this.root
+      .getByRole('link')
+      .filter({
+        hasText:
+          /Admin|PIM|Leave|Time|Recruitment|Performance|Dashboard|Directory|Maintenance|Claim|Buzz|My Info/i,
+      });
     this.toggleButton = page.locator(OXD_SELECTORS.SIDEBAR_TOGGLE).getByRole('button');
   }
 
@@ -32,12 +37,13 @@ export class SidebarComponent extends BaseComponent {
    * @param moduleName - Name of the module to navigate to
    */
   async navigateTo(moduleName: ModuleName): Promise<void> {
-    const selector = SIDEBAR_SELECTORS[moduleName];
-    if (!selector) {
+    if (!SIDEBAR_SELECTORS[moduleName]) {
       throw new Error(`Unknown module: ${moduleName}`);
     }
 
-    const menuItem = this.page.locator(selector).getByRole('link');
+    const menuItem = this.root
+      .getByRole('link', { name: new RegExp(`^\\s*${moduleName}\\s*$`, 'i') })
+      .first();
     await menuItem.click();
     await this.page.waitForLoadState('domcontentloaded');
     await this.waitForReady();
@@ -97,11 +103,14 @@ export class SidebarComponent extends BaseComponent {
    * Check if a specific module is visible in the sidebar
    */
   async hasModule(moduleName: ModuleName): Promise<boolean> {
-    const selector = SIDEBAR_SELECTORS[moduleName];
-    if (!selector) {
+    if (!SIDEBAR_SELECTORS[moduleName]) {
       return false;
     }
-    return this.page.locator(selector).getByRole('link').isVisible();
+    return this.root
+      .getByRole('link', { name: new RegExp(`^\\s*${moduleName}\\s*$`, 'i') })
+      .first()
+      .isVisible()
+      .catch(() => false);
   }
 
   /**

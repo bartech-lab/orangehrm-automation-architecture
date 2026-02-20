@@ -2,10 +2,6 @@ import { test as baseTest, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { AuthHelper } from '../auth/auth-helper.js';
 
-declare const process: {
-  stdout: { write: (message: string) => void };
-};
-
 // Types for fixture definitions
 export interface TestFixtures {
   auth: Page;
@@ -91,14 +87,6 @@ export const test = baseTest.extend<TestFixtures & WorkerFixtures>({
     await authHelper.login();
 
     await use(page);
-
-    // Teardown: logout (suppress errors to prevent test hanging)
-    try {
-      await authHelper.logout();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      process.stdout.write(`[FIXTURE WARNING] Auth teardown logout failed: ${errorMessage}\n`);
-    }
   },
 
   /**
