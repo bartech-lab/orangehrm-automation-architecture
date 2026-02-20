@@ -51,8 +51,22 @@ export class TopbarComponent extends BaseComponent {
   }
 
   async closeUserMenu(): Promise<void> {
+    const isMenuOpen = await this.userMenu.isVisible().catch(() => false);
+    if (!isMenuOpen) {
+      return;
+    }
+
     await this.page.keyboard.press('Escape');
-    await this.userMenu.waitFor({ state: 'hidden' }).catch(() => {});
+    await this.userMenu.waitFor({ state: 'hidden', timeout: 1500 }).catch(async () => {
+      const dropdownVisible = await this.userDropdown.isVisible().catch(() => false);
+      if (dropdownVisible) {
+        await this.userDropdown.click();
+      }
+      await this.userMenu.waitFor({ state: 'hidden', timeout: 2000 }).catch(async () => {
+        await this.page.mouse.click(5, 5);
+        await this.userMenu.waitFor({ state: 'hidden', timeout: 2000 }).catch(() => {});
+      });
+    });
   }
 
   async clickUserMenuItem(itemText: string): Promise<void> {

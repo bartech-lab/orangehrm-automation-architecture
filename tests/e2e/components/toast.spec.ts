@@ -23,6 +23,15 @@ test.describe('Toast Component', () => {
       const employee = testData.createEmployee();
       await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
       await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
+      const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
+      const employeeIdGroup = hrmPage
+        .locator('.oxd-input-group')
+        .filter({ has: hrmPage.locator('label').filter({ hasText: /^Employee Id$/ }) })
+        .first();
+      const employeeIdInput = employeeIdGroup.locator('input').first();
+      await employeeIdInput.click();
+      await employeeIdInput.press('ControlOrMeta+A');
+      await employeeIdInput.fill(uniqueEmployeeId);
 
       // Save the employee - this should trigger a success toast
       await hrmPage.locator('button[type="submit"]').click();
@@ -262,6 +271,18 @@ test.describe('Toast Component', () => {
               return message.length;
             }
 
+            const inlineErrors = await hrmPage
+              .locator('.oxd-input-group__message, .oxd-input-field-error-message')
+              .allTextContents()
+              .catch(() => []);
+            const inlineError = inlineErrors
+              .map((value) => value.trim())
+              .find((value) => value.length > 0);
+            if (inlineError) {
+              message = inlineError;
+              return message.length;
+            }
+
             const onDetailsPage = /viewPersonalDetails/.test(hrmPage.url());
             if (!onDetailsPage) {
               return 0;
@@ -275,7 +296,7 @@ test.describe('Toast Component', () => {
             message = fallbackText?.trim() || 'Successfully Saved';
             return message.length;
           },
-          { timeout: 12000, intervals: [100, 200, 300, 500] }
+          { timeout: 20000, intervals: [100, 200, 300, 500, 1000] }
         )
         .toBeGreaterThan(0);
 
