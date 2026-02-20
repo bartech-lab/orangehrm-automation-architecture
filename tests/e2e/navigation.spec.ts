@@ -3,10 +3,10 @@ import { SidebarComponent, TopbarComponent, MODULE_NAMES } from '../../ui/compon
 
 test.describe('Navigation Components', () => {
   test.describe('Sidebar Navigation', () => {
-    test('sidebar expands and collapses @smoke', async ({ hrmPage }) => {
-      await hrmPage.goto('/web/index.php/dashboard/index');
+    test('sidebar expands and collapses @smoke', async ({ auth }) => {
+      await auth.goto('/web/index.php/dashboard/index');
 
-      const sidebar = new SidebarComponent(hrmPage);
+      const sidebar = new SidebarComponent(auth);
       await sidebar.waitForReady();
 
       await expect(sidebar.root).toBeVisible();
@@ -22,23 +22,23 @@ test.describe('Navigation Components', () => {
       expect(isExpandedAgain).toBe(true);
     });
 
-    test('sidebar navigation to modules @smoke', async ({ hrmPage }) => {
-      await hrmPage.goto('/web/index.php/dashboard/index');
+    test('sidebar navigation to modules @smoke', async ({ auth }) => {
+      await auth.goto('/web/index.php/dashboard/index');
 
-      const sidebar = new SidebarComponent(hrmPage);
+      const sidebar = new SidebarComponent(auth);
       await sidebar.waitForReady();
 
       await sidebar.navigateTo(MODULE_NAMES.PIM);
-      await expect(hrmPage).toHaveURL(/pim/);
+      await expect(auth).toHaveURL(/pim/);
 
       await sidebar.navigateTo(MODULE_NAMES.DASHBOARD);
-      await expect(hrmPage).toHaveURL(/dashboard/);
+      await expect(auth).toHaveURL(/dashboard/);
     });
 
-    test('sidebar shows all menu items', async ({ hrmPage }) => {
-      await hrmPage.goto('/web/index.php/dashboard/index');
+    test('sidebar shows all menu items', async ({ auth }) => {
+      await auth.goto('/web/index.php/dashboard/index');
 
-      const sidebar = new SidebarComponent(hrmPage);
+      const sidebar = new SidebarComponent(auth);
       await sidebar.waitForReady();
 
       const menuTexts = await sidebar.getMenuItemTexts();
@@ -53,10 +53,10 @@ test.describe('Navigation Components', () => {
   });
 
   test.describe('Topbar Search Functionality', () => {
-    test('search functionality filters content @smoke', async ({ hrmPage }) => {
-      await hrmPage.goto('/web/index.php/dashboard/index');
+    test('search functionality filters content @smoke', async ({ auth }) => {
+      await auth.goto('/web/index.php/dashboard/index');
 
-      const topbar = new TopbarComponent(hrmPage);
+      const topbar = new TopbarComponent(auth);
       await topbar.waitForReady();
 
       const isSearchAvailable = await topbar.isSearchAvailable();
@@ -69,10 +69,10 @@ test.describe('Navigation Components', () => {
       expect(searchValue).toBe('Admin');
     });
 
-    test('search input accepts different queries', async ({ hrmPage }) => {
-      await hrmPage.goto('/web/index.php/dashboard/index');
+    test('search input accepts different queries', async ({ auth }) => {
+      await auth.goto('/web/index.php/dashboard/index');
 
-      const topbar = new TopbarComponent(hrmPage);
+      const topbar = new TopbarComponent(auth);
       await topbar.waitForReady();
 
       const searchTerms = ['PIM', 'Leave', 'Time'];
@@ -87,10 +87,10 @@ test.describe('Navigation Components', () => {
   });
 
   test.describe('User Menu Actions', () => {
-    test('user menu opens and shows options @smoke', async ({ hrmPage }) => {
-      await hrmPage.goto('/web/index.php/dashboard/index');
+    test('user menu opens and shows options @smoke', async ({ auth }) => {
+      await auth.goto('/web/index.php/dashboard/index');
 
-      const topbar = new TopbarComponent(hrmPage);
+      const topbar = new TopbarComponent(auth);
       await topbar.waitForReady();
 
       await topbar.openUserMenu();
@@ -108,23 +108,23 @@ test.describe('Navigation Components', () => {
       await topbar.closeUserMenu();
     });
 
-    test('logout action redirects to login page @smoke', async ({ hrmPage }) => {
-      await hrmPage.goto('/web/index.php/dashboard/index');
+    test('logout action redirects to login page @smoke', async ({ auth }) => {
+      await auth.goto('/web/index.php/dashboard/index');
 
-      const topbar = new TopbarComponent(hrmPage);
+      const topbar = new TopbarComponent(auth);
       await topbar.waitForReady();
 
       await expect(topbar.userDropdown).toBeVisible();
       await topbar.logout();
 
-      await expect(hrmPage).toHaveURL(/login/);
-      await expect(hrmPage.locator('input[name="username"]')).toBeVisible();
+      await expect(auth).toHaveURL(/login/);
+      await expect(auth.locator('input[name="username"]')).toBeVisible();
     });
 
-    test('user menu has expected menu items', async ({ hrmPage }) => {
-      await hrmPage.goto('/web/index.php/dashboard/index');
+    test('user menu has expected menu items', async ({ auth }) => {
+      await auth.goto('/web/index.php/dashboard/index');
 
-      const topbar = new TopbarComponent(hrmPage);
+      const topbar = new TopbarComponent(auth);
       await topbar.waitForReady();
 
       await topbar.openUserMenu();
@@ -140,11 +140,11 @@ test.describe('Navigation Components', () => {
   });
 
   test.describe('Breadcrumb Navigation', () => {
-    test('breadcrumb shows current page location @smoke', async ({ hrmPage }) => {
-      await hrmPage.goto('/web/index.php/dashboard/index');
+    test('breadcrumb shows current page location @smoke', async ({ auth }) => {
+      await auth.goto('/web/index.php/dashboard/index');
 
       const { BreadcrumbComponent } = await import('../../ui/components/index.js');
-      const breadcrumb = new BreadcrumbComponent(hrmPage);
+      const breadcrumb = new BreadcrumbComponent(auth);
 
       await breadcrumb.waitForReady();
 
@@ -155,11 +155,11 @@ test.describe('Navigation Components', () => {
       expect(currentPage).toBeTruthy();
     });
 
-    test('breadcrumb depth reflects page hierarchy', async ({ hrmPage }) => {
-      await hrmPage.goto('/web/index.php/pim/viewEmployeeList');
+    test('breadcrumb depth reflects page hierarchy', async ({ auth }) => {
+      await auth.goto('/web/index.php/pim/viewEmployeeList');
 
       const { BreadcrumbComponent } = await import('../../ui/components/index.js');
-      const breadcrumb = new BreadcrumbComponent(hrmPage);
+      const breadcrumb = new BreadcrumbComponent(auth);
       await breadcrumb.waitForReady();
 
       const depth = await breadcrumb.getDepth();
