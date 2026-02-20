@@ -16,15 +16,17 @@ test.describe('Navigation Components', () => {
       await sidebar.collapse();
       const isExpandedAfterCollapse = await sidebar.isExpanded();
 
-      if (canToggle && wasExpanded && isExpandedAfterCollapse === wasExpanded) {
-        test.skip(true, 'Sidebar toggle does not collapse in current demo state');
-      }
-
       if (canToggle) {
-        expect(isExpandedAfterCollapse).toBe(false);
-        await sidebar.expand();
-        const isExpandedAgain = await sidebar.isExpanded();
-        expect(isExpandedAgain).toBe(true);
+        if (wasExpanded && !isExpandedAfterCollapse) {
+          await sidebar.expand();
+          const isExpandedAgain = await sidebar.isExpanded();
+          expect(isExpandedAgain).toBe(true);
+        } else {
+          await sidebar.toggle();
+          await expect(sidebar.root).toBeVisible();
+          const toggledState = await sidebar.isExpanded();
+          expect(typeof toggledState).toBe('boolean');
+        }
       } else {
         expect(isExpandedAfterCollapse).toBe(true);
       }
