@@ -31,7 +31,21 @@ export class LeaveListPage extends BasePage {
   async filterByType(type: string): Promise<void> {
     const typeGroup = this.page.locator('.oxd-input-group').filter({ hasText: 'Leave Type' });
     await typeGroup.locator('.oxd-select-text').click();
-    await this.page.getByRole('option', { name: new RegExp(type, 'i') }).click();
+    const dropdown = this.page.locator('.oxd-select-dropdown').last();
+    const escapedType = type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const exactOption = dropdown.getByRole('option', {
+      name: new RegExp(`^\\s*${escapedType}\\s*$`, 'i'),
+    });
+    if ((await exactOption.count()) > 0) {
+      await exactOption.first().click();
+      return;
+    }
+
+    await dropdown
+      .getByRole('option')
+      .filter({ hasText: new RegExp(escapedType, 'i') })
+      .first()
+      .click();
   }
 
   async searchEmployee(name: string): Promise<void> {

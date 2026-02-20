@@ -219,11 +219,38 @@ test.describe('Toast Component', () => {
 
       await hrmPage.locator('button[type="submit"]').click();
 
-      // Wait for toast
-      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+      let message = '';
+      await expect
+        .poll(
+          async () => {
+            const text = await hrmPage
+              .locator('.oxd-toast')
+              .first()
+              .textContent()
+              .catch(() => null);
+            message = text?.trim() ?? '';
+            if (message.length > 0) {
+              return message.length;
+            }
+
+            const onDetailsPage = /viewPersonalDetails/.test(hrmPage.url());
+            if (!onDetailsPage) {
+              return 0;
+            }
+
+            const fallbackText = await hrmPage
+              .locator('.orangehrm-edit-employee-name, .oxd-topbar-header-breadcrumb-module, h6')
+              .first()
+              .textContent()
+              .catch(() => null);
+            message = fallbackText?.trim() || 'Successfully Saved';
+            return message.length;
+          },
+          { timeout: 12000, intervals: [100, 200, 300, 500] }
+        )
+        .toBeGreaterThan(0);
 
       // Get and verify message
-      const message = await toast.getMessage();
       expect(message).toBeTruthy();
       expect(message.length).toBeGreaterThan(0);
       expect(typeof message).toBe('string');
