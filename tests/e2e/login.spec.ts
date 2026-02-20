@@ -23,7 +23,7 @@ test.describe('Login Functionality', () => {
     expect(isLoggedIn).toBe(true);
   });
 
-  test.skip('@auth - Invalid credentials show error message', async () => {
+  test('@auth - Invalid credentials show error message', async () => {
     const credentials: Credentials = {
       username: 'InvalidUser',
       password: 'wrongpassword',
@@ -52,5 +52,4 @@ test.describe('Login Functionality', () => {
     const isStillOnLogin = await loginPage.isReady();
     expect(isStillOnLogin).toBe(true);
   });
-
 });

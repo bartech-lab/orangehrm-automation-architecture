@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test';
 
 export class EmployeeDetailsPage extends BasePage {
   constructor(page: Page) {
-    super(page, '/web/index.php/pim/viewPersonalDetails');
+    super(page, '/web/index.php/pim/viewMyDetails');
   }
 
   async navigate(): Promise<void> {
@@ -15,7 +15,7 @@ export class EmployeeDetailsPage extends BasePage {
       .getByRole('form')
       .or(this.page.locator('.oxd-form'))
       .first()
-      .waitFor({ state: 'visible' });
+      .waitFor({ state: 'visible', timeout: 10000 });
   }
 
   async isReady(): Promise<boolean> {
@@ -46,10 +46,18 @@ export class EmployeeDetailsPage extends BasePage {
     await this.navigateToTab('Contact Details');
 
     if (contact.email) {
-      await this.page.getByLabel(/email/i).fill(contact.email);
+      const emailGroup = this.page
+        .locator('.oxd-input-group')
+        .filter({ hasText: /Work Email/i })
+        .first();
+      await emailGroup.locator('input').first().fill(contact.email);
     }
     if (contact.phone) {
-      await this.page.getByLabel(/phone|telephone/i).fill(contact.phone);
+      const phoneGroup = this.page
+        .locator('.oxd-input-group')
+        .filter({ hasText: /Mobile|Work|Home/i })
+        .first();
+      await phoneGroup.locator('input').first().fill(contact.phone);
     }
     await this.page.getByRole('button', { name: 'Save' }).first().click();
   }
