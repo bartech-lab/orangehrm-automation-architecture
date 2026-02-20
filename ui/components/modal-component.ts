@@ -38,8 +38,12 @@ export class ModalComponent extends BaseComponent {
   }
 
   async getMessage(): Promise<string> {
-    const body = this.root.locator('[class*="body"], [class*="content"]');
-    return (await body.textContent()) ?? '';
+    const body = this.root
+      .locator(
+        '.oxd-dialog-content-text, .oxd-dialog-content, .oxd-dialog-body, [role="document"] p'
+      )
+      .first();
+    return ((await body.textContent()) ?? '').trim();
   }
 
   async isClosable(): Promise<boolean> {

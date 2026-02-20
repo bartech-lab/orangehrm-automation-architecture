@@ -20,7 +20,7 @@ test.describe('ModalComponent', () => {
       if (deleteButtonCount > 0) {
         await firstDeleteButton.click();
 
-        const modal = new ModalComponent(auth, '.oxd-dialog');
+        const modal = new ModalComponent(auth);
         await modal.waitForReady();
         const isVisible = await modal.isVisible();
         expect(isVisible).toBe(true);
@@ -54,7 +54,7 @@ test.describe('ModalComponent', () => {
       if (deleteButtonCount > 0) {
         await auth.locator('.oxd-table-row .oxd-icon.bi-trash').first().click();
 
-        const modal = new ModalComponent(auth, '.oxd-dialog');
+        const modal = new ModalComponent(auth);
         await modal.waitForReady();
         expect(await modal.isVisible()).toBe(true);
 
@@ -88,7 +88,7 @@ test.describe('ModalComponent', () => {
       if (deleteButtonCount > 0) {
         await auth.locator('.oxd-table-row .oxd-icon.bi-trash').first().click();
 
-        const modal = new ModalComponent(auth, '.oxd-dialog');
+        const modal = new ModalComponent(auth);
         await modal.waitForReady();
 
         const message = await modal.getMessage();
@@ -236,7 +236,7 @@ test.describe('ModalComponent', () => {
       if (deleteButtonCount > 0) {
         await auth.locator('.oxd-table-row .oxd-icon.bi-trash').first().click();
 
-        const modal = new ModalComponent(auth, '.oxd-dialog');
+        const modal = new ModalComponent(auth);
         await modal.waitForReady();
         expect(await modal.isVisible()).toBe(true);
         await modal.cancel();
@@ -271,7 +271,7 @@ test.describe('ModalComponent', () => {
 
         await auth.locator('.oxd-table-row .oxd-icon.bi-trash').first().click();
 
-        const modal = new ModalComponent(auth, '.oxd-dialog');
+        const modal = new ModalComponent(auth);
         await modal.waitForReady();
         await modal.cancel();
 
@@ -328,7 +328,7 @@ test.describe('ModalComponent', () => {
       await expect(auth.locator('.oxd-topbar-header')).toBeVisible();
 
       // Check modal visibility when no modal exists
-      const modal = new ModalComponent(auth, '.oxd-dialog');
+      const modal = new ModalComponent(auth);
       const isVisible = await modal.isVisible();
 
       expect(isVisible).toBe(false);

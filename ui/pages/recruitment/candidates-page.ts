@@ -98,6 +98,74 @@ export class CandidatesPage extends BasePage {
       await this.viewCandidateDetails(name);
     }
 
+    const shortlistButton = this.page.getByRole('button', { name: /shortlist/i }).first();
+    const shouldShortlist = /shortlist/i.test(status);
+    const canShortlist = await shortlistButton
+      .waitFor({ state: 'visible', timeout: 5000 })
+      .then(() => true)
+      .catch(() => false);
+    if (shouldShortlist && canShortlist) {
+      await shortlistButton.click();
+
+      await this.page
+        .getByRole('heading', { name: /shortlist candidate/i })
+        .first()
+        .waitFor({ state: 'visible', timeout: 5000 })
+        .catch(() => {});
+
+      await this.page
+        .locator('.oxd-form textarea')
+        .first()
+        .fill('Status updated to shortlisted')
+        .catch(() => {});
+
+      const saveButton = this.page.getByRole('button', { name: /^Save$/ }).first();
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const saveVisible = await saveButton
+          .waitFor({ state: 'visible', timeout: 5000 })
+          .then(() => true)
+          .catch(() => false);
+        if (!saveVisible) {
+          break;
+        }
+
+        try {
+          await saveButton.click({ timeout: 5000 });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          const isTransientUiState =
+            message.includes('intercepts pointer events') ||
+            message.includes('Element is not attached') ||
+            message.includes('element was detached');
+          if (!isTransientUiState || attempt === 2) {
+            throw error;
+          }
+
+          await this.page.waitForTimeout(300);
+          continue;
+        }
+
+        const workflowAdvanced = await Promise.race([
+          this.page
+            .getByRole('heading', { name: /shortlist candidate/i })
+            .first()
+            .waitFor({ state: 'hidden', timeout: 4000 })
+            .then(() => true)
+            .catch(() => false),
+          this.page
+            .locator('.oxd-toast')
+            .first()
+            .waitFor({ state: 'visible', timeout: 4000 })
+            .then(() => true)
+            .catch(() => false),
+        ]);
+        if (workflowAdvanced) {
+          break;
+        }
+      }
+      return;
+    }
+
     const statusGroup = this.page.locator('.oxd-input-group').filter({ hasText: /status/i });
     await statusGroup.locator('.oxd-select-text').click();
     await this.page.getByRole('option', { name: new RegExp(status, 'i') }).click();

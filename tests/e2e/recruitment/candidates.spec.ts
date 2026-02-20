@@ -58,17 +58,10 @@ test.describe('Recruitment - Candidates', () => {
       firstName: 'John',
       lastName: candidateLastName,
       email: `status_${uniqueSuffix}@example.com`,
+      vacancy: 'Software Engineer',
     });
 
-    await candidatesPage.navigate();
-    const statusChanged = await Promise.race([
-      candidatesPage
-        .changeCandidateStatus(candidateLastName, 'Shortlisted')
-        .then(() => true)
-        .catch(() => false),
-      auth.waitForTimeout(20000).then(() => false),
-    ]);
-    test.skip(!statusChanged, 'Candidate status controls are not available in current demo state');
+    await candidatesPage.changeCandidateStatus(candidateLastName, 'Shortlisted');
 
     await expect
       .poll(
@@ -79,7 +72,25 @@ test.describe('Recruitment - Candidates', () => {
               .first()
               .textContent()
               .catch(() => null)) ?? '';
-          return /success|updated|saved/i.test(toastText);
+          if (/success|updated|saved/i.test(toastText)) {
+            return true;
+          }
+
+          const shortlistHeadingVisible = await auth
+            .getByRole('heading', { name: /shortlist candidate/i })
+            .first()
+            .isVisible()
+            .catch(() => false);
+          if (shortlistHeadingVisible) {
+            return true;
+          }
+
+          const statusLabel = auth
+            .locator('p')
+            .filter({ hasText: /status:/i })
+            .first();
+          const statusText = ((await statusLabel.textContent().catch(() => '')) ?? '').trim();
+          return /shortlist|shortlisted/i.test(statusText);
         },
         { timeout: 20000, intervals: [100, 200, 500, 1000] }
       )

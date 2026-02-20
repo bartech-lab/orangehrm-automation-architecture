@@ -106,17 +106,20 @@ test.describe('Toast Component', () => {
 
       const targetRow = rows.filter({ hasText: uniqueEmployeeId }).first();
       await expect(targetRow).toBeVisible({ timeout: 10000 });
-      const beforeCount = await rows.count();
-      expect(beforeCount).toBeGreaterThan(0);
 
       const rowActionButtons = targetRow.getByRole('button');
+      const fallbackDeleteButton = targetRow
+        .locator('button:has(i.bi-trash), .oxd-icon-button:has(i.bi-trash), i.bi-trash')
+        .first();
       const actionButtonCount = await rowActionButtons.count();
-      expect(actionButtonCount).toBeGreaterThan(0);
 
       let deleteButton = rowActionButtons.last();
-      if (actionButtonCount === 1) {
+      if (actionButtonCount === 0) {
+        deleteButton = fallbackDeleteButton;
+      } else if (actionButtonCount === 1) {
         deleteButton = rowActionButtons.first();
       }
+
       expect(await deleteButton.count()).toBeGreaterThan(0);
       await deleteButton.scrollIntoViewIfNeeded();
       await deleteButton.click({ timeout: 5000 });
@@ -154,12 +157,6 @@ test.describe('Toast Component', () => {
             const seededAfterCount = await seededRowAfterAction.count();
             if (seededAfterCount === 0) {
               feedback = 'Seeded row no longer present after delete';
-              return true;
-            }
-
-            const afterCount = await rows.count();
-            if (afterCount < beforeCount) {
-              feedback = 'Row count decreased after delete';
               return true;
             }
 
