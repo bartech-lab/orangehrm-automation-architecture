@@ -3,13 +3,18 @@ import { BaseComponent } from '../base-component.js';
 
 export class BreadcrumbComponent extends BaseComponent {
   readonly breadcrumbItems: Locator;
+  readonly breadcrumbNav: Locator;
   readonly headerTitle: Locator;
 
   constructor(page: Page) {
-    super(page, page.locator('.oxd-topbar-header-breadcrumb'));
-    this.breadcrumbItems = this.root
-      .locator('.oxd-topbar-header-breadcrumb-item')
-      .getByRole('link');
+    const breadcrumbRoot = page
+      .locator('nav[aria-label="breadcrumb"], .oxd-topbar-header-breadcrumb')
+      .first();
+    super(page, breadcrumbRoot);
+    this.breadcrumbNav = breadcrumbRoot;
+    this.breadcrumbItems = this.root.locator(
+      '.oxd-topbar-header-breadcrumb-item, .oxd-topbar-header-breadcrumb-module'
+    );
     this.headerTitle = page.locator('.oxd-topbar-header-title').getByRole('heading');
   }
 
@@ -17,7 +22,10 @@ export class BreadcrumbComponent extends BaseComponent {
     const isBreadcrumbVisible = await this.root.isVisible().catch(() => false);
     if (isBreadcrumbVisible) {
       await this.root.waitFor({ state: 'visible' });
+      return;
     }
+
+    await this.headerTitle.waitFor({ state: 'visible' });
   }
 
   async isVisible(): Promise<boolean> {
@@ -34,18 +42,34 @@ export class BreadcrumbComponent extends BaseComponent {
     const items = await this.breadcrumbItems.all();
     const texts: string[] = [];
     for (const item of items) {
-      const text = await item.textContent();
+      const text = await item.textContent().catch(() => null);
       if (text) {
         texts.push(text.trim());
       }
     }
+
+    if (texts.length > 0) {
+      return texts;
+    }
+
+    const rootText = await this.root.textContent().catch(() => null);
+    if (rootText && rootText.trim().length > 0) {
+      return [rootText.trim()];
+    }
+
+    const headerText = await this.headerTitle.textContent().catch(() => null);
+    if (headerText && headerText.trim().length > 0) {
+      return [headerText.trim()];
+    }
+
     return texts;
   }
 
   async getCurrentPage(): Promise<string | null> {
     const isBreadcrumbVisible = await this.isVisible();
     if (!isBreadcrumbVisible) {
-      return this.headerTitle.textContent();
+      const headerText = await this.headerTitle.textContent().catch(() => null);
+      return headerText ? headerText.trim() : null;
     }
 
     const items = await this.getBreadcrumbItems();
@@ -63,8 +87,14 @@ export class BreadcrumbComponent extends BaseComponent {
       throw new Error('Breadcrumb not available on this page');
     }
 
-    const item = this.breadcrumbItems.locator(`:has-text("${itemText}")`);
-    await item.click();
+    const item = this.breadcrumbItems.filter({ hasText: itemText }).first();
+    const link = item.getByRole('link').first();
+
+    if (!(await link.isVisible().catch(() => false))) {
+      throw new Error(`Breadcrumb item "${itemText}" is not clickable`);
+    }
+
+    await link.click();
     await this.page.waitForLoadState('domcontentloaded');
     await this.headerTitle.waitFor({ state: 'visible' });
   }
@@ -77,7 +107,12 @@ export class BreadcrumbComponent extends BaseComponent {
 
     const items = await this.breadcrumbItems.all();
     if (items.length >= 2) {
-      await items[items.length - 2].click();
+      const parentLink = items[items.length - 2].getByRole('link').first();
+      if (!(await parentLink.isVisible().catch(() => false))) {
+        throw new Error('Parent breadcrumb is not clickable');
+      }
+
+      await parentLink.click();
       await this.page.waitForLoadState('domcontentloaded');
       await this.headerTitle.waitFor({ state: 'visible' });
     }
@@ -90,8 +125,12 @@ export class BreadcrumbComponent extends BaseComponent {
       return;
     }
 
-    const firstItem = this.breadcrumbItems.first();
-    await firstItem.click();
+    const firstItemLink = this.breadcrumbItems.first().getByRole('link').first();
+    if (!(await firstItemLink.isVisible().catch(() => false))) {
+      throw new Error('Home breadcrumb is not clickable');
+    }
+
+    await firstItemLink.click();
     await this.page.waitForLoadState('domcontentloaded');
     await this.headerTitle.waitFor({ state: 'visible' });
   }
@@ -109,7 +148,8 @@ export class BreadcrumbComponent extends BaseComponent {
   async getLevel(index: number): Promise<string | null> {
     const items = await this.breadcrumbItems.all();
     if (index >= 0 && index < items.length) {
-      return items[index].textContent();
+      const text = await items[index].textContent().catch(() => null);
+      return text ? text.trim() : null;
     }
     return null;
   }
