@@ -37,13 +37,28 @@ export class EmployeeListPage extends BasePage {
 
   async navigateToEmployee(name: string): Promise<void> {
     await this.searchEmployee(name);
-    const row = this.page
-      .getByRole('row')
-      .filter({ hasText: new RegExp(name, 'i') })
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const rowByCard = this.page
+      .locator('.oxd-table-card')
+      .filter({ hasText: new RegExp(escapedName, 'i') })
       .first();
-    await row.waitFor({ state: 'visible' });
-    await row.scrollIntoViewIfNeeded();
-    await row.click();
+
+    const hasCardRow =
+      (await rowByCard
+        .count()
+        .then((count) => count > 0)
+        .catch(() => false)) === true;
+
+    if (hasCardRow) {
+      await rowByCard.click();
+      return;
+    }
+
+    const semanticRow = this.page
+      .getByRole('row')
+      .filter({ hasText: new RegExp(escapedName, 'i') })
+      .first();
+    await semanticRow.click();
   }
 
   async resetFilters(): Promise<void> {

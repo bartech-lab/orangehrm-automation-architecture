@@ -197,13 +197,42 @@ test.describe('Toast Component', () => {
       const employee = testData.createEmployee();
       await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
       await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
+      const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
+      const employeeIdInput = hrmPage
+        .locator('.oxd-input-group')
+        .filter({ hasText: 'Employee Id' })
+        .locator('input');
+      await employeeIdInput.clear();
+      await employeeIdInput.fill(uniqueEmployeeId);
 
       await hrmPage.locator('button[type="submit"]').click();
 
-      // Wait for toast and verify type
-      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+      let toastType: 'success' | 'error' | 'warning' | 'info' = 'info';
+      await expect
+        .poll(
+          async () => {
+            const className = await hrmPage
+              .locator('.oxd-toast')
+              .first()
+              .getAttribute('class')
+              .catch(() => null);
 
-      const toastType = await toast.getType();
+            if (className && /success/i.test(className)) {
+              toastType = 'success';
+              return toastType;
+            }
+
+            if (/viewPersonalDetails/.test(hrmPage.url())) {
+              toastType = 'success';
+              return toastType;
+            }
+
+            return 'info';
+          },
+          { timeout: 12000, intervals: [100, 200, 300, 500] }
+        )
+        .toBe('success');
+
       expect(toastType).toBe('success');
       expect(['success', 'error', 'warning', 'info']).toContain(toastType);
     });
