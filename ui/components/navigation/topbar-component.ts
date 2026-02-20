@@ -11,9 +11,9 @@ export class TopbarComponent extends BaseComponent {
     const topbar = page.getByRole('banner');
     super(page, topbar);
     this.searchInput = page.getByPlaceholder('Search', { exact: false });
-    this.userDropdown = page.locator('.oxd-userdropdown').getByRole('button');
-    this.userDropdownName = page.locator('.oxd-userdropdown').getByText(/./);
-    this.userMenu = page.getByRole('menu');
+    this.userDropdown = page.locator('.oxd-userdropdown-tab');
+    this.userDropdownName = page.locator('.oxd-userdropdown-name');
+    this.userMenu = page.locator('.oxd-dropdown-menu');
   }
 
   async waitForReady(): Promise<void> {
@@ -28,7 +28,7 @@ export class TopbarComponent extends BaseComponent {
   async search(query: string): Promise<void> {
     await this.searchInput.fill(query);
     await this.searchInput.press('Enter');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async isSearchAvailable(): Promise<boolean> {
@@ -40,8 +40,14 @@ export class TopbarComponent extends BaseComponent {
   }
 
   async openUserMenu(): Promise<void> {
+    const isMenuOpen = await this.userMenu.isVisible().catch(() => false);
+    if (isMenuOpen) {
+      return;
+    }
+
+    await this.userDropdown.waitFor({ state: 'visible' });
     await this.userDropdown.click();
-    await this.userMenu.waitFor({ state: 'visible' });
+    await this.userMenu.waitFor({ state: 'visible', timeout: 5000 });
   }
 
   async closeUserMenu(): Promise<void> {
@@ -51,14 +57,23 @@ export class TopbarComponent extends BaseComponent {
 
   async clickUserMenuItem(itemText: string): Promise<void> {
     await this.openUserMenu();
-    const menuItem = this.userMenu.getByRole('link', { name: itemText });
+    const menuItem = this.userMenu
+      .locator('a, [role="menuitem"]')
+      .filter({ hasText: itemText })
+      .first();
+
+    await menuItem.waitFor({ state: 'visible' });
     await menuItem.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async logout(): Promise<void> {
     await this.openUserMenu();
-    const logoutItem = this.userMenu.getByRole('menuitem', { name: 'Logout' });
+    const logoutItem = this.userMenu
+      .locator('a:has-text("Logout"), [role="menuitem"]:has-text("Logout")')
+      .first();
+
+    await logoutItem.waitFor({ state: 'visible' });
     await logoutItem.click();
     await this.page.waitForURL(/login/);
   }
@@ -81,7 +96,7 @@ export class TopbarComponent extends BaseComponent {
 
   async getUserMenuItems(): Promise<string[]> {
     await this.openUserMenu();
-    const items = this.userMenu.getByRole('link');
+    const items = this.userMenu.locator('a, [role="menuitem"]');
     return items.allTextContents();
   }
 }

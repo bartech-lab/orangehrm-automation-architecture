@@ -29,9 +29,8 @@ export class VacanciesPage extends BasePage {
     positions: number;
   }): Promise<void> {
     await this.page.getByRole('button', { name: 'Add' }).click();
-    await this.page.waitForLoadState('networkidle');
-
     const form = this.page.locator('.oxd-form');
+    await form.waitFor({ state: 'visible' });
 
     const nameGroup = form.locator('.oxd-input-group').filter({ hasText: 'Vacancy Name' });
     await nameGroup.getByRole('textbox').fill(vacancy.name);
@@ -42,8 +41,9 @@ export class VacanciesPage extends BasePage {
 
     const managerGroup = form.locator('.oxd-input-group').filter({ hasText: 'Hiring Manager' });
     await managerGroup.getByPlaceholder(/type for hints/i).fill(vacancy.hiringManager);
-    await this.page.waitForTimeout(500);
-    await this.page.getByRole('option').first().click();
+    const managerOption = this.page.getByRole('option').first();
+    await managerOption.waitFor({ state: 'visible' });
+    await managerOption.click();
 
     const positionsGroup = form
       .locator('.oxd-input-group')
@@ -60,9 +60,9 @@ export class VacanciesPage extends BasePage {
   async toggleVacancyStatus(name: string, active: boolean): Promise<void> {
     await this.searchVacancy(name);
     await this.page.locator('.oxd-table-cell-action-edit').first().click();
-    await this.page.waitForLoadState('networkidle');
 
     const checkbox = this.page.getByRole('checkbox');
+    await checkbox.waitFor({ state: 'visible' });
     if (active) {
       await checkbox.check();
     } else {

@@ -29,9 +29,10 @@ export class CandidatesPage extends BasePage {
     vacancy?: string;
   }): Promise<void> {
     await this.page.getByRole('button', { name: 'Add' }).click();
-    await this.page.waitForLoadState('networkidle');
+    const firstNameInput = this.page.getByPlaceholder('First Name');
+    await firstNameInput.waitFor({ state: 'visible' });
 
-    await this.page.getByPlaceholder('First Name').fill(candidate.firstName);
+    await firstNameInput.fill(candidate.firstName);
     await this.page.getByPlaceholder('Last Name').fill(candidate.lastName);
     await this.page
       .getByPlaceholder(/email/i)
@@ -54,7 +55,7 @@ export class CandidatesPage extends BasePage {
   async viewCandidateDetails(name: string): Promise<void> {
     await this.searchCandidate(name);
     await this.page.locator('.oxd-table-cell-action-view').first().click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.getByRole('button', { name: 'Save' }).waitFor({ state: 'visible' });
   }
 
   async changeCandidateStatus(name: string, status: string): Promise<void> {

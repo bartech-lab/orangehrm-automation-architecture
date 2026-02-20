@@ -23,7 +23,7 @@ export class AuthHelper {
     this.usernameInput = page.getByPlaceholder('Username');
     this.passwordInput = page.getByPlaceholder('Password');
     this.loginButton = page.getByRole('button', { name: /login/i });
-    this.userDropdown = page.getByRole('button', { name: /admin/i });
+    this.userDropdown = page.locator('.oxd-userdropdown-tab');
     this.logoutMenuItem = page.getByRole('menuitem', { name: /logout/i });
   }
 
@@ -37,9 +37,10 @@ export class AuthHelper {
   }
 
   async logout(): Promise<void> {
-    await this.userDropdown.click();
+    await this.userDropdown.click({ timeout: 3000 });
+    await this.page.getByRole('menu').waitFor({ state: 'visible', timeout: 3000 });
     await this.logoutMenuItem.click();
-    await this.page.waitForURL(/auth\/login/);
+    await this.page.waitForURL(/auth\/login/, { timeout: 5000 });
   }
 
   async isAuthenticated(): Promise<boolean> {

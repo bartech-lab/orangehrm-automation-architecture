@@ -92,8 +92,13 @@ export const test = baseTest.extend<TestFixtures & WorkerFixtures>({
 
     await use(page);
 
-    // Cleanup: logout after test
-    await authHelper.logout();
+    // Teardown: logout (suppress errors to prevent test hanging)
+    try {
+      await authHelper.logout();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      process.stdout.write(`[FIXTURE WARNING] Auth teardown logout failed: ${errorMessage}\n`);
+    }
   },
 
   /**

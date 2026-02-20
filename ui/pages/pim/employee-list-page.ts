@@ -26,10 +26,9 @@ export class EmployeeListPage extends BasePage {
     const empNameInput = this.page.getByRole('textbox', { name: /type for hints/i }).first();
     await empNameInput.clear();
     await empNameInput.fill(query);
-    await this.page.waitForTimeout(500);
 
     await this.page.getByRole('button', { name: 'Search' }).click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async getEmployeeCount(): Promise<number> {
@@ -49,6 +48,6 @@ export class EmployeeListPage extends BasePage {
 
   async resetFilters(): Promise<void> {
     await this.page.getByRole('button', { name: 'Reset' }).click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
   }
 }

@@ -63,7 +63,7 @@ test.describe('Navigation Components', () => {
       expect(isSearchAvailable).toBe(true);
 
       await topbar.search('Admin');
-      await hrmPage.waitForLoadState('networkidle');
+      await expect(topbar.searchInput).toHaveValue('Admin');
 
       const searchValue = await topbar.searchInput.inputValue();
       expect(searchValue).toBe('Admin');

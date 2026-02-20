@@ -29,7 +29,7 @@ export class EmployeeDetailsPage extends BasePage {
 
   async navigateToTab(tabName: string): Promise<void> {
     await this.page.getByRole('tab', { name: new RegExp(tabName, 'i') }).click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async editPersonalDetails(details: { firstName?: string; lastName?: string }): Promise<void> {

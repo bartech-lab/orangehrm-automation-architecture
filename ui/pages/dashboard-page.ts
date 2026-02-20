@@ -29,14 +29,16 @@ export class DashboardPage extends BasePage {
     super(page, baseUrl);
 
     this.topbarHeader = this.page.getByRole('banner');
-    this.welcomeMessage = this.page.getByRole('heading', { name: /welcome/i });
+    this.welcomeMessage = this.page.locator('.oxd-topbar-header-title');
     this.quickActionButtons = this.page.getByRole('button');
     this.sidebar = this.page.getByRole('navigation', { name: /sidepanel/i });
     this.sidebarMenuItems = this.sidebar.getByRole('link');
-    this.userDropdown = this.page.locator('.oxd-userdropdown').getByRole('button');
-    this.userDropdownMenu = this.page.getByRole('menu');
-    this.logoutLink = this.page.getByRole('menuitem', { name: /logout/i });
-    this.userNameText = this.page.locator('.oxd-userdropdown').getByText(/./);
+    this.userDropdown = this.page.locator('.oxd-userdropdown-tab');
+    this.userDropdownMenu = this.page.locator('.oxd-dropdown-menu');
+    this.logoutLink = this.userDropdownMenu
+      .locator('a:has-text("Logout"), [role="menuitem"]:has-text("Logout")')
+      .first();
+    this.userNameText = this.page.locator('.oxd-userdropdown-name');
   }
 
   async navigate(): Promise<void> {
@@ -58,9 +60,18 @@ export class DashboardPage extends BasePage {
   }
 
   async getWelcomeMessage(): Promise<string> {
-    await this.welcomeMessage.waitFor({ state: 'visible' });
-    const text = await this.welcomeMessage.textContent();
-    return text ?? '';
+    const topbarVisible = await this.welcomeMessage
+      .first()
+      .isVisible()
+      .catch(() => false);
+    if (topbarVisible) {
+      const topbarText = await this.welcomeMessage.first().textContent();
+      return topbarText?.trim() ?? '';
+    }
+
+    await this.userNameText.first().waitFor({ state: 'visible' });
+    const fallbackText = await this.userNameText.first().textContent();
+    return fallbackText?.trim() ?? '';
   }
 
   async navigateTo(moduleName: ModuleName): Promise<void> {
@@ -68,12 +79,18 @@ export class DashboardPage extends BasePage {
 
     await menuItem.waitFor({ state: 'visible' });
     await menuItem.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async openUserDropdown(): Promise<void> {
+    const isMenuOpen = await this.userDropdownMenu.isVisible().catch(() => false);
+    if (isMenuOpen) {
+      return;
+    }
+
+    await this.userDropdown.waitFor({ state: 'visible' });
     await this.userDropdown.click();
-    await this.userDropdownMenu.waitFor({ state: 'visible' });
+    await this.userDropdownMenu.waitFor({ state: 'visible', timeout: 5000 });
   }
 
   async getCurrentUser(): Promise<string> {

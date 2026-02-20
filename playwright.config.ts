@@ -26,6 +26,7 @@ export default defineConfig({
   use: {
     baseURL: 'https://opensource-demo.orangehrmlive.com',
     trace: 'on-first-retry',
+    viewport: { width: 1280, height: 720 },
   },
 
   /* Run tests in files in parallel */

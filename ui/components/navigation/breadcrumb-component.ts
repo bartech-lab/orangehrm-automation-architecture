@@ -65,7 +65,8 @@ export class BreadcrumbComponent extends BaseComponent {
 
     const item = this.breadcrumbItems.locator(`:has-text("${itemText}")`);
     await item.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.headerTitle.waitFor({ state: 'visible' });
   }
 
   async navigateToParent(): Promise<void> {
@@ -77,7 +78,8 @@ export class BreadcrumbComponent extends BaseComponent {
     const items = await this.breadcrumbItems.all();
     if (items.length >= 2) {
       await items[items.length - 2].click();
-      await this.page.waitForLoadState('networkidle');
+      await this.page.waitForLoadState('domcontentloaded');
+      await this.headerTitle.waitFor({ state: 'visible' });
     }
   }
 
@@ -90,7 +92,8 @@ export class BreadcrumbComponent extends BaseComponent {
 
     const firstItem = this.breadcrumbItems.first();
     await firstItem.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.headerTitle.waitFor({ state: 'visible' });
   }
 
   async getDepth(): Promise<number> {

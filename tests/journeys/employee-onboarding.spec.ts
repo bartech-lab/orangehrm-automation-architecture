@@ -19,7 +19,11 @@ test.describe('User Journey - Employee Onboarding', () => {
     });
     await addPage.save();
 
-    await auth.waitForTimeout(2000);
+    await auth
+      .locator('.oxd-toast, [class*="viewPersonalDetails"]')
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .catch(() => {});
 
     const url = auth.url();
     const onDetailsPage = url.includes('viewPersonalDetails');

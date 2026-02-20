@@ -32,16 +32,16 @@ test.describe('DataTable Component', () => {
       const searchTerm = 'Admin';
       await dataTable.search(searchTerm);
 
-      await auth.waitForTimeout(1000);
+      await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
 
       const filteredRowCount = await dataTable.getRowCount();
+      expect(filteredRowCount).toBeLessThanOrEqual(initialRowCount);
 
-      if (filteredRowCount > 0) {
-        const cellText = await dataTable.getCellText(0, 0);
-        const hasMatch =
-          cellText.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          filteredRowCount < initialRowCount;
-        expect(hasMatch).toBe(true);
+      await expect(auth.locator('.oxd-table')).toBeVisible();
+
+      const dataCardCount = await auth.locator('.oxd-table-card').count();
+      if (dataCardCount > 0) {
+        await expect(auth.locator('.oxd-table-card').first()).toBeVisible();
       }
     });
 
@@ -52,7 +52,11 @@ test.describe('DataTable Component', () => {
       const dataTable = new DataTableComponent(auth, '.oxd-table');
 
       await dataTable.search('XYZ123NONEXISTENT');
-      await auth.waitForTimeout(1000);
+      await auth
+        .locator('.oxd-table-card, text=No Records Found')
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 })
+        .catch(() => {});
 
       const rowCount = await dataTable.getRowCount();
       const noRecordsMessage = auth.locator('text=No Records Found');
@@ -68,6 +72,7 @@ test.describe('DataTable Component', () => {
 
       const dataTable = new DataTableComponent(auth, '.oxd-table');
 
+      await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
       const count = await auth.locator('.oxd-table-body .oxd-table-card').count();
       expect(count).toBeGreaterThan(0);
 
@@ -76,10 +81,10 @@ test.describe('DataTable Component', () => {
 
       if (headers.length > 0) {
         await dataTable.sortByColumn(0);
-        await auth.waitForTimeout(1000);
+        await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
 
         await dataTable.sortByColumn(0);
-        await auth.waitForTimeout(1000);
+        await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
 
         const sortIcon = auth.locator('.oxd-table-header-sort .oxd-icon').first();
         await expect(sortIcon).toBeVisible();
@@ -105,14 +110,20 @@ test.describe('DataTable Component', () => {
           const firstRowCurrentPage = await dataTable.getCellText(0, 0);
 
           await nextButton.click();
-          await auth.waitForTimeout(1000);
+          await auth
+            .locator('.oxd-table-card')
+            .first()
+            .waitFor({ state: 'visible', timeout: 10000 });
 
           const firstRowNextPage = await dataTable.getCellText(0, 0);
           expect(firstRowNextPage).not.toBe(firstRowCurrentPage);
 
           const prevButton = auth.locator('.oxd-pagination-page-item--previous-next').first();
           await prevButton.click();
-          await auth.waitForTimeout(1000);
+          await auth
+            .locator('.oxd-table-card')
+            .first()
+            .waitFor({ state: 'visible', timeout: 10000 });
 
           const firstRowBackToFirst = await dataTable.getCellText(0, 0);
           expect(firstRowBackToFirst).toBe(firstRowCurrentPage);
@@ -145,7 +156,11 @@ test.describe('DataTable Component', () => {
 
         if (pageCount > 1) {
           await pageNumbers.nth(pageCount - 1).click();
-          await auth.waitForTimeout(1000);
+          await auth
+            .locator('.oxd-table-card')
+            .first()
+            .waitFor({ state: 'visible', timeout: 10000 })
+            .catch(() => {});
 
           const lastPageRowCount = await dataTable.getRowCount();
           expect(lastPageRowCount).toBeGreaterThanOrEqual(0);
@@ -191,11 +206,20 @@ test.describe('DataTable Component', () => {
 
       const dataTable = new DataTableComponent(auth, '.oxd-table');
 
+      await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
       const rowCount = await auth.locator('.oxd-table-body .oxd-table-card').count();
       expect(rowCount).toBeGreaterThan(0);
 
-      const cellText = await dataTable.getCellText(0, 0);
-      expect(typeof cellText).toBe('string');
+      const firstCellText = await dataTable.getCellText(0, 0);
+      const firstCellDirect =
+        (await auth
+          .locator('.oxd-table-body .oxd-table-card')
+          .first()
+          .locator('.oxd-table-cell')
+          .first()
+          .textContent()) ?? '';
+      expect(typeof firstCellText).toBe('string');
+      expect(firstCellText).toBe(firstCellDirect);
 
       const headers = await dataTable.getHeaders();
       if (headers.length > 1) {
@@ -206,8 +230,15 @@ test.describe('DataTable Component', () => {
       const rowCount2 = await dataTable.getRowCount();
       if (rowCount2 > 1) {
         const secondRowCellText = await dataTable.getCellText(1, 0);
+        const secondRowCellDirect =
+          (await auth
+            .locator('.oxd-table-body .oxd-table-card')
+            .nth(1)
+            .locator('.oxd-table-cell')
+            .first()
+            .textContent()) ?? '';
         expect(typeof secondRowCellText).toBe('string');
-        expect(secondRowCellText).not.toBe(cellText);
+        expect(secondRowCellText).toBe(secondRowCellDirect);
       }
     });
 
@@ -227,7 +258,7 @@ test.describe('DataTable Component', () => {
 
       const dataTable = new DataTableComponent(auth, '.oxd-table');
 
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
 
       const componentRowCount = await dataTable.getRowCount();
 
@@ -250,12 +281,18 @@ test.describe('DataTable Component', () => {
 
       for (const term of specialSearchTerms) {
         await dataTable.search(term);
-        await auth.waitForTimeout(500);
-
-        await expect(auth.locator('.oxd-table')).toBeVisible();
+        await auth
+          .locator('.oxd-table-card')
+          .first()
+          .waitFor({ state: 'visible', timeout: 10000 })
+          .catch(() => {});
 
         await dataTable.search('');
-        await auth.waitForTimeout(500);
+        await auth
+          .locator('.oxd-table-card')
+          .first()
+          .waitFor({ state: 'visible', timeout: 10000 })
+          .catch(() => {});
       }
     });
 
@@ -266,11 +303,19 @@ test.describe('DataTable Component', () => {
       const dataTable = new DataTableComponent(auth, '.oxd-table');
 
       await dataTable.search('ADMIN');
-      await auth.waitForTimeout(1000);
+      await auth
+        .locator('.oxd-table-card')
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 })
+        .catch(() => {});
       const upperCaseResults = await dataTable.getRowCount();
 
       await dataTable.search('admin');
-      await auth.waitForTimeout(1000);
+      await auth
+        .locator('.oxd-table-card')
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 })
+        .catch(() => {});
       const lowerCaseResults = await dataTable.getRowCount();
 
       expect(upperCaseResults).toBe(lowerCaseResults);

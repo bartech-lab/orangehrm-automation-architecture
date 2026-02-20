@@ -37,8 +37,8 @@ export class LeaveListPage extends BasePage {
   async searchEmployee(name: string): Promise<void> {
     const hintInput = this.page.getByPlaceholder(/type for hints/i).first();
     await hintInput.fill(name);
-    await this.page.waitForTimeout(500);
     const option = this.page.locator('.oxd-autocomplete-option, .oxd-dropdown-option').first();
+    await option.waitFor({ state: 'visible' });
     await option.click();
   }
 

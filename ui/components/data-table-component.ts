@@ -20,9 +20,16 @@ export class DataTableComponent extends BaseComponent {
   }
 
   private async waitForTableBody(): Promise<void> {
-    await this.page
+    const cardRows = this.page.locator('.oxd-table-card');
+    await cardRows
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .catch(() => {});
+
+    const semanticDataRows = this.page
       .getByRole('row')
-      .or(this.page.locator('.oxd-table-card'))
+      .filter({ has: this.page.getByRole('cell') });
+    await semanticDataRows
       .first()
       .waitFor({ state: 'visible', timeout: 10000 })
       .catch(() => {});
@@ -39,22 +46,46 @@ export class DataTableComponent extends BaseComponent {
 
   async getRowCount(): Promise<number> {
     await this.waitForTableBody();
-    const rows = this.page.getByRole('row').or(this.page.locator('.oxd-table-card'));
-    return rows.count();
+    const cardRows = this.page.locator('.oxd-table-card');
+    const cardRowCount = await cardRows.count();
+    if (cardRowCount > 0) {
+      return cardRowCount;
+    }
+
+    const semanticDataRows = this.page
+      .getByRole('row')
+      .filter({ has: this.page.getByRole('cell') });
+    return semanticDataRows.count();
   }
 
   async getCellText(row: number, column: number): Promise<string> {
     await this.waitForTableBody();
-    const rows = this.page.getByRole('row').or(this.page.locator('.oxd-table-card'));
-    const cells = rows.nth(row).getByRole('cell').or(rows.nth(row).locator('.oxd-table-cell'));
-    const text = await cells.nth(column).textContent();
+
+    const cardRows = this.page.locator('.oxd-table-card');
+    if ((await cardRows.count()) > 0) {
+      const cells = cardRows.nth(row).locator('.oxd-table-cell');
+      const text = await cells.nth(column).textContent();
+      return text ?? '';
+    }
+
+    const semanticDataRows = this.page
+      .getByRole('row')
+      .filter({ has: this.page.getByRole('cell') });
+    const text = await semanticDataRows.nth(row).getByRole('cell').nth(column).textContent();
     return text ?? '';
   }
 
   async clickRow(row: number): Promise<void> {
     await this.waitForTableBody();
-    const rows = this.page.getByRole('row').or(this.page.locator('.oxd-table-card'));
-    const targetRow = rows.nth(row);
+
+    const cardRows = this.page.locator('.oxd-table-card');
+    const targetRow =
+      (await cardRows.count()) > 0
+        ? cardRows.nth(row)
+        : this.page
+            .getByRole('row')
+            .filter({ has: this.page.getByRole('cell') })
+            .nth(row);
     await targetRow.scrollIntoViewIfNeeded();
     await targetRow.click();
   }
