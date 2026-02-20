@@ -27,7 +27,6 @@ export class TopbarComponent extends BaseComponent {
 
   async search(query: string): Promise<void> {
     await this.searchInput.fill(query);
-    await this.searchInput.press('Enter');
     await this.page.waitForLoadState('domcontentloaded');
   }
 
@@ -56,7 +55,7 @@ export class TopbarComponent extends BaseComponent {
       return;
     }
 
-    await this.page.keyboard.press('Escape');
+    await this.userDropdown.click();
     await this.userMenu.waitFor({ state: 'hidden', timeout: 1500 }).catch(async () => {
       const dropdownVisible = await this.userDropdown.isVisible().catch(() => false);
       if (dropdownVisible) {

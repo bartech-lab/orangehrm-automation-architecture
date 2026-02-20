@@ -30,7 +30,7 @@ test.describe('Toast Component', () => {
         .first();
       const employeeIdInput = employeeIdGroup.locator('input').first();
       await employeeIdInput.click();
-      await employeeIdInput.press('ControlOrMeta+A');
+      await employeeIdInput.clear();
       await employeeIdInput.fill(uniqueEmployeeId);
 
       // Save the employee - this should trigger a success toast
@@ -66,7 +66,7 @@ test.describe('Toast Component', () => {
         .first();
       const employeeIdInput = employeeIdGroup.locator('input').first();
       await employeeIdInput.click();
-      await employeeIdInput.press('ControlOrMeta+A');
+      await employeeIdInput.clear();
       await employeeIdInput.fill(uniqueEmployeeId);
 
       await hrmPage.locator('button[type="submit"]').click();
@@ -97,7 +97,7 @@ test.describe('Toast Component', () => {
         .first();
       const searchEmployeeIdInput = searchEmployeeIdGroup.locator('input').first();
       await searchEmployeeIdInput.click();
-      await searchEmployeeIdInput.press('ControlOrMeta+A');
+      await searchEmployeeIdInput.clear();
       await searchEmployeeIdInput.fill(uniqueEmployeeId);
       await hrmPage.getByRole('button', { name: /^Search$/ }).click();
 
@@ -238,7 +238,7 @@ test.describe('Toast Component', () => {
         .first();
       const employeeIdInput = employeeIdGroup.locator('input').first();
       await employeeIdInput.click();
-      await employeeIdInput.press('ControlOrMeta+A');
+      await employeeIdInput.clear();
       await employeeIdInput.fill(uniqueEmployeeId);
 
       // Save to trigger toast
@@ -297,7 +297,7 @@ test.describe('Toast Component', () => {
         .first();
       const employeeIdInput = employeeIdGroup.locator('input').first();
       await employeeIdInput.click();
-      await employeeIdInput.press('ControlOrMeta+A');
+      await employeeIdInput.clear();
       await employeeIdInput.fill(uniqueEmployeeId);
 
       // Save to trigger toast
@@ -479,7 +479,7 @@ test.describe('Toast Component', () => {
         .locator('input')
         .first();
       await firstEmployeeIdInput.click();
-      await firstEmployeeIdInput.press('ControlOrMeta+A');
+      await firstEmployeeIdInput.clear();
       await firstEmployeeIdInput.fill(firstEmployeeId);
       await hrmPage.locator('button[type="submit"]').click();
 
@@ -532,7 +532,7 @@ test.describe('Toast Component', () => {
         .locator('input')
         .first();
       await secondEmployeeIdInput.click();
-      await secondEmployeeIdInput.press('ControlOrMeta+A');
+      await secondEmployeeIdInput.clear();
       await secondEmployeeIdInput.fill(secondEmployeeId);
       await hrmPage.locator('button[type="submit"]').click();
 

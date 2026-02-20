@@ -32,7 +32,7 @@ test.describe('User Journey - Leave Approval', () => {
     let fallbackLeaveType = '';
     for (let employeeIndex = 0; employeeIndex < 5 && !assignableSelectionFound; employeeIndex++) {
       await employeeInput.click();
-      await employeeInput.press('ControlOrMeta+A');
+      await employeeInput.clear();
       await employeeInput.fill('a');
 
       const employeeOptions = auth.locator('.oxd-autocomplete-option');
@@ -95,10 +95,10 @@ test.describe('User Journey - Leave Approval', () => {
       const fromDateInput = auth.getByPlaceholder(/yyyy-dd-mm/i).first();
       const toDateInput = auth.getByPlaceholder(/yyyy-dd-mm/i).nth(1);
       await fromDateInput.click();
-      await fromDateInput.press('ControlOrMeta+A');
+      await fromDateInput.clear();
       await fromDateInput.fill(formatDate(startDate));
       await toDateInput.click();
-      await toDateInput.press('ControlOrMeta+A');
+      await toDateInput.clear();
       await toDateInput.fill(formatDate(endDate));
       await auth
         .locator('.oxd-form textarea')

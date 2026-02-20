@@ -54,28 +54,13 @@ test.describe('Recruitment - Vacancies', () => {
       positions: 1,
     });
 
-    const statusCheckbox = auth.getByRole('checkbox').first();
-    await statusCheckbox.waitFor({ state: 'visible', timeout: 10000 });
-    await statusCheckbox.uncheck();
-    await auth.getByRole('button', { name: /^Save$/ }).click();
+    await vacanciesPage.setCurrentVacancyStatus(false);
 
     await expect
-      .poll(
-        async () => {
-          const toastText =
-            (await auth
-              .locator('.oxd-toast')
-              .first()
-              .textContent()
-              .catch(() => null)) ?? '';
-          if (/success|saved|updated/i.test(toastText)) {
-            return true;
-          }
-
-          return /recruitment\/addJobVacancy\/\d+/.test(auth.url());
-        },
-        { timeout: 20000, intervals: [100, 200, 500, 1000] }
-      )
-      .toBe(true);
+      .poll(() => vacanciesPage.isCurrentVacancyActive().catch(() => true), {
+        timeout: 20000,
+        intervals: [100, 200, 500, 1000],
+      })
+      .toBe(false);
   });
 });

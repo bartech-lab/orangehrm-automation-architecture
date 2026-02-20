@@ -5,6 +5,55 @@ import type { Page } from '@playwright/test';
 export class VacanciesPage extends BasePage {
   readonly dataTable: DataTableComponent;
 
+  private async setStatusOnVacancyForm(active: boolean): Promise<void> {
+    const checkbox = this.page.getByRole('checkbox').first();
+    await checkbox.waitFor({ state: 'visible' });
+
+    const desiredState = active;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const isChecked = await checkbox.isChecked().catch(() => !desiredState);
+      if (isChecked === desiredState) {
+        break;
+      }
+
+      const switchControl = this.page.locator('.oxd-switch-wrapper, .oxd-switch-input').first();
+      try {
+        await switchControl.click({ timeout: 5000 });
+      } catch {
+        await checkbox.click({ force: true, timeout: 5000 });
+      }
+
+      await this.page.waitForTimeout(200);
+    }
+
+    const finalState = await checkbox.isChecked().catch(() => !desiredState);
+    if (finalState !== desiredState) {
+      throw new Error(`Could not set vacancy status to ${desiredState ? 'active' : 'inactive'}`);
+    }
+
+    const loader = this.page.locator('.oxd-form-loader');
+    await loader.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+
+    const saveButton = this.page.getByRole('button', { name: /^Save$/ }).first();
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await saveButton.click({ timeout: 5000 });
+        break;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const isTransientUiState =
+          message.includes('intercepts pointer events') ||
+          message.includes('Element is not attached') ||
+          message.includes('element was detached');
+        if (!isTransientUiState || attempt === 2) {
+          throw error;
+        }
+
+        await loader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+      }
+    }
+  }
+
   constructor(page: Page) {
     super(page, '/web/index.php/recruitment/viewJobVacancy');
     this.dataTable = new DataTableComponent(page, '.oxd-table');
@@ -133,14 +182,16 @@ export class VacanciesPage extends BasePage {
     }
 
     await rowButtons.last().click();
+    await this.setStatusOnVacancyForm(active);
+  }
 
-    const checkbox = this.page.getByRole('checkbox');
-    await checkbox.waitFor({ state: 'visible' });
-    if (active) {
-      await checkbox.check();
-    } else {
-      await checkbox.uncheck();
-    }
-    await this.page.getByRole('button', { name: 'Save' }).click();
+  async setCurrentVacancyStatus(active: boolean): Promise<void> {
+    await this.setStatusOnVacancyForm(active);
+  }
+
+  async isCurrentVacancyActive(): Promise<boolean> {
+    const checkbox = this.page.getByRole('checkbox').first();
+    await checkbox.waitFor({ state: 'visible', timeout: 5000 });
+    return checkbox.isChecked();
   }
 }
