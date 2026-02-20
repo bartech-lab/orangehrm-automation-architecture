@@ -30,7 +30,7 @@ export default defineConfig({
   },
 
   /* Run tests in files in parallel */
-  fullyParallel: false,
+  fullyParallel: true,
 
   /* Fail the build on CI if you accidentally left test.only in the source code */
   forbidOnly: isCI,
@@ -38,7 +38,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: isCI ? 1 : 0,
 
-  workers: 1,
+  workers: isCI ? 1 : 4,
 
   /* Timeout for each test */
   timeout: 45000,
