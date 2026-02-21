@@ -1,71 +1,51 @@
-# UI Layer
+# AGENTS.md — UI Layer Rules
 
-Page Objects + Components for OrangeHRM.
+The UI layer encapsulates all Playwright interactions.
 
-## STRUCTURE
+---
 
-```
-ui/
-├── components/           # Reusable UI components
-│   ├── base-component.ts # Abstract base with semantic helpers
-│   ├── *-component.ts    # Concrete components
-│   └── navigation/       # Sidebar, Topbar, Breadcrumb
-├── pages/                # Page Objects by module
-│   ├── base-page.ts      # Abstract page base
-│   ├── login-page.ts     # Authentication
-│   ├── dashboard-page.ts # Main dashboard
-│   ├── pim/              # PIM module pages
-│   ├── admin/            # Admin module pages
-│   ├── leave/            # Leave module pages
-│   └── ...
-└── index.ts              # Barrel export
-```
+# 1. UI Encapsulates Implementation
 
-## WHERE TO LOOK
+UI classes may use:
 
-| Task              | Location                                                     |
-| ----------------- | ------------------------------------------------------------ |
-| Add page object   | `ui/pages/{module}/{name}-page.ts`                           |
-| Add component     | `ui/components/{name}-component.ts`                          |
-| Modify navigation | `ui/components/navigation/`                                  |
-| Update base class | `ui/components/base-component.ts` or `ui/pages/base-page.ts` |
+- locators
+- Playwright Page
+- selectors
+- DOM logic
 
-## COMPONENT PATTERN
+But callers must not depend on these details.
 
-All components extend `BaseComponent`:
+---
 
-```typescript
-class MyComponent extends BaseComponent {
-  constructor(page: Page) {
-    super(page, '.my-selector'); // or pass Locator
-  }
+# 2. Page Methods Must Express Intent
 
-  // Use semantic helpers from base
-  async getValue(): Promise<string> {
-    const input = this.getByLabel(/value/i);
-    return input.inputValue();
-  }
-}
-```
+Bad:
+clickSave()
 
-## PAGE OBJECT PATTERN
+Good:
+saveEmployee(data)
 
-All pages extend `BasePage`:
+---
 
-```typescript
-class MyPage extends BasePage {
-  readonly submitButton: Locator;
+# 3. Page Methods Must Handle Waiting
 
-  constructor(page: Page, baseUrl: string) {
-    super(page, baseUrl);
-    this.submitButton = page.getByRole('button', { name: /submit/i });
-  }
-}
-```
+Callers should never need to add waits.
 
-## CONVENTIONS
+Methods must:
 
-- **Semantic locators first**: `getByRole`, `getByLabel`, `getByPlaceholder`
-- **CSS fallback**: `.oxd-*` classes only when semantic unavailable
-- **Locator properties**: Define as `readonly` in constructor
-- **Error handling**: Use `.catch(() => false)` for visibility checks
+- wait for readiness
+- perform action
+- confirm completion
+
+---
+
+# 4. UI MUST NOT:
+
+- import domain layer
+- expose locators publicly
+- assume caller timing
+- return raw locator objects
+
+---
+
+End of file.

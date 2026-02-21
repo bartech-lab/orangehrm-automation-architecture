@@ -44,4 +44,17 @@ export class ToastComponent extends BaseComponent {
     const closeBtn = this.root.getByRole('button', { name: /close|dismiss/i });
     return closeBtn.isVisible().catch(() => false);
   }
+
+  async waitForMessage(text: string | RegExp): Promise<void> {
+    const pattern = typeof text === 'string' ? new RegExp(text, 'i') : text;
+    const toast = this.page.getByRole('alert').filter({ hasText: pattern });
+    await toast.waitFor({ state: 'visible', timeout: 10_000 });
+  }
+
+  async waitForSuccess(): Promise<void> {
+    const successToast = this.page
+      .locator('.oxd-toast--success, .toast-success')
+      .or(this.page.getByRole('alert').filter({ hasText: /success|saved|updated|deleted|added/i }));
+    await successToast.waitFor({ state: 'visible', timeout: 10_000 });
+  }
 }

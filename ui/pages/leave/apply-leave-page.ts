@@ -1,9 +1,29 @@
 import { BasePage } from '../base-page.js';
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+
+export interface LeaveRequestData {
+  leaveType: string;
+  fromDate: string;
+  toDate: string;
+  comment?: string;
+}
 
 export class ApplyLeavePage extends BasePage {
+  private readonly leaveFormContainer: Locator;
+  private readonly leaveForm: Locator;
+  private readonly formLoader: Locator;
+  private readonly successFeedback: Locator;
+
   constructor(page: Page) {
     super(page, '/web/index.php/leave/applyLeave');
+    this.leaveFormContainer = this.page.locator('.orangehrm-card-container').first();
+    this.leaveForm = this.page.locator('.oxd-form').first();
+    this.formLoader = this.page.locator('.oxd-form-loader').first();
+    this.successFeedback = this.page
+      .locator('.oxd-toast')
+      .filter({ hasText: /success|successfully|saved|submitted/i })
+      .first()
+      .or(this.page.getByText(/successfully saved|success/i).first());
   }
 
   async navigate(): Promise<void> {
@@ -11,14 +31,11 @@ export class ApplyLeavePage extends BasePage {
   }
 
   async waitForReady(): Promise<void> {
-    await this.page.locator('.orangehrm-card-container').waitFor({ state: 'visible' });
+    await this.leaveFormContainer.waitFor({ state: 'visible' });
   }
 
   async isReady(): Promise<boolean> {
-    return await this.page
-      .locator('.orangehrm-card-container')
-      .isVisible()
-      .catch(() => false);
+    return this.leaveFormContainer.isVisible().catch(() => false);
   }
 
   async hasLeaveTypes(): Promise<boolean> {
@@ -31,12 +48,12 @@ export class ApplyLeavePage extends BasePage {
   }
 
   async selectLeaveType(type: string): Promise<void> {
-    const form = this.page.locator('.oxd-form');
-    const leaveTypeGroup = form.locator('.oxd-input-group').filter({ hasText: 'Leave Type' });
+    const leaveTypeGroup = this.leaveForm
+      .locator('.oxd-input-group')
+      .filter({ hasText: 'Leave Type' });
     const dropdown = leaveTypeGroup.locator('.oxd-select-text');
     await dropdown.waitFor({ state: 'visible', timeout: 5000 });
-    const loader = this.page.locator('.oxd-form-loader');
-    await loader.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+    await this.formLoader.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
 
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
@@ -52,7 +69,7 @@ export class ApplyLeavePage extends BasePage {
           throw error;
         }
 
-        await loader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+        await this.formLoader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
       }
     }
 
@@ -72,8 +89,7 @@ export class ApplyLeavePage extends BasePage {
   }
 
   async apply(): Promise<void> {
-    const loader = this.page.locator('.oxd-form-loader');
-    await loader.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+    await this.formLoader.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
 
     const applyButton = this.page
       .locator('.oxd-form')
@@ -94,11 +110,22 @@ export class ApplyLeavePage extends BasePage {
           throw error;
         }
 
-        await loader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+        await this.formLoader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
       }
     }
 
-    await loader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+    await this.formLoader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+  }
+
+  async submitLeaveRequest(data: LeaveRequestData): Promise<void> {
+    await this.waitForReady();
+    await this.selectLeaveType(data.leaveType);
+    await this.setDateRange(data.fromDate, data.toDate);
+    if (data.comment) {
+      await this.addComments(data.comment);
+    }
+    await this.apply();
+    await this.successFeedback.waitFor({ state: 'visible', timeout: 10000 });
   }
 
   async getBalance(): Promise<string> {

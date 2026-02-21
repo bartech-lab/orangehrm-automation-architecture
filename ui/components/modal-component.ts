@@ -50,4 +50,14 @@ export class ModalComponent extends BaseComponent {
     const closeBtn = this.root.getByRole('button', { name: /close|cancel/i });
     return closeBtn.isVisible().catch(() => false);
   }
+
+  async confirmAction(): Promise<void> {
+    await this.waitForReady();
+    await this.confirm();
+  }
+
+  async cancelAction(): Promise<void> {
+    await this.waitForReady();
+    await this.cancel();
+  }
 }

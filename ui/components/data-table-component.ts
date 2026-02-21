@@ -119,4 +119,50 @@ export class DataTableComponent extends BaseComponent {
     }
     return result;
   }
+
+  async findRow(criteria: Record<string, string | RegExp>): Promise<number> {
+    await this.waitForTableBody();
+    const rowCount = await this.getRowCount();
+
+    for (let i = 0; i < rowCount; i++) {
+      let matches = true;
+      for (const [columnText, searchValue] of Object.entries(criteria)) {
+        const headers = await this.getHeaders();
+        const columnIndex = headers.findIndex((h) =>
+          h.toLowerCase().includes(columnText.toLowerCase())
+        );
+        if (columnIndex === -1) {
+          matches = false;
+          break;
+        }
+        const cellText = await this.getCellText(i, columnIndex);
+        const pattern =
+          typeof searchValue === 'string' ? new RegExp(searchValue, 'i') : searchValue;
+        if (!pattern.test(cellText)) {
+          matches = false;
+          break;
+        }
+      }
+      if (matches) return i;
+    }
+    return -1;
+  }
+
+  async clickRowByContent(content: string | RegExp): Promise<void> {
+    await this.waitForTableBody();
+    const pattern = typeof content === 'string' ? new RegExp(content, 'i') : content;
+
+    const cardRows = this.page.locator('.oxd-table-card');
+    if ((await cardRows.count()) > 0) {
+      const matchingRow = cardRows.filter({ hasText: pattern }).first();
+      await matchingRow.scrollIntoViewIfNeeded();
+      await matchingRow.click();
+      return;
+    }
+
+    const semanticRows = this.page.getByRole('row').filter({ has: this.page.getByRole('cell') });
+    const matchingRow = semanticRows.filter({ hasText: pattern }).first();
+    await matchingRow.scrollIntoViewIfNeeded();
+    await matchingRow.click();
+  }
 }

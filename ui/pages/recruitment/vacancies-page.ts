@@ -3,7 +3,7 @@ import { DataTableComponent } from '../../components/index.js';
 import type { Page } from '@playwright/test';
 
 export class VacanciesPage extends BasePage {
-  readonly dataTable: DataTableComponent;
+  private readonly dataTable: DataTableComponent;
 
   private async setStatusOnVacancyForm(active: boolean): Promise<void> {
     const checkbox = this.page.getByRole('checkbox').first();
@@ -131,6 +131,44 @@ export class VacanciesPage extends BasePage {
 
         await loader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
       }
+    }
+
+    await Promise.race([
+      this.page.locator('.oxd-toast--success').waitFor({ state: 'visible', timeout: 10000 }),
+      this.page.locator('.oxd-toast').waitFor({ state: 'visible', timeout: 10000 }),
+    ]).catch(() => {});
+  }
+
+  private vacancyRow(title: string) {
+    const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return this.page
+      .getByRole('row')
+      .filter({ hasText: new RegExp(escapedTitle, 'i') })
+      .or(this.page.locator('.oxd-table-card').filter({ hasText: new RegExp(escapedTitle, 'i') }))
+      .first();
+  }
+
+  async findVacancy(title: string): Promise<boolean> {
+    await this.waitForReady();
+    await this.dataTable.search(title);
+
+    const row = this.vacancyRow(title);
+    await row.waitFor({ state: 'visible', timeout: 5000 }).catch(() => undefined);
+    return row.isVisible().catch(() => false);
+  }
+
+  async createVacancy(vacancy: {
+    name: string;
+    jobTitle: string;
+    hiringManager: string;
+    positions: number;
+  }): Promise<void> {
+    await this.addVacancy(vacancy);
+
+    await this.waitForReady();
+    const created = await this.findVacancy(vacancy.name);
+    if (!created) {
+      throw new Error(`Expected created vacancy to appear in table: ${vacancy.name}`);
     }
   }
 

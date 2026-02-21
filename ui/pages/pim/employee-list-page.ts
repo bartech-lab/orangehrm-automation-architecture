@@ -1,13 +1,17 @@
 import { BasePage } from '../base-page.js';
 import { DataTableComponent } from '../../components/index.js';
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 export class EmployeeListPage extends BasePage {
-  readonly dataTable: DataTableComponent;
+  private readonly dataTable: DataTableComponent;
 
   constructor(page: Page) {
     super(page, '/web/index.php/pim/viewEmployeeList');
     this.dataTable = new DataTableComponent(page, '.oxd-table');
+  }
+
+  async getCellText(rowIndex: number, columnIndex: number): Promise<string> {
+    return await this.dataTable.getCellText(rowIndex, columnIndex);
   }
 
   async navigate(): Promise<void> {
@@ -22,13 +26,58 @@ export class EmployeeListPage extends BasePage {
     return await this.dataTable.isVisible();
   }
 
-  async searchEmployee(query: string): Promise<void> {
-    const empNameInput = this.page.getByRole('textbox', { name: /type for hints/i }).first();
-    await empNameInput.clear();
-    await empNameInput.fill(query);
+  private employeeNameSearchInput(): Locator {
+    return this.page.getByRole('textbox', { name: /type for hints/i }).first();
+  }
 
-    await this.page.getByRole('button', { name: 'Search' }).click();
+  private searchButton(): Locator {
+    return this.page.getByRole('button', { name: 'Search' });
+  }
+
+  private matchingCardRow(namePattern: RegExp): Locator {
+    return this.page.locator('.oxd-table-card').filter({ hasText: namePattern }).first();
+  }
+
+  private matchingSemanticRow(namePattern: RegExp): Locator {
+    return this.page.getByRole('row').filter({ hasText: namePattern }).first();
+  }
+
+  private async resolveEmployeeRow(name: string): Promise<Locator> {
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const namePattern = new RegExp(escapedName, 'i');
+
+    const cardRow = this.matchingCardRow(namePattern);
+    if ((await cardRow.count()) > 0) {
+      await cardRow.waitFor({ state: 'visible', timeout: 10000 });
+      return cardRow;
+    }
+
+    const semanticRow = this.matchingSemanticRow(namePattern);
+    if ((await semanticRow.count()) > 0) {
+      await semanticRow.waitFor({ state: 'visible', timeout: 10000 });
+      return semanticRow;
+    }
+
+    throw new Error(`Employee '${name}' was not found in the employee list.`);
+  }
+
+  async searchEmployee(query: string): Promise<void> {
+    const employeeNameInput = this.employeeNameSearchInput();
+    await employeeNameInput.clear();
+    await employeeNameInput.fill(query);
+
+    await this.searchButton().click();
     await this.page.waitForLoadState('domcontentloaded');
+    await this.page
+      .locator('.oxd-loading-spinner')
+      .waitFor({ state: 'hidden' })
+      .catch(() => {});
+    await this.waitForReady();
+  }
+
+  async findEmployee(name: string): Promise<void> {
+    await this.searchEmployee(name);
+    await this.resolveEmployeeRow(name);
   }
 
   async getEmployeeCount(): Promise<number> {
@@ -36,41 +85,12 @@ export class EmployeeListPage extends BasePage {
   }
 
   async navigateToEmployee(name: string): Promise<void> {
-    await this.searchEmployee(name);
-    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    await this.findEmployee(name);
+
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const rowByCard = this.page
-          .locator('.oxd-table-card')
-          .filter({ hasText: new RegExp(escapedName, 'i') })
-          .first();
-
-        if ((await rowByCard.count()) > 0) {
-          await rowByCard.click();
-          return;
-        }
-
-        const semanticRow = this.page
-          .getByRole('row')
-          .filter({ hasText: new RegExp(escapedName, 'i') })
-          .first();
-
-        if ((await semanticRow.count()) > 0) {
-          await semanticRow.click();
-          return;
-        }
-
-        const firstCardRow = this.page.locator('.oxd-table-card').first();
-        if ((await firstCardRow.count()) > 0) {
-          await firstCardRow.click();
-          return;
-        }
-
-        await this.page
-          .getByRole('row')
-          .filter({ has: this.page.getByRole('cell') })
-          .first()
-          .click();
+        const employeeRow = await this.resolveEmployeeRow(name);
+        await employeeRow.click();
         return;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);

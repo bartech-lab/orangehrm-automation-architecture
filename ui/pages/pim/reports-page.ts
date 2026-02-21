@@ -2,8 +2,12 @@ import { BasePage } from '../base-page.js';
 import { DataTableComponent } from '../../components/index.js';
 import type { Page } from '@playwright/test';
 
+type ReportCriteria = {
+  reportName: string;
+};
+
 export class ReportsPage extends BasePage {
-  readonly dataTable: DataTableComponent;
+  private readonly dataTable: DataTableComponent;
 
   constructor(page: Page) {
     super(page, '/web/index.php/pim/viewDefinedPredefinedReports');
@@ -54,6 +58,24 @@ export class ReportsPage extends BasePage {
       .or(this.page.locator('.oxd-table-cell-action-run'))
       .first()
       .click();
+    await this.page
+      .locator('.oxd-loading-spinner')
+      .waitFor({ state: 'hidden', timeout: 10000 })
+      .catch(() => {});
+  }
+
+  async generateReport(criteria: ReportCriteria): Promise<void> {
+    await this.waitForReady();
+    await this.runReport(criteria.reportName);
+
+    await Promise.race([
+      this.page.waitForURL(/\/web\/index\.php\/pim\/displayPredefinedReport\//, { timeout: 10000 }),
+      this.page
+        .getByRole('table')
+        .or(this.page.locator('.oxd-table, .orangehrm-container'))
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 }),
+    ]);
   }
 
   async configureReport(config: { name: string; criteria: string }): Promise<void> {

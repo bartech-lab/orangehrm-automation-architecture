@@ -9,7 +9,7 @@ test.describe('Navigation Components', () => {
       const sidebar = new SidebarComponent(auth);
       await sidebar.waitForReady();
 
-      await expect(sidebar.root).toBeVisible();
+      expect(await sidebar.isVisible()).toBe(true);
       const wasExpanded = await sidebar.isExpanded();
       const canToggle = await sidebar.toggleButton.isVisible().catch(() => false);
 
@@ -23,7 +23,7 @@ test.describe('Navigation Components', () => {
           expect(isExpandedAgain).toBe(true);
         } else {
           await sidebar.toggle();
-          await expect(sidebar.root).toBeVisible();
+          expect(await sidebar.isVisible()).toBe(true);
           const toggledState = await sidebar.isExpanded();
           expect(typeof toggledState).toBe('boolean');
         }

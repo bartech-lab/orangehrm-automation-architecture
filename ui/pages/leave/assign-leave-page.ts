@@ -1,9 +1,41 @@
 import { BasePage } from '../base-page.js';
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+
+export interface AssignLeaveData {
+  leaveType: string;
+  fromDate: string;
+  toDate: string;
+  comment?: string;
+}
 
 export class AssignLeavePage extends BasePage {
+  private readonly assignForm: Locator;
+  private readonly employeeHintInput: Locator;
+  private readonly leaveTypeField: Locator;
+  private readonly assignButton: Locator;
+  private readonly formLoader: Locator;
+  private readonly successFeedback: Locator;
+
   constructor(page: Page) {
     super(page, '/web/index.php/leave/assignLeave');
+    this.assignForm = this.page.locator('.oxd-form').first();
+    this.employeeHintInput = this.page.getByPlaceholder(/type for hints/i).first();
+    this.leaveTypeField = this.page
+      .getByRole('combobox', { name: /leave type/i })
+      .or(
+        this.page
+          .locator('.oxd-input-group')
+          .filter({ hasText: /leave type/i })
+          .locator('.oxd-select-text')
+      )
+      .first();
+    this.assignButton = this.page.getByRole('button', { name: /assign/i }).first();
+    this.formLoader = this.page.locator('.oxd-form-loader').first();
+    this.successFeedback = this.page
+      .locator('.oxd-toast')
+      .filter({ hasText: /success|assigned|saved/i })
+      .first()
+      .or(this.page.getByText(/successfully saved|success/i).first());
   }
 
   async navigate(): Promise<void> {
@@ -13,7 +45,7 @@ export class AssignLeavePage extends BasePage {
   async waitForReady(): Promise<void> {
     await this.page
       .getByRole('heading', { name: /assign leave/i })
-      .or(this.page.locator('.oxd-form'))
+      .or(this.assignForm)
       .first()
       .waitFor({ state: 'visible' });
   }
@@ -21,17 +53,14 @@ export class AssignLeavePage extends BasePage {
   async isReady(): Promise<boolean> {
     return this.page
       .getByRole('heading', { name: /assign leave/i })
-      .or(this.page.locator('.oxd-form'))
+      .or(this.assignForm)
       .first()
       .isVisible()
       .catch(() => false);
   }
 
   async selectEmployee(name: string): Promise<void> {
-    await this.page
-      .getByPlaceholder(/type for hints/i)
-      .first()
-      .fill(name);
+    await this.employeeHintInput.fill(name);
     await this.page
       .getByRole('option', { name: new RegExp(name, 'i') })
       .or(this.page.locator('.oxd-autocomplete-option, .oxd-autocomplete-dropdown-option').first())
@@ -40,16 +69,7 @@ export class AssignLeavePage extends BasePage {
   }
 
   async selectLeaveType(type: string): Promise<void> {
-    await this.page
-      .getByRole('combobox', { name: /leave type/i })
-      .or(
-        this.page
-          .locator('.oxd-input-group')
-          .filter({ hasText: /leave type/i })
-          .locator('.oxd-select-text')
-      )
-      .first()
-      .click();
+    await this.leaveTypeField.click();
     await this.page
       .getByRole('option', { name: new RegExp(type, 'i') })
       .or(
@@ -79,6 +99,25 @@ export class AssignLeavePage extends BasePage {
   }
 
   async assign(): Promise<void> {
-    await this.page.getByRole('button', { name: /assign/i }).click();
+    await this.assignButton.click();
+  }
+
+  async assignLeave(employee: string, leaveData: AssignLeaveData): Promise<void> {
+    await this.waitForReady();
+    await this.selectEmployee(employee);
+    await this.selectLeaveType(leaveData.leaveType);
+    await this.setDates(leaveData.fromDate, leaveData.toDate);
+
+    if (leaveData.comment) {
+      await this.page
+        .getByPlaceholder(/comment/i)
+        .or(this.page.locator('textarea'))
+        .first()
+        .fill(leaveData.comment);
+    }
+
+    await this.assign();
+    await this.formLoader.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+    await this.successFeedback.waitFor({ state: 'visible', timeout: 10000 });
   }
 }

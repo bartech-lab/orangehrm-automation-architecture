@@ -1,15 +1,17 @@
 import type { Locator, Page } from '@playwright/test';
 import { BasePage } from './base-page.js';
-import type { Credentials } from '../../domain/auth/types.js';
+
+interface Credentials {
+  username: string;
+  password: string;
+}
 
 export class LoginPage extends BasePage {
-  readonly usernameInput: Locator;
-  readonly passwordInput: Locator;
-  readonly loginButton: Locator;
-  readonly errorMessage: Locator;
-  readonly errorAlert: Locator;
-  readonly rememberMeCheckbox: Locator;
-  readonly forgotPasswordLink: Locator;
+  private readonly usernameInput: Locator;
+  private readonly passwordInput: Locator;
+  private readonly loginButton: Locator;
+  private readonly errorAlert: Locator;
+  private readonly rememberMeCheckbox: Locator;
 
   constructor(page: Page, baseUrl: string = 'https://opensource-demo.orangehrmlive.com') {
     super(page, baseUrl);
@@ -17,10 +19,8 @@ export class LoginPage extends BasePage {
     this.usernameInput = page.getByPlaceholder('Username');
     this.passwordInput = page.getByPlaceholder('Password');
     this.loginButton = page.getByRole('button', { name: /login/i });
-    this.errorMessage = page.locator('.oxd-alert-content-text');
     this.errorAlert = page.locator('.oxd-alert-content-text');
     this.rememberMeCheckbox = page.getByRole('checkbox', { name: /remember me/i });
-    this.forgotPasswordLink = page.getByRole('link', { name: /forgot password/i });
   }
 
   async navigate(): Promise<void> {
@@ -49,15 +49,24 @@ export class LoginPage extends BasePage {
   }
 
   async login(credentials: Credentials): Promise<void> {
+    await this.waitForReady();
     await this.usernameInput.fill(credentials.username);
     await this.passwordInput.fill(credentials.password);
     await this.loginButton.click();
+    await Promise.race([
+      this.page.waitForURL(/.*dashboard.*/, { timeout: 10000 }),
+      this.errorAlert.waitFor({ state: 'visible', timeout: 10000 }),
+      this.page
+        .locator('.oxd-input-field-error-message')
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 }),
+    ]);
   }
 
   async getErrorMessage(): Promise<string | null> {
     try {
-      await this.errorMessage.waitFor({ state: 'visible', timeout: 5000 });
-      return await this.errorMessage.textContent();
+      await this.errorAlert.waitFor({ state: 'visible', timeout: 5000 });
+      return await this.errorAlert.textContent();
     } catch {
       return null;
     }
@@ -97,18 +106,6 @@ export class LoginPage extends BasePage {
   async clearForm(): Promise<void> {
     await this.usernameInput.clear();
     await this.passwordInput.clear();
-  }
-
-  async fillUsername(username: string): Promise<void> {
-    await this.usernameInput.fill(username);
-  }
-
-  async fillPassword(password: string): Promise<void> {
-    await this.passwordInput.fill(password);
-  }
-
-  async clickLogin(): Promise<void> {
-    await this.loginButton.click();
   }
 
   async getFieldValidationErrors(): Promise<string[]> {

@@ -1,62 +1,80 @@
-# Tests
+# AGENTS.md — Tests Layer Rules
 
-E2E tests for OrangeHRM using Playwright.
+This file defines how tests must be generated or modified.
 
-## STRUCTURE
+---
 
-```
-tests/
-├── e2e/                  # Module-specific tests
-│   ├── login.spec.ts     # Authentication tests
-│   ├── dashboard.spec.ts # Dashboard tests
-│   ├── components/       # Component tests
-│   ├── pim/              # PIM module tests
-│   ├── admin/            # Admin module tests
-│   ├── leave/            # Leave module tests
-│   └── ...
-├── journeys/             # Cross-module workflow tests
-│   ├── employee-onboarding.spec.ts
-│   ├── leave-approval.spec.ts
-│   └── recruitment-pipeline.spec.ts
-└── verify-fixtures.spec.ts
-```
+# 1. Tests Represent Behaviour
 
-## WHERE TO LOOK
+Tests must describe what the system does, not how the UI is manipulated.
 
-| Task               | Location                                   |
-| ------------------ | ------------------------------------------ |
-| Add module test    | `tests/e2e/{module}/{feature}.spec.ts`     |
-| Add journey test   | `tests/journeys/{workflow}.spec.ts`        |
-| Add component test | `tests/e2e/components/{component}.spec.ts` |
+Good:
 
-## TEST PATTERN
+- "HR updates employee salary"
+- "Candidate can apply to vacancy"
 
-Use `given/when/then` style:
+Bad:
 
-```typescript
-test('should login successfully', async ({ page, loginPage }) => {
-  // Given
-  await loginPage.navigate();
+- "Click edit button and fill form"
 
-  // When
-  await loginPage.login({ username: 'Admin', password: 'admin123' });
+---
 
-  // Then
-  await expect(page).toHaveURL(/dashboard/);
-});
-```
+# 2. Tests MUST NOT Use UI Directly
 
-## FIXTURES
+Tests must not:
 
-Custom fixtures from `infra/test-runner/fixtures.ts`:
+- import page objects directly
+- call locators
+- interact with playwright Page
+- depend on UI structure
 
-- `page` - Playwright page
-- `loginPage`, `dashboardPage`, etc. - Page objects
-- `authenticatedPage` - Pre-authenticated page
+Use domain-level methods when available.
 
-## CONVENTIONS
+---
 
-- **File naming**: `{feature}.spec.ts`
-- **Test structure**: `given/when/then` (NOT Arrange-Act-Assert)
-- **Assertions**: Use Playwright's `expect()`
-- **Parallel**: Tests run in parallel by default
+# 3. Assertion Rules
+
+Tests must prefer strong assertions:
+
+- entity visible after reload
+- list reflects change
+- persisted value updated
+- cross-page consistency
+
+Weak assertions like toast visibility alone are insufficient.
+
+---
+
+# 4. Data Rules
+
+Tests must:
+
+- generate unique entity names
+- avoid static identifiers
+- avoid cross-test dependencies
+- clean up if necessary
+
+---
+
+# 5. Independence Rules
+
+Tests must:
+
+- run in any order
+- not depend on previous tests
+- define their own state
+
+---
+
+# 6. Style Rules
+
+Tests must:
+
+- use descriptive names (actor + action + outcome)
+- avoid inline selectors
+- avoid manual waits
+- rely on abstractions
+
+---
+
+End of file.

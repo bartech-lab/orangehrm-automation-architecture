@@ -3,7 +3,7 @@ import { DataTableComponent } from '../../components/index.js';
 import type { Page } from '@playwright/test';
 
 export class CandidatesPage extends BasePage {
-  readonly dataTable: DataTableComponent;
+  private readonly dataTable: DataTableComponent;
 
   constructor(page: Page) {
     super(page, '/web/index.php/recruitment/viewCandidates');
@@ -45,6 +45,32 @@ export class CandidatesPage extends BasePage {
     }
 
     await this.page.getByRole('button', { name: 'Save' }).click();
+
+    await Promise.race([
+      this.page.locator('.oxd-toast--success').waitFor({ state: 'visible', timeout: 10000 }),
+      this.page.locator('.oxd-toast').waitFor({ state: 'visible', timeout: 10000 }),
+      this.page
+        .getByRole('heading', { name: /application stage/i })
+        .waitFor({ state: 'visible', timeout: 10000 }),
+    ]).catch(() => {});
+  }
+
+  private candidateRow(name: string) {
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return this.page
+      .getByRole('row')
+      .filter({ hasText: new RegExp(escapedName, 'i') })
+      .or(this.page.locator('.oxd-table-card').filter({ hasText: new RegExp(escapedName, 'i') }))
+      .first();
+  }
+
+  async findCandidate(name: string): Promise<boolean> {
+    await this.waitForReady();
+    await this.dataTable.search(name);
+
+    const row = this.candidateRow(name);
+    await row.waitFor({ state: 'visible', timeout: 5000 }).catch(() => undefined);
+    return row.isVisible().catch(() => false);
   }
 
   async searchCandidate(name: string): Promise<void> {

@@ -128,4 +128,24 @@ export class FormComponent extends BaseComponent {
       );
     return !(await fieldError.isVisible().catch(() => false));
   }
+
+  async submitForm(data: Record<string, string>): Promise<void> {
+    await this.waitForReady();
+
+    for (const [fieldName, value] of Object.entries(data)) {
+      await this.fillField(fieldName, value);
+    }
+
+    await this.submit();
+
+    await this.page
+      .waitForResponse(
+        (response) =>
+          response.request().method() === 'POST' || response.request().method() === 'PUT',
+        { timeout: 10_000 }
+      )
+      .catch(() => {});
+
+    await this.page.waitForTimeout(500);
+  }
 }

@@ -1,103 +1,203 @@
-# web-app-e2e-architecture
+# AGENTS.md — Repository Rules for AI Code Generation
 
-**Generated:** 2026-02-18
-**Commit:** 208a128
-**Branch:** master
+This file defines strict rules for AI agents generating or modifying code in this repository.
+These rules are mandatory. If a rule conflicts with a suggestion, the rule wins.
 
-## OVERVIEW
+---
 
-Playwright E2E testing framework for OrangeHRM using Page Object Model with component abstraction layer. TypeScript with Allure reporting.
+# 1. Purpose of This Repository
 
-## STRUCTURE
+This repository contains a layered Playwright E2E test architecture designed to:
 
-```
-.
-├── ui/              # Page Objects + Components (semantic locators)
-├── tests/           # E2E tests + journey tests
-├── infra/           # Test runner, fixtures, auth helpers
-├── domain/          # Type definitions (auth, employee, leave)
-├── data/            # Test data builders + fixtures
-└── api/             # API client base
-```
+- express behaviour, not UI scripting
+- isolate UI implementation from test intent
+- ensure maintainability at scale
+- prevent fragile locator-driven tests
 
-## WHERE TO LOOK
+Agents must preserve this design.
 
-| Task                  | Location                        | Notes                                  |
-| --------------------- | ------------------------------- | -------------------------------------- |
-| Add new page object   | `ui/pages/`                     | Extend BasePage, use semantic locators |
-| Add new component     | `ui/components/`                | Extend BaseComponent                   |
-| Add new test          | `tests/e2e/`                    | Mirror ui/pages structure              |
-| Add journey test      | `tests/journeys/`               | Cross-module workflows                 |
-| Modify fixtures       | `infra/test-runner/fixtures.ts` | Custom test fixtures                   |
-| Add domain types      | `domain/{module}/types.ts`      | Shared interfaces                      |
-| Add test data builder | `data/builders/`                | Builder pattern for entities           |
+---
 
-## CONVENTIONS
+# 2. Dependency Rules (MANDATORY)
 
-### Locator Pattern (CRITICAL)
+The allowed dependency direction is:
 
-Always use semantic locators first, CSS fallback:
+tests → domain → ui → playwright
 
-```typescript
-// Preferred - Semantic locators
-this.usernameInput = page.getByPlaceholder('Username');
-this.loginButton = page.getByRole('button', { name: /login/i });
-this.alert = page.getByRole('alert');
-this.table = page.getByRole('table');
-this.checkbox = page.getByRole('checkbox');
+### Tests MAY import:
 
-// Fallback only when semantic unavailable - Use attribute filters
-this.errorMessage = page.locator('[class*="error-message"]').filter({ hasText: /required|invalid/i });
-this.toast = page.locator('[class*="toast"]');
-this.form = page.locator('[class*="form"]');
-```
+- domain/\*
+- data/\*
+- fixtures from infra
+- test utilities
 
-### Test Structure
+### Tests MUST NOT import:
 
-- Use `given/when/then` style (NOT Arrange-Act-Assert)
-- Co-located: `Component.spec.ts` tests `Component.ts`
-- All tests use custom fixtures from `infra/test-runner/fixtures.ts`
+- ui/pages directly
+- ui/components directly
+- playwright Page object
+- raw locators
 
-### Error Handling
+---
 
-```typescript
-// Use .catch(() => false) for visibility checks
-async isVisible(): Promise<boolean> {
-  return this.root.isVisible().catch(() => false);
-}
-```
+### Domain MAY import:
 
-### File Organization
+- ui/pages
+- domain models
+- data factories
 
-- `index.ts` exports from each module
-- Component files: `*-component.ts`
-- Page files: `*-page.ts`
+### Domain MUST NOT import:
 
-## ANTI-PATTERNS
+- playwright test API
+- fixtures
+- expect()
 
-| Pattern            | Reason                                |
-| ------------------ | ------------------------------------- |
-| `as any`           | Type error suppression - never use    |
-| `@ts-ignore`       | Type error suppression - never use    |
-| `@ts-expect-error` | Type error suppression - never use    |
-| CSS-only locators  | Use semantic first, CSS fallback only |
-| Arrange-Act-Assert | Use given/when/then style             |
-| Empty catch blocks | Always handle or rethrow              |
+---
 
-## COMMANDS
+### UI layer MAY import:
 
-```bash
-npx playwright test              # Run all tests
-npx playwright test --ui         # Interactive UI mode
-npx playwright test --headed     # Run with browser visible
-npm run lint                     # ESLint check
-npm run typecheck                # TypeScript check
-npm run report:allure            # Generate + open Allure report
-```
+- playwright
+- base classes
+- shared UI utilities
 
-## NOTES
+### UI MUST NOT import:
 
-- **Base URL**: `https://opensource-demo.orangehrmlive.com`
-- **Test timeout**: 20s per test
-- **OrangeHRM uses `.oxd-*` CSS classes** - use semantic locators instead
-- **All components extend BaseComponent** which provides getByRole, getByLabel, getByPlaceholder, getByTestId helpers
+- domain layer
+- tests
+- fixtures
+
+---
+
+# 3. Test Writing Contract (MANDATORY)
+
+Tests represent behaviour, not interactions.
+
+### Tests MUST:
+
+- describe user intent
+- use domain-level operations where available
+- verify persisted state when modifying data
+- use unique test data
+- be independent of execution order
+
+### Tests MUST NOT:
+
+- call locator methods directly
+- depend on toast visibility alone
+- rely on UI structure knowledge
+- use static entity names
+- use sleep or fixed timeout waits
+
+---
+
+# 4. Page Object Contract (MANDATORY)
+
+Page objects represent **capabilities**, not UI structure.
+
+### Page methods MUST:
+
+- express user intent
+- include waiting logic internally
+- ensure action success before returning
+- hide locators from callers
+
+### Page methods MUST NOT:
+
+- expose locator objects publicly
+- be thin wrappers around click/fill
+- require callers to add waits
+- leak DOM structure assumptions
+
+---
+
+# 5. Locator Policy (STRICT PRIORITY ORDER)
+
+When generating selectors, agents MUST use:
+
+1. role selectors
+2. test id selectors
+3. label associations
+4. semantic attributes
+5. CSS selectors only as fallback
+
+### Agents MUST NOT use:
+
+- nth() unless no alternative exists
+- deep chained CSS selectors
+- brittle structural selectors
+- text matching for layout elements
+
+---
+
+# 6. Fixture Philosophy
+
+Fixtures provide **capabilities**, not workflows.
+
+### Fixtures MAY:
+
+- create authenticated contexts
+- provide configured services
+- provide test data helpers
+
+### Fixtures MUST NOT:
+
+- encode business flows
+- hide side effects
+- perform assertions implicitly
+
+---
+
+# 7. Code Generation Rules
+
+When generating code, agents MUST:
+
+- follow existing naming patterns
+- use constructor-based locator initialization
+- keep comments minimal and in English
+- prefer domain calls over page calls
+- match existing async style
+- reuse existing helpers instead of duplicating logic
+
+---
+
+# 8. Forbidden Patterns
+
+Agents MUST NEVER generate:
+
+- tests importing ui/\*
+- expect(page.locator(...)) inside tests
+- page methods that just click a button
+- toast-only verification
+- static test entities
+- sleep-based waiting
+- duplicated flows across tests
+
+---
+
+# 9. Refactor Safety Rules
+
+Agents MUST NOT:
+
+- rename files without instruction
+- move layers automatically
+- change public method signatures silently
+- replace domain flows with UI calls
+
+If unsure, agents must modify the smallest possible surface.
+
+---
+
+# 10. Golden Example Pattern
+
+A good test:
+
+- describes behaviour
+- uses domain-level API
+- verifies persisted outcome
+- does not expose UI structure
+
+Agents should mirror this pattern whenever possible.
+
+---
+
+End of file.

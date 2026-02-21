@@ -3,7 +3,7 @@ import { DataTableComponent } from '../../components/index.js';
 import type { Page } from '@playwright/test';
 
 export class UserManagementPage extends BasePage {
-  readonly dataTable: DataTableComponent;
+  private readonly dataTable: DataTableComponent;
 
   constructor(page: Page) {
     super(page, '/web/index.php/admin/viewSystemUsers');
@@ -43,22 +43,41 @@ export class UserManagementPage extends BasePage {
     await this.dataTable.search(username);
   }
 
-  async addUser(user: {
+  private userRow(username: string) {
+    return this.page
+      .getByRole('row')
+      .filter({ hasText: new RegExp(username, 'i') })
+      .or(this.page.locator('.oxd-table-card').filter({ hasText: new RegExp(username, 'i') }))
+      .first();
+  }
+
+  async findUser(username: string): Promise<boolean> {
+    await this.waitForReady();
+    await this.dataTable.search(username);
+
+    const row = this.userRow(username);
+    await row.waitFor({ state: 'visible', timeout: 5000 }).catch(() => undefined);
+    return row.isVisible().catch(() => false);
+  }
+
+  async createUser(user: {
     username: string;
     password: string;
     role: string;
     employeeName?: string;
     status?: string;
   }): Promise<void> {
+    await this.waitForReady();
     await this.page.getByRole('button', { name: /add/i }).click();
     await this.selectCustomOption(/user role/i, user.role);
 
     const employeeInput = this.page
       .getByPlaceholder(/type for hints/i)
       .or(this.page.getByRole('textbox', { name: /employee name/i }));
-    await employeeInput.first().fill(user.employeeName ?? 'Admin');
+    const employeeName = user.employeeName ?? 'Admin';
+    await employeeInput.first().fill(employeeName);
     await this.page
-      .getByRole('option', { name: new RegExp(user.employeeName ?? 'Admin', 'i') })
+      .getByRole('option', { name: new RegExp(employeeName, 'i') })
       .or(this.page.locator('.oxd-autocomplete-option').first())
       .first()
       .click();
@@ -69,15 +88,27 @@ export class UserManagementPage extends BasePage {
     await this.page.getByLabel(/^password$/i).fill(user.password);
     await this.page.getByLabel(/confirm password/i).fill(user.password);
     await this.page.getByRole('button', { name: /save/i }).click();
+
+    await this.waitForReady();
+    const created = await this.findUser(user.username);
+    if (!created) {
+      throw new Error(`Expected created user to appear in table: ${user.username}`);
+    }
+  }
+
+  async addUser(user: {
+    username: string;
+    password: string;
+    role: string;
+    employeeName?: string;
+    status?: string;
+  }): Promise<void> {
+    await this.createUser(user);
   }
 
   async deleteUser(username: string): Promise<void> {
     await this.searchUser(username);
-    const userRow = this.page
-      .getByRole('row')
-      .filter({ hasText: new RegExp(username, 'i') })
-      .or(this.page.locator('.oxd-table-card').filter({ hasText: new RegExp(username, 'i') }))
-      .first();
+    const userRow = this.userRow(username);
     await userRow.scrollIntoViewIfNeeded();
 
     const deleteButton = userRow.getByRole('button', { name: /delete/i }).first();
@@ -91,11 +122,7 @@ export class UserManagementPage extends BasePage {
 
   async editUser(username: string, changes: Partial<{ role: string }>): Promise<void> {
     await this.searchUser(username);
-    const userRow = this.page
-      .getByRole('row')
-      .filter({ hasText: new RegExp(username, 'i') })
-      .or(this.page.locator('.oxd-table-card').filter({ hasText: new RegExp(username, 'i') }))
-      .first();
+    const userRow = this.userRow(username);
     await userRow.scrollIntoViewIfNeeded();
 
     const editButton = userRow.getByRole('button', { name: /edit/i }).first();
