@@ -1,47 +1,50 @@
 import { test, expect } from '../../../infra/test-runner/index.js';
-import { EmployeeDetailsPage } from '../../../ui/pages/pim/employee-details-page.js';
+import { EmployeeDomain } from '../../../domain/employee-domain.js';
 
 test.describe('PIM - Employee Details', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test('should view employee details', async ({ auth }) => {
-    const detailsPage = new EmployeeDetailsPage(auth);
-    await detailsPage.navigate();
-    await detailsPage.waitForReady();
-    expect(await detailsPage.isReady()).toBe(true);
+    const employeeDomain = new EmployeeDomain(auth);
+    const isReady = await employeeDomain.viewCurrentEmployeeDetails();
+
+    expect(isReady).toBe(true);
   });
 
   test('should edit personal information', async ({ auth }) => {
-    const detailsPage = new EmployeeDetailsPage(auth);
-    await detailsPage.navigate();
-    await detailsPage.editPersonalDetails({
+    const employeeDomain = new EmployeeDomain(auth);
+    const isUpdated = await employeeDomain.editCurrentEmployeePersonalDetails({
       firstName: 'Updated',
-      lastName: 'Name',
+      lastName: `Name${Date.now()}`,
     });
-    await expect(auth.locator('.oxd-toast')).toBeVisible();
+
+    expect(isUpdated).toBe(true);
   });
 
   test('should edit contact details', async ({ auth }) => {
-    const detailsPage = new EmployeeDetailsPage(auth);
-    await detailsPage.navigate();
-    await detailsPage.editContactDetails({
-      email: 'test@example.com',
+    const employeeDomain = new EmployeeDomain(auth);
+    const isUpdated = await employeeDomain.editCurrentEmployeeContactDetails({
+      email: `test${Date.now()}@example.com`,
       phone: '1234567890',
     });
-    await expect(auth.locator('.oxd-toast')).toBeVisible();
+
+    expect(isUpdated).toBe(true);
   });
 
   test('should view job information', async ({ auth }) => {
-    const detailsPage = new EmployeeDetailsPage(auth);
-    await detailsPage.navigate();
-    await detailsPage.viewJobInformation();
-    await expect(auth.locator('.oxd-table')).toBeVisible();
+    const employeeDomain = new EmployeeDomain(auth);
+    const hasJobSection = await employeeDomain.viewCurrentEmployeeJobInformation();
+
+    expect(hasJobSection).toBe(true);
   });
 
   test('should navigate between tabs', async ({ auth }) => {
-    const detailsPage = new EmployeeDetailsPage(auth);
-    await detailsPage.navigate();
-    await detailsPage.navigateToTab('Contact Details');
-    await expect(auth.locator('.oxd-form')).toBeVisible();
-    await detailsPage.navigateToTab('Job');
-    await expect(auth.locator('.oxd-table')).toBeVisible();
+    const employeeDomain = new EmployeeDomain(auth);
+    const canNavigateTabs = await employeeDomain.navigateCurrentEmployeeTabs([
+      'Contact Details',
+      'Job',
+    ]);
+
+    expect(canNavigateTabs).toBe(true);
   });
 });

@@ -12,10 +12,25 @@ export class BreadcrumbComponent extends BaseComponent {
       .first();
     super(page, breadcrumbRoot);
     this.breadcrumbNav = breadcrumbRoot;
-    this.breadcrumbItems = this.root.locator(
-      '.oxd-topbar-header-breadcrumb-item, .oxd-topbar-header-breadcrumb-module'
-    );
-    this.headerTitle = page.locator('.oxd-topbar-header-title').getByRole('heading');
+    this.breadcrumbItems = this.root
+      .getByRole('listitem')
+      .or(
+        this.root.locator(
+          '.oxd-topbar-header-breadcrumb-item, .oxd-topbar-header-breadcrumb-module'
+        )
+      )
+      .first()
+      .locator('xpath=..')
+      .getByRole('listitem')
+      .or(
+        this.root.locator(
+          '.oxd-topbar-header-breadcrumb-item, .oxd-topbar-header-breadcrumb-module'
+        )
+      );
+    this.headerTitle = page
+      .getByRole('heading')
+      .or(page.locator('.oxd-topbar-header-title').getByRole('heading'))
+      .first();
   }
 
   async waitForReady(): Promise<void> {

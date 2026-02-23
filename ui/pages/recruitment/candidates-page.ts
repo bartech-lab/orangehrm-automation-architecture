@@ -7,7 +7,10 @@ export class CandidatesPage extends BasePage {
 
   constructor(page: Page) {
     super(page, '/web/index.php/recruitment/viewCandidates');
-    this.dataTable = new DataTableComponent(page, '.oxd-table');
+    this.dataTable = new DataTableComponent(
+      page,
+      page.getByRole('table').or(page.locator('.oxd-table'))
+    );
   }
 
   async navigate(): Promise<void> {
@@ -34,21 +37,32 @@ export class CandidatesPage extends BasePage {
 
     await firstNameInput.fill(candidate.firstName);
     await this.page.getByPlaceholder('Last Name').fill(candidate.lastName);
-    const form = this.page.locator('.oxd-form').first();
+    const form = this.page.getByRole('form').or(this.page.locator('.oxd-form')).first();
     const emailInput = form.locator('input[placeholder="Type here"]').first();
     await emailInput.fill(candidate.email);
 
     if (candidate.vacancy) {
       const vacancyGroup = this.page.locator('.oxd-input-group').filter({ hasText: 'Vacancy' });
-      await vacancyGroup.locator('.oxd-select-text').click();
+      await vacancyGroup
+        .getByRole('combobox')
+        .or(vacancyGroup.locator('.oxd-select-text'))
+        .first()
+        .click();
       await this.page.getByRole('option', { name: new RegExp(candidate.vacancy, 'i') }).click();
     }
 
     await this.page.getByRole('button', { name: 'Save' }).click();
 
     await Promise.race([
-      this.page.locator('.oxd-toast--success').waitFor({ state: 'visible', timeout: 10000 }),
-      this.page.locator('.oxd-toast').waitFor({ state: 'visible', timeout: 10000 }),
+      this.page
+        .getByRole('alert')
+        .filter({ hasText: /success/i })
+        .waitFor({ state: 'visible', timeout: 10000 }),
+      this.page
+        .getByRole('alert')
+        .or(this.page.locator('.oxd-toast'))
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 }),
       this.page
         .getByRole('heading', { name: /application stage/i })
         .waitFor({ state: 'visible', timeout: 10000 }),
@@ -60,7 +74,12 @@ export class CandidatesPage extends BasePage {
     return this.page
       .getByRole('row')
       .filter({ hasText: new RegExp(escapedName, 'i') })
-      .or(this.page.locator('.oxd-table-card').filter({ hasText: new RegExp(escapedName, 'i') }))
+      .or(
+        this.page
+          .getByRole('table')
+          .locator('.oxd-table-card')
+          .filter({ hasText: new RegExp(escapedName, 'i') })
+      )
       .first();
   }
 
@@ -84,7 +103,10 @@ export class CandidatesPage extends BasePage {
 
   async viewCandidateDetails(name: string): Promise<void> {
     await this.searchCandidate(name);
-    const viewButton = this.page.locator('.oxd-table-cell-action-view').first();
+    const viewButton = this.page
+      .getByRole('button', { name: /view/i })
+      .or(this.page.locator('.oxd-table-cell-action-view'))
+      .first();
     if ((await viewButton.count()) > 0) {
       await viewButton.click();
       await this.page
@@ -95,7 +117,11 @@ export class CandidatesPage extends BasePage {
       return;
     }
 
-    const firstCardRow = this.page.locator('.oxd-table-card').first();
+    const firstCardRow = this.page
+      .getByRole('row')
+      .filter({ has: this.page.getByRole('cell') })
+      .or(this.page.getByRole('table').locator('.oxd-table-card'))
+      .first();
     if ((await firstCardRow.count()) > 0) {
       await firstCardRow.click();
       await this.page
@@ -140,7 +166,11 @@ export class CandidatesPage extends BasePage {
         .catch(() => {});
 
       await this.page
-        .locator('.oxd-form textarea')
+        .getByRole('form')
+        .or(this.page.locator('.oxd-form'))
+        .first()
+        .getByRole('textbox', { name: /note/i })
+        .or(this.page.locator('.oxd-form textarea'))
         .first()
         .fill('Status updated to shortlisted')
         .catch(() => {});
@@ -179,7 +209,8 @@ export class CandidatesPage extends BasePage {
             .then(() => true)
             .catch(() => false),
           this.page
-            .locator('.oxd-toast')
+            .getByRole('alert')
+            .or(this.page.locator('.oxd-toast'))
             .first()
             .waitFor({ state: 'visible', timeout: 4000 })
             .then(() => true)
@@ -193,7 +224,11 @@ export class CandidatesPage extends BasePage {
     }
 
     const statusGroup = this.page.locator('.oxd-input-group').filter({ hasText: /status/i });
-    await statusGroup.locator('.oxd-select-text').click();
+    await statusGroup
+      .getByRole('combobox')
+      .or(statusGroup.locator('.oxd-select-text'))
+      .first()
+      .click();
     await this.page.getByRole('option', { name: new RegExp(status, 'i') }).click();
 
     await this.page.getByRole('button', { name: 'Save' }).click();

@@ -36,6 +36,16 @@ export interface EmployeeSearchCriteria extends EmployeeSearchFilters {
   employeeId?: string;
 }
 
+export interface CreateEmployeeAttemptResult {
+  success: boolean;
+  hasValidationErrors: boolean;
+}
+
+export interface CancelEmployeeCreationResult {
+  cancelled: boolean;
+  currentUrl: string;
+}
+
 const DEFAULT_TIMEOUT_MS = 20000;
 const POLL_INTERVAL_MS = 250;
 
@@ -85,6 +95,92 @@ export class EmployeeDomain {
     };
   }
 
+  async attemptCreateEmployee(data: CreateEmployeeInput): Promise<CreateEmployeeAttemptResult> {
+    await this.addEmployeePage.navigate();
+    await this.addEmployeePage.waitForReady();
+    await this.addEmployeePage.fillEmployeeDetails({
+      firstName: data.firstName,
+      middleName: data.middleName,
+      lastName: data.lastName,
+      employeeId: data.employeeId,
+    });
+
+    if (data.photoPath) {
+      await this.addEmployeePage.uploadPhoto(data.photoPath);
+    }
+
+    return await this.addEmployeePage.attemptSave();
+  }
+
+  async cancelEmployeeCreation(data: CreateEmployeeInput): Promise<CancelEmployeeCreationResult> {
+    await this.addEmployeePage.navigate();
+    await this.addEmployeePage.waitForReady();
+    await this.addEmployeePage.fillEmployeeDetails({
+      firstName: data.firstName,
+      middleName: data.middleName,
+      lastName: data.lastName,
+      employeeId: data.employeeId,
+    });
+    await this.addEmployeePage.cancel();
+
+    const currentUrl = await this.addEmployeePage.getCurrentUrl();
+    return {
+      cancelled: /viewEmployeeList/i.test(currentUrl),
+      currentUrl,
+    };
+  }
+
+  async viewCurrentEmployeeDetails(): Promise<boolean> {
+    await this.employeeDetailsPage.navigate();
+    await this.employeeDetailsPage.waitForReady();
+    return await this.employeeDetailsPage.isReady();
+  }
+
+  async editCurrentEmployeePersonalDetails(details: {
+    firstName?: string;
+    lastName?: string;
+  }): Promise<boolean> {
+    await this.employeeDetailsPage.navigate();
+    await this.employeeDetailsPage.waitForReady();
+    await this.employeeDetailsPage.editPersonalDetails(details);
+    return await this.employeeDetailsPage.isReady();
+  }
+
+  async editCurrentEmployeeContactDetails(contact: {
+    email?: string;
+    phone?: string;
+  }): Promise<boolean> {
+    await this.employeeDetailsPage.navigate();
+    await this.employeeDetailsPage.waitForReady();
+    await this.employeeDetailsPage.editContactDetails(contact);
+    return await this.employeeDetailsPage.isReady();
+  }
+
+  async viewCurrentEmployeeJobInformation(): Promise<boolean> {
+    await this.employeeDetailsPage.navigate();
+    await this.employeeDetailsPage.waitForReady();
+    await this.employeeDetailsPage.viewJobInformation();
+    return true;
+  }
+
+  async navigateCurrentEmployeeTabs(tabs: string[]): Promise<boolean> {
+    await this.employeeDetailsPage.navigate();
+    await this.employeeDetailsPage.waitForReady();
+
+    for (const tab of tabs) {
+      await this.employeeDetailsPage.navigateToTab(tab);
+    }
+
+    return true;
+  }
+
+  async openEmployeeDetailsFromList(employeeReference: string): Promise<boolean> {
+    await this.employeeListPage.navigate();
+    await this.employeeListPage.navigateToEmployee(employeeReference);
+    await this.employeeDetailsPage.waitForReady();
+    return await this.employeeDetailsPage.isReady();
+  }
+
   async updateEmployee(id: string, data: UpdateEmployeeInput): Promise<Employee> {
     const existingEmployee = await this.getEmployeeDetails(id);
     if (!existingEmployee) {
@@ -131,7 +227,8 @@ export class EmployeeDomain {
     await this.employeeListPage.waitForReady();
 
     const searchQuery = this.resolveSearchQuery(criteria);
-    if (searchQuery.length > 0) {
+    const shouldUseUiSearch = searchQuery.length > 0 && !criteria.employeeId;
+    if (shouldUseUiSearch) {
       await this.employeeListPage.searchEmployee(searchQuery);
     }
 
@@ -156,6 +253,10 @@ export class EmployeeDomain {
         department: criteria.department ?? Department.OPERATIONS,
         employmentStatus: criteria.employmentStatus ?? EmploymentStatus.ACTIVE,
       });
+    }
+
+    if (criteria.employeeId) {
+      return employees.filter((employee) => employee.id === criteria.employeeId);
     }
 
     return employees;

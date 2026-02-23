@@ -9,12 +9,10 @@ dist/
 build/
 *.tsbuildinfo
 
-# Test outputs
+# Test outputs (consolidated under test-output/)
+test-output/
 test-results/
-playwright-report/
 playwright/.cache/
-allure-results/
-allure-report/
 
 # IDE
 .vscode/

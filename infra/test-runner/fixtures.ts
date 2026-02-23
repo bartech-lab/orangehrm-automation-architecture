@@ -1,6 +1,10 @@
 import { test as baseTest, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { AuthHelper } from '../auth/auth-helper.js';
+import { defaultConfig } from '../config/test-config.js';
+import { HRMSystem } from '../../domain/hrm-system.js';
+import { EmployeeDomain } from '../../domain/employee-domain.js';
+import { LeaveDomain } from '../../domain/leave-domain.js';
 
 // Types for fixture definitions
 export interface TestFixtures {
@@ -9,6 +13,9 @@ export interface TestFixtures {
   testData: TestDataFactory;
   failureCapture: void;
   testLogger: void;
+  hrmSystem: HRMSystem;
+  employeeDomain: EmployeeDomain;
+  leaveDomain: LeaveDomain;
 }
 
 export interface WorkerFixtures {
@@ -77,10 +84,10 @@ export const test = baseTest.extend<TestFixtures & WorkerFixtures>({
    * Returns a page with user already logged in
    */
   auth: async ({ page }, use, testInfo) => {
-    const baseUrl = testInfo.project.use?.baseURL || 'https://opensource-demo.orangehrmlive.com';
+    const baseUrl = testInfo.project.use?.baseURL || defaultConfig.baseUrl;
     const credentials = {
-      username: 'Admin',
-      password: 'admin123',
+      username: defaultConfig.credentials.admin.username,
+      password: defaultConfig.credentials.admin.password,
     };
 
     const authHelper = new AuthHelper(page, baseUrl, credentials);
@@ -107,6 +114,33 @@ export const test = baseTest.extend<TestFixtures & WorkerFixtures>({
   testData: async ({}, use) => {
     const factory = createTestDataFactory();
     await use(factory);
+  },
+
+  /**
+   * HRM System domain fixture
+   * Provides access to high-level HRM operations
+   */
+  hrmSystem: async ({ auth: page }, use) => {
+    const hrmSystem = new HRMSystem(page);
+    await use(hrmSystem);
+  },
+
+  /**
+   * Employee domain fixture
+   * Provides access to employee management operations
+   */
+  employeeDomain: async ({ auth: page }, use) => {
+    const employeeDomain = new EmployeeDomain(page);
+    await use(employeeDomain);
+  },
+
+  /**
+   * Leave domain fixture
+   * Provides access to leave management operations
+   */
+  leaveDomain: async ({ auth: page }, use) => {
+    const leaveDomain = new LeaveDomain(page);
+    await use(leaveDomain);
   },
 
   // ==================== Auto-Fixtures ====================

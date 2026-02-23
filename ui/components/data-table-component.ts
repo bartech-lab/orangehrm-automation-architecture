@@ -2,6 +2,8 @@ import type { Locator, Page } from '@playwright/test';
 import { BaseComponent } from './base-component.js';
 
 export class DataTableComponent extends BaseComponent {
+  private readonly cardRowSelector = '.oxd-table-card';
+
   constructor(page: Page, selector: string | Locator) {
     super(page, selector);
   }
@@ -20,7 +22,7 @@ export class DataTableComponent extends BaseComponent {
   }
 
   private async waitForTableBody(): Promise<void> {
-    const cardRows = this.page.locator('.oxd-table-card');
+    const cardRows = this.page.locator(this.cardRowSelector);
     await cardRows
       .first()
       .waitFor({ state: 'visible', timeout: 10000 })
@@ -46,7 +48,7 @@ export class DataTableComponent extends BaseComponent {
 
   async getRowCount(): Promise<number> {
     await this.waitForTableBody();
-    const cardRows = this.page.locator('.oxd-table-card');
+    const cardRows = this.page.locator(this.cardRowSelector);
     const cardRowCount = await cardRows.count();
     if (cardRowCount > 0) {
       return cardRowCount;
@@ -61,9 +63,12 @@ export class DataTableComponent extends BaseComponent {
   async getCellText(row: number, column: number): Promise<string> {
     await this.waitForTableBody();
 
-    const cardRows = this.page.locator('.oxd-table-card');
+    const cardRows = this.page.locator(this.cardRowSelector);
     if ((await cardRows.count()) > 0) {
-      const cells = cardRows.nth(row).locator('.oxd-table-cell');
+      const cells = cardRows
+        .nth(row)
+        .getByRole('cell')
+        .or(cardRows.nth(row).locator('.oxd-table-cell'));
       const text = await cells.nth(column).textContent();
       return text ?? '';
     }
@@ -78,7 +83,7 @@ export class DataTableComponent extends BaseComponent {
   async clickRow(row: number): Promise<void> {
     await this.waitForTableBody();
 
-    const cardRows = this.page.locator('.oxd-table-card');
+    const cardRows = this.page.locator(this.cardRowSelector);
     const targetRow =
       (await cardRows.count()) > 0
         ? cardRows.nth(row)
@@ -152,7 +157,7 @@ export class DataTableComponent extends BaseComponent {
     await this.waitForTableBody();
     const pattern = typeof content === 'string' ? new RegExp(content, 'i') : content;
 
-    const cardRows = this.page.locator('.oxd-table-card');
+    const cardRows = this.page.locator(this.cardRowSelector);
     if ((await cardRows.count()) > 0) {
       const matchingRow = cardRows.filter({ hasText: pattern }).first();
       await matchingRow.scrollIntoViewIfNeeded();

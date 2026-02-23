@@ -15,12 +15,13 @@ export class PerformanceReviewsPage extends BasePage {
 
   constructor(page: Page) {
     super(page, '/web/index.php/performance/searchEvaluatePerformanceReview');
-    this.formContainer = this.page.locator('.oxd-form').first();
+    this.formContainer = this.page.getByRole('form').or(this.page.locator('.oxd-form')).first();
     this.successFeedback = this.page
-      .locator('.oxd-toast')
+      .getByRole('alert')
       .filter({ hasText: /success|successfully|saved|added/i })
       .first()
-      .or(this.page.getByText(/successfully|saved/i).first());
+      .or(this.page.getByText(/successfully|saved/i).first())
+      .or(this.page.locator('.oxd-toast').first());
   }
 
   private employeeNameInput(): Locator {

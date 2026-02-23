@@ -14,12 +14,10 @@ export class SidebarComponent extends BaseComponent {
 
   constructor(page: Page) {
     super(page, OXD_SELECTORS.SIDEBAR_ASIDE);
-    this.menuItems = this.root
-      .getByRole('link')
-      .filter({
-        hasText:
-          /Admin|PIM|Leave|Time|Recruitment|Performance|Dashboard|Directory|Maintenance|Claim|Buzz|My Info/i,
-      });
+    this.menuItems = this.root.getByRole('link').filter({
+      hasText:
+        /Admin|PIM|Leave|Time|Recruitment|Performance|Dashboard|Directory|Maintenance|Claim|Buzz|My Info/i,
+    });
     this.toggleButton = page.locator(OXD_SELECTORS.SIDEBAR_TOGGLE).getByRole('button');
   }
 
@@ -93,10 +91,23 @@ export class SidebarComponent extends BaseComponent {
   }
 
   /**
-   * Get all visible menu item texts
+   * Get the currently active module name
    */
-  async getMenuItemTexts(): Promise<string[]> {
-    return this.menuItems.allTextContents();
+  async getActiveModule(): Promise<string | null> {
+    const activeByAria = this.root
+      .getByRole('link')
+      .filter({ has: this.page.locator('[aria-current="page"]') });
+    if (await activeByAria.isVisible().catch(() => false)) {
+      return activeByAria.textContent();
+    }
+
+    const activeItem = this.page
+      .locator(`${OXD_SELECTORS.SIDEBAR_MENU_ITEM}--active, .oxd-main-menu-item.active`)
+      .getByRole('link');
+    if (await activeItem.isVisible().catch(() => false)) {
+      return activeItem.textContent();
+    }
+    return null;
   }
 
   /**
@@ -114,16 +125,10 @@ export class SidebarComponent extends BaseComponent {
   }
 
   /**
-   * Get the currently active module name
+   * Get all visible menu item texts
    */
-  async getActiveModule(): Promise<string | null> {
-    const activeItem = this.page
-      .locator(`${OXD_SELECTORS.SIDEBAR_MENU_ITEM}--active, .oxd-main-menu-item.active`)
-      .getByRole('link');
-    if (await activeItem.isVisible().catch(() => false)) {
-      return activeItem.textContent();
-    }
-    return null;
+  async getMenuItemTexts(): Promise<string[]> {
+    return this.menuItems.allTextContents();
   }
 }
 

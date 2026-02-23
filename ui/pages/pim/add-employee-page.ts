@@ -27,9 +27,10 @@ export class AddEmployeePage extends BasePage {
 
   private employeeIdInput() {
     return this.page
-      .locator('.oxd-input-group')
-      .filter({ hasText: 'Employee Id' })
-      .locator('input');
+      .getByLabel(/employee id/i)
+      .or(
+        this.page.locator('.oxd-input-group').filter({ hasText: 'Employee Id' }).locator('input')
+      );
   }
 
   private saveButton() {
@@ -81,7 +82,9 @@ export class AddEmployeePage extends BasePage {
       return { success: true, hasValidationErrors: false };
     } catch {
       const hasErrors = await this.page
-        .locator('.oxd-input-field-error-message')
+        .getByRole('alert')
+        .filter({ hasText: /required|invalid/i })
+        .or(this.page.locator('.oxd-input-field-error-message'))
         .first()
         .isVisible()
         .catch(() => false);

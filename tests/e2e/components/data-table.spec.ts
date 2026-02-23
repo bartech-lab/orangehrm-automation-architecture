@@ -9,9 +9,14 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table'))).toBeVisible();
 
       const rowCount = await dataTable.getRowCount();
       expect(rowCount).toBeGreaterThan(0);
@@ -24,7 +29,11 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
       const initialRowCount = await dataTable.getRowCount();
       expect(initialRowCount).toBeGreaterThan(0);
@@ -32,13 +41,16 @@ test.describe('DataTable Component', () => {
       const searchTerm = 'Admin';
       await dataTable.search(searchTerm);
 
+      // CSS fallback: Table cards use custom class structure
       await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
 
       const filteredRowCount = await dataTable.getRowCount();
       expect(filteredRowCount).toBeLessThanOrEqual(initialRowCount);
 
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table'))).toBeVisible();
 
+      // CSS fallback: Table cards use custom class structure
       const dataCardCount = await auth.locator('.oxd-table-card').count();
       if (dataCardCount > 0) {
         await expect(auth.locator('.oxd-table-card').first()).toBeVisible();
@@ -49,9 +61,14 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
       await dataTable.search('XYZ123NONEXISTENT');
+      // CSS fallback: Table cards use custom class structure
       await auth
         .locator('.oxd-table-card, text=No Records Found')
         .first()
@@ -62,6 +79,7 @@ test.describe('DataTable Component', () => {
       const noRecordsMessage = auth.locator('text=No Records Found');
 
       if (rowCount === 0) {
+        // CSS fallback: Table body uses custom class structure
         await expect(noRecordsMessage.or(auth.locator('.oxd-table-body:empty'))).toBeVisible();
       }
     });
@@ -70,9 +88,15 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
+      // CSS fallback: Table cards use custom class structure
       await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
+      // CSS fallback: Table body uses custom class structure
       const count = await auth.locator('.oxd-table-body .oxd-table-card').count();
       expect(count).toBeGreaterThan(0);
 
@@ -81,11 +105,14 @@ test.describe('DataTable Component', () => {
 
       if (headers.length > 0) {
         await dataTable.sortByColumn(0);
+        // CSS fallback: Table cards use custom class structure
         await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
 
         await dataTable.sortByColumn(0);
+        // CSS fallback: Table cards use custom class structure
         await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
 
+        // CSS fallback: Sort icons use custom class structure
         const sortIcon = auth.locator('.oxd-table-header-sort .oxd-icon').first();
         await expect(sortIcon).toBeVisible();
       }
@@ -95,14 +122,21 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table'))).toBeVisible();
 
+      // CSS fallback: Pagination uses custom class structure
       const pagination = auth.locator('.oxd-pagination');
       const hasPagination = await pagination.isVisible().catch(() => false);
 
       if (hasPagination) {
+        // CSS fallback: Pagination buttons use custom class structure
         const nextButton = auth.locator('.oxd-pagination-page-item--previous-next').nth(1);
         const isNextEnabled = await nextButton.isEnabled().catch(() => false);
 
@@ -110,6 +144,7 @@ test.describe('DataTable Component', () => {
           const firstRowCurrentPage = await dataTable.getCellText(0, 0);
 
           await nextButton.click();
+          // CSS fallback: Table cards use custom class structure
           await auth
             .locator('.oxd-table-card')
             .first()
@@ -118,8 +153,10 @@ test.describe('DataTable Component', () => {
           const firstRowNextPage = await dataTable.getCellText(0, 0);
           expect(firstRowNextPage).not.toBe(firstRowCurrentPage);
 
+          // CSS fallback: Pagination buttons use custom class structure
           const prevButton = auth.locator('.oxd-pagination-page-item--previous-next').first();
           await prevButton.click();
+          // CSS fallback: Table cards use custom class structure
           await auth
             .locator('.oxd-table-card')
             .first()
@@ -135,15 +172,22 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table'))).toBeVisible();
 
       const rowCount = await dataTable.getRowCount();
+      // CSS fallback: Pagination uses custom class structure
       const pagination = auth.locator('.oxd-pagination');
       const hasPagination = await pagination.isVisible().catch(() => false);
 
       if (hasPagination) {
+        // CSS fallback: Pagination info uses custom class structure
         const paginationText = await auth.locator('.oxd-pagination-page-info').textContent();
         const totalMatch = paginationText?.match(/(\d+)\s*Records?/);
         if (totalMatch) {
@@ -151,11 +195,13 @@ test.describe('DataTable Component', () => {
           expect(totalRecords).toBeGreaterThanOrEqual(135);
         }
 
+        // CSS fallback: Pagination page numbers use custom class structure
         const pageNumbers = auth.locator('.oxd-pagination-page-item--page-number');
         const pageCount = await pageNumbers.count();
 
         if (pageCount > 1) {
           await pageNumbers.nth(pageCount - 1).click();
+          // CSS fallback: Table cards use custom class structure
           await auth
             .locator('.oxd-table-card')
             .first()
@@ -174,10 +220,16 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table'))).toBeVisible();
 
+      // CSS fallback: Checkbox inputs use custom class structure
       const checkboxes = auth.locator('.oxd-table-card .oxd-checkbox-input');
       const hasCheckboxes = await checkboxes
         .first()
@@ -204,13 +256,20 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
+      // CSS fallback: Table cards use custom class structure
       await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
+      // CSS fallback: Table body uses custom class structure
       const rowCount = await auth.locator('.oxd-table-body .oxd-table-card').count();
       expect(rowCount).toBeGreaterThan(0);
 
       const firstCellText = await dataTable.getCellText(0, 0);
+      // CSS fallback: Table cells use custom class structure
       const firstCellDirect =
         (await auth
           .locator('.oxd-table-body .oxd-table-card')
@@ -230,6 +289,7 @@ test.describe('DataTable Component', () => {
       const rowCount2 = await dataTable.getRowCount();
       if (rowCount2 > 1) {
         const secondRowCellText = await dataTable.getCellText(1, 0);
+        // CSS fallback: Table cells use custom class structure
         const secondRowCellDirect =
           (await auth
             .locator('.oxd-table-body .oxd-table-card')
@@ -246,7 +306,11 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
       const isVisible = await dataTable.isVisible();
       expect(isVisible).toBe(true);
@@ -256,12 +320,18 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
+      // CSS fallback: Table cards use custom class structure
       await auth.locator('.oxd-table-card').first().waitFor({ state: 'visible', timeout: 10000 });
 
       const componentRowCount = await dataTable.getRowCount();
 
+      // CSS fallback: Table body uses custom class structure
       const tableRows = auth.locator('.oxd-table-body .oxd-table-card');
       const directRowCount = await tableRows.count();
 
@@ -275,12 +345,17 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
       const specialSearchTerms = ['test@email.com', "O'Brien", 'Name-With-Hyphen'];
 
       for (const term of specialSearchTerms) {
         await dataTable.search(term);
+        // CSS fallback: Table cards use custom class structure
         await auth
           .locator('.oxd-table-card')
           .first()
@@ -288,6 +363,7 @@ test.describe('DataTable Component', () => {
           .catch(() => {});
 
         await dataTable.search('');
+        // CSS fallback: Table cards use custom class structure
         await auth
           .locator('.oxd-table-card')
           .first()
@@ -300,9 +376,14 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
       await dataTable.search('ADMIN');
+      // CSS fallback: Table cards use custom class structure
       await auth
         .locator('.oxd-table-card')
         .first()
@@ -311,6 +392,7 @@ test.describe('DataTable Component', () => {
       const upperCaseResults = await dataTable.getRowCount();
 
       await dataTable.search('admin');
+      // CSS fallback: Table cards use custom class structure
       await auth
         .locator('.oxd-table-card')
         .first()
@@ -327,7 +409,11 @@ test.describe('DataTable Component', () => {
       await auth.goto(EMPLOYEE_LIST_URL);
       await auth.waitForURL(/viewEmployeeList/);
 
-      const dataTable = new DataTableComponent(auth, '.oxd-table');
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      const dataTable = new DataTableComponent(
+        auth,
+        auth.getByRole('table').or(auth.locator('.oxd-table'))
+      );
 
       const headers = await dataTable.getHeaders();
 

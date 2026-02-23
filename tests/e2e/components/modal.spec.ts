@@ -10,12 +10,25 @@ test.describe('ModalComponent', () => {
       );
 
       // Wait for the page to load and users table to be visible
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(
+        auth.getByRole('table').or(auth.locator('.oxd-table')).first().first()
+      ).toBeVisible();
 
       // Find and click the first delete button to trigger confirmation modal
-      const firstDeleteButton = auth.locator('.oxd-table-row .oxd-icon.bi-trash').first();
+      // CSS fallback: Delete buttons use icon classes without accessible names
+      const firstDeleteButton = auth
+        .getByRole('row')
+        .filter({ has: auth.locator('.bi-trash') })
+        .first()
+        .getByRole('button')
+        .or(auth.locator('.oxd-table-row .oxd-icon.bi-trash').first());
 
-      const deleteButtonCount = await auth.locator('.oxd-table-row .oxd-icon.bi-trash').count();
+      const deleteButtonCount = await auth
+        .getByRole('row')
+        .filter({ has: auth.locator('.bi-trash') })
+        .count()
+        .then((c) => c || auth.locator('.oxd-table-row .oxd-icon.bi-trash').count());
 
       if (deleteButtonCount > 0) {
         await firstDeleteButton.click();
@@ -28,8 +41,12 @@ test.describe('ModalComponent', () => {
         const title = await modal.getTitle();
         expect(title.toLowerCase()).toContain('confirm');
       } else {
-        await auth.locator('button:has-text("Add")').click();
-        const modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+        await auth.getByRole('button', { name: 'Add' }).click();
+        // CSS fallback: Modal overlay uses custom class structure
+        const modal = new ModalComponent(
+          auth,
+          auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+        );
         const modalVisible = await modal.isVisible();
         if (modalVisible) {
           await modal.waitForReady();
@@ -48,10 +65,16 @@ test.describe('ModalComponent', () => {
       await auth.goto(
         'https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers'
       );
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table')).first()).toBeVisible();
 
-      const deleteButtonCount = await auth.locator('.oxd-table-row .oxd-icon.bi-trash').count();
+      const deleteButtonCount = await auth
+        .getByRole('row')
+        .filter({ has: auth.locator('.bi-trash') })
+        .count()
+        .then((c) => c || auth.locator('.oxd-table-row .oxd-icon.bi-trash').count());
       if (deleteButtonCount > 0) {
+        // CSS fallback: Delete buttons use icon classes without accessible names
         await auth.locator('.oxd-table-row .oxd-icon.bi-trash').first().click();
 
         const modal = new ModalComponent(auth);
@@ -62,8 +85,12 @@ test.describe('ModalComponent', () => {
         const isStillVisible = await modal.isVisible();
         expect(isStillVisible).toBe(false);
       } else {
-        await auth.locator('button:has-text("Add")').click();
-        const modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+        await auth.getByRole('button', { name: 'Add' }).click();
+        // CSS fallback: Modal overlay uses custom class structure
+        const modal = new ModalComponent(
+          auth,
+          auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+        );
         const modalVisible = await modal.isVisible();
         if (modalVisible) {
           await modal.waitForReady();
@@ -82,10 +109,16 @@ test.describe('ModalComponent', () => {
       await auth.goto(
         'https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers'
       );
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table')).first()).toBeVisible();
 
-      const deleteButtonCount = await auth.locator('.oxd-table-row .oxd-icon.bi-trash').count();
+      const deleteButtonCount = await auth
+        .getByRole('row')
+        .filter({ has: auth.locator('.bi-trash') })
+        .count()
+        .then((c) => c || auth.locator('.oxd-table-row .oxd-icon.bi-trash').count());
       if (deleteButtonCount > 0) {
+        // CSS fallback: Delete buttons use icon classes without accessible names
         await auth.locator('.oxd-table-row .oxd-icon.bi-trash').first().click();
 
         const modal = new ModalComponent(auth);
@@ -97,8 +130,12 @@ test.describe('ModalComponent', () => {
 
         await modal.cancel();
       } else {
-        await auth.locator('button:has-text("Add")').click();
-        const modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+        await auth.getByRole('button', { name: 'Add' }).click();
+        // CSS fallback: Modal overlay uses custom class structure
+        const modal = new ModalComponent(
+          auth,
+          auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+        );
         const modalVisible = await modal.isVisible();
         if (modalVisible) {
           await modal.waitForReady();
@@ -120,12 +157,17 @@ test.describe('ModalComponent', () => {
       await auth.goto(
         'https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers'
       );
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table')).first()).toBeVisible();
 
       // Click "Add" button to open form modal
-      await auth.locator('button:has-text("Add")').click();
+      await auth.getByRole('button', { name: 'Add' }).click();
 
-      const modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+      // CSS fallback: Modal overlay uses custom class structure
+      const modal = new ModalComponent(
+        auth,
+        auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+      );
       const modalVisible = await modal.isVisible();
 
       if (modalVisible) {
@@ -148,12 +190,17 @@ test.describe('ModalComponent', () => {
       await auth.goto(
         'https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers'
       );
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table')).first()).toBeVisible();
 
       // Open add user modal
-      await auth.locator('button:has-text("Add")').click();
+      await auth.getByRole('button', { name: 'Add' }).click();
 
-      const modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+      // CSS fallback: Modal overlay uses custom class structure
+      const modal = new ModalComponent(
+        auth,
+        auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+      );
       const modalVisible = await modal.isVisible();
 
       if (modalVisible) {
@@ -176,12 +223,17 @@ test.describe('ModalComponent', () => {
       await auth.goto(
         'https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers'
       );
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table')).first()).toBeVisible();
 
       // Test Add modal title
-      await auth.locator('button:has-text("Add")').click();
+      await auth.getByRole('button', { name: 'Add' }).click();
 
-      let modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+      // CSS fallback: Modal overlay uses custom class structure
+      let modal = new ModalComponent(
+        auth,
+        auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+      );
       const modalVisible = await modal.isVisible();
 
       if (modalVisible) {
@@ -192,10 +244,16 @@ test.describe('ModalComponent', () => {
         expect(addTitle.length).toBeGreaterThan(0);
 
         await modal.close();
-        await expect(auth.locator('.oxd-dialog')).not.toBeVisible();
+        // CSS fallback: Dialog visibility check
+        await expect(
+          auth.getByRole('dialog').or(auth.locator('.oxd-dialog')).first()
+        ).not.toBeVisible();
 
-        await auth.locator('button:has-text("Add")').click();
-        modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+        await auth.getByRole('button', { name: 'Add' }).click();
+        modal = new ModalComponent(
+          auth,
+          auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+        );
         await modal.waitForReady();
 
         const secondTitle = await modal.getTitle();
@@ -211,7 +269,7 @@ test.describe('ModalComponent', () => {
         await auth.getByRole('button', { name: /cancel/i }).click();
         await expect(auth).toHaveURL(/admin\/viewSystemUsers/);
 
-        await auth.locator('button:has-text("Add")').click();
+        await auth.getByRole('button', { name: 'Add' }).click();
         await expect(auth).toHaveURL(/admin\/saveSystemUser/);
         const secondHeading = auth.getByRole('heading', { name: /add user/i });
         await expect(secondHeading).toBeVisible();
@@ -230,10 +288,13 @@ test.describe('ModalComponent', () => {
       await auth.goto(
         'https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers'
       );
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table')).first()).toBeVisible();
 
+      // CSS fallback: Delete buttons use icon classes without accessible names
       const deleteButtonCount = await auth.locator('.oxd-table-row .oxd-icon.bi-trash').count();
       if (deleteButtonCount > 0) {
+        // CSS fallback: Delete buttons use icon classes without accessible names
         await auth.locator('.oxd-table-row .oxd-icon.bi-trash').first().click();
 
         const modal = new ModalComponent(auth);
@@ -242,8 +303,12 @@ test.describe('ModalComponent', () => {
         await modal.cancel();
         expect(await modal.isVisible()).toBe(false);
       } else {
-        await auth.locator('button:has-text("Add")').click();
-        const modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+        await auth.getByRole('button', { name: 'Add' }).click();
+        // CSS fallback: Modal overlay uses custom class structure
+        const modal = new ModalComponent(
+          auth,
+          auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+        );
         const modalVisible = await modal.isVisible();
         if (modalVisible) {
           await modal.waitForReady();
@@ -263,25 +328,37 @@ test.describe('ModalComponent', () => {
       await auth.goto(
         'https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers'
       );
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table')).first()).toBeVisible();
 
+      // CSS fallback: Delete buttons use icon classes without accessible names
       const deleteButtonCount = await auth.locator('.oxd-table-row .oxd-icon.bi-trash').count();
       if (deleteButtonCount > 0) {
+        // CSS fallback: Table rows use custom card implementation
         const countBefore = await auth.locator('.oxd-table-row').count();
 
+        // CSS fallback: Delete buttons use icon classes without accessible names
         await auth.locator('.oxd-table-row .oxd-icon.bi-trash').first().click();
 
         const modal = new ModalComponent(auth);
         await modal.waitForReady();
         await modal.cancel();
 
-        await expect(auth.locator('.oxd-dialog')).not.toBeVisible();
+        // CSS fallback: Dialog visibility check
+        await expect(
+          auth.getByRole('dialog').or(auth.locator('.oxd-dialog')).first()
+        ).not.toBeVisible();
 
+        // CSS fallback: Table rows use custom card implementation
         const countAfter = await auth.locator('.oxd-table-row').count();
         expect(countAfter).toBe(countBefore);
       } else {
-        await auth.locator('button:has-text("Add")').click();
-        const modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+        await auth.getByRole('button', { name: 'Add' }).click();
+        // CSS fallback: Modal overlay uses custom class structure
+        const modal = new ModalComponent(
+          auth,
+          auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+        );
         const modalVisible = await modal.isVisible();
         if (modalVisible) {
           await modal.waitForReady();
@@ -300,11 +377,16 @@ test.describe('ModalComponent', () => {
       await auth.goto(
         'https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers'
       );
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table')).first()).toBeVisible();
 
-      await auth.locator('button:has-text("Add")').click();
+      await auth.getByRole('button', { name: 'Add' }).click();
 
-      const modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+      // CSS fallback: Modal overlay uses custom class structure
+      const modal = new ModalComponent(
+        auth,
+        auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+      );
       const modalVisible = await modal.isVisible();
 
       if (modalVisible) {
@@ -325,7 +407,10 @@ test.describe('ModalComponent', () => {
     test('should return false for isVisible when no modal is present', async ({ auth }) => {
       // Navigate to a page with no initial modal
       await auth.goto('https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index');
-      await expect(auth.locator('.oxd-topbar-header')).toBeVisible();
+      // CSS fallback: Topbar uses custom class structure
+      await expect(
+        auth.getByRole('banner').or(auth.locator('.oxd-topbar-header')).first()
+      ).toBeVisible();
 
       // Check modal visibility when no modal exists
       const modal = new ModalComponent(auth);
@@ -339,15 +424,20 @@ test.describe('ModalComponent', () => {
       await auth.goto(
         'https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers'
       );
-      await expect(auth.locator('.oxd-table')).toBeVisible();
+      // CSS fallback: OrangeHRM uses custom table implementation without semantic roles
+      await expect(auth.getByRole('table').or(auth.locator('.oxd-table')).first()).toBeVisible();
 
-      const modal = new ModalComponent(auth, '.oxd-dialog, .oxd-overlay--show');
+      // CSS fallback: Modal overlay uses custom class structure
+      const modal = new ModalComponent(
+        auth,
+        auth.getByRole('dialog').or(auth.locator('.oxd-dialog, .oxd-overlay--show')).first()
+      );
 
       // Initially no modal
       expect(await modal.isVisible()).toBe(false);
 
       // Open modal
-      await auth.locator('button:has-text("Add")').click();
+      await auth.getByRole('button', { name: 'Add' }).click();
       const modalVisible = await modal.isVisible();
 
       if (modalVisible) {

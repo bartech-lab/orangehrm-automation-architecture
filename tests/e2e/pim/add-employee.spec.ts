@@ -1,108 +1,89 @@
 import { test, expect } from '../../../infra/test-runner/index.js';
-import { AddEmployeePage } from '../../../ui/pages/pim/add-employee-page.js';
+import { EmployeeDomain } from '../../../domain/employee-domain.js';
 import path from 'path';
 
 test.describe('PIM - Add Employee', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test('should add employee with valid data', async ({ auth, testData }) => {
-    const addPage = new AddEmployeePage(auth);
-    await addPage.navigate();
+    const employeeDomain = new EmployeeDomain(auth);
     const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
     const uniqueLastName = testData
       .getUniqueString('last')
       .replace(/[^a-zA-Z0-9]/g, '')
       .slice(-8);
-    await addPage.fillEmployeeDetails({
+
+    const createdEmployee = await employeeDomain.createEmployee({
       firstName: 'Test',
       lastName: `Employee${uniqueLastName}`,
       employeeId: uniqueEmployeeId,
     });
-    await addPage.save();
 
     await expect
       .poll(
         async () => {
-          const onDetailsPage = /viewPersonalDetails/.test(auth.url());
-          if (onDetailsPage) {
-            return true;
-          }
-
-          const toastText =
-            (await auth
-              .locator('.oxd-toast')
-              .first()
-              .textContent()
-              .catch(() => null)) ?? '';
-          return /success/i.test(toastText);
+          const results = await employeeDomain.searchEmployee({ employeeId: uniqueEmployeeId });
+          return results.some((employee) => employee.id === uniqueEmployeeId);
         },
-        { timeout: 20000, intervals: [100, 200, 500, 1000] }
+        { timeout: 20000, intervals: [250, 500, 1000, 2000] }
       )
       .toBe(true);
+
+    expect(createdEmployee.id).toBe(uniqueEmployeeId);
+    expect(createdEmployee.fullName).toContain(`Employee${uniqueLastName}`);
   });
 
   test('should add employee with photo upload', async ({ auth, testData }) => {
-    const addPage = new AddEmployeePage(auth);
-    await addPage.navigate();
+    const employeeDomain = new EmployeeDomain(auth);
     const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
     const uniqueLastName = testData
       .getUniqueString('photo')
       .replace(/[^a-zA-Z0-9]/g, '')
       .slice(-8);
-    await addPage.fillEmployeeDetails({
+
+    const createdEmployee = await employeeDomain.createEmployee({
       firstName: 'Photo',
       lastName: `Test${uniqueLastName}`,
       employeeId: uniqueEmployeeId,
+      photoPath: path.join(process.cwd(), 'data/fixtures/test-image.jpg'),
     });
-    await addPage.uploadPhoto(path.join(process.cwd(), 'data/fixtures/test-image.jpg'));
-    await addPage.save();
 
     await expect
       .poll(
         async () => {
-          const onDetailsPage = /viewPersonalDetails/.test(auth.url());
-          if (onDetailsPage) {
-            return true;
-          }
-
-          const toastText =
-            (await auth
-              .locator('.oxd-toast')
-              .first()
-              .textContent()
-              .catch(() => null)) ?? '';
-          return /success/i.test(toastText);
+          const results = await employeeDomain.searchEmployee({ employeeId: uniqueEmployeeId });
+          return results.some((employee) => employee.id === uniqueEmployeeId);
         },
-        { timeout: 20000, intervals: [100, 200, 500, 1000] }
+        { timeout: 20000, intervals: [250, 500, 1000, 2000] }
       )
       .toBe(true);
+
+    expect(createdEmployee.id).toBe(uniqueEmployeeId);
+    expect(createdEmployee.fullName).toContain(`Test${uniqueLastName}`);
   });
 
   test('should show validation errors for required fields', async ({ auth }) => {
-    const addPage = new AddEmployeePage(auth);
-    await addPage.navigate();
-    await addPage.save();
+    const employeeDomain = new EmployeeDomain(auth);
+    const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
 
-    await expect
-      .poll(async () => {
-        const messages = auth.locator('.oxd-input-group__message');
-        const count = await messages.count();
-        if (count === 0) {
-          return false;
-        }
+    const attempt = await employeeDomain.attemptCreateEmployee({
+      firstName: '',
+      lastName: '',
+      employeeId: uniqueEmployeeId,
+    });
 
-        const texts = await messages.allTextContents();
-        return texts.some((text) => /required/i.test(text));
-      })
-      .toBe(true);
+    expect(attempt.success).toBe(false);
+    expect(attempt.hasValidationErrors).toBe(true);
   });
 
   test('should cancel operation', async ({ auth }) => {
-    const addPage = new AddEmployeePage(auth);
-    await addPage.navigate();
-    await addPage.fillEmployeeDetails({
+    const employeeDomain = new EmployeeDomain(auth);
+    const cancelled = await employeeDomain.cancelEmployeeCreation({
       firstName: 'Cancel',
-      lastName: 'Test',
+      lastName: `Employee${Date.now()}`,
     });
-    await addPage.cancel();
-    await expect(auth).toHaveURL(/viewEmployeeList/);
+
+    expect(cancelled.cancelled).toBe(true);
+    expect(cancelled.currentUrl).toContain('/pim/viewEmployeeList');
   });
 });

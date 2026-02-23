@@ -1,50 +1,37 @@
 import { test, expect } from '../../infra/test-runner/index.js';
-import { AddEmployeePage } from '../../ui/pages/pim/add-employee-page.js';
-import { EmployeeListPage } from '../../ui/pages/pim/employee-list-page.js';
-import { EmployeeDetailsPage } from '../../ui/pages/pim/employee-details-page.js';
+import { EmployeeDomain } from '../../domain/employee-domain.js';
 
 test.describe('User Journey - Employee Onboarding', () => {
-  test('complete onboarding workflow', async ({ auth }) => {
-    const addPage = new AddEmployeePage(auth);
-    await addPage.navigate();
-    await addPage.waitForReady();
+  test('complete onboarding workflow', async ({ auth, testData }) => {
+    const employeeDomain = new EmployeeDomain(auth);
+    const suffix = testData
+      .getUniqueString('onboard')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(-10);
+    const employeeId = `${Date.now()}`.slice(-6);
+    const firstName = `Onboard${suffix}`;
+    const lastName = 'Test';
 
-    const employeeName = 'Onboard_' + Date.now();
-    const shortId = Date.now().toString().slice(-6);
-
-    await addPage.fillEmployeeDetails({
-      firstName: employeeName,
-      lastName: 'Test',
-      employeeId: shortId,
+    const createdEmployee = await employeeDomain.createEmployee({
+      firstName,
+      lastName,
+      employeeId,
     });
-    await addPage.save();
 
-    await auth
-      .locator('.oxd-toast, [class*="viewPersonalDetails"]')
-      .first()
-      .waitFor({ state: 'visible', timeout: 10000 })
-      .catch(() => {});
+    await expect
+      .poll(
+        async () => {
+          const results = await employeeDomain.searchEmployee({ employeeId });
+          return results.some((employee) => employee.id === employeeId);
+        },
+        { timeout: 20000, intervals: [250, 500, 1000, 2000] }
+      )
+      .toBe(true);
 
-    const url = auth.url();
-    const onDetailsPage = url.includes('viewPersonalDetails');
-    const toastVisible = await auth
-      .locator('.oxd-toast')
-      .isVisible()
-      .catch(() => false);
+    const detailsOpened = await employeeDomain.openEmployeeDetailsFromList(employeeId);
 
-    expect(onDetailsPage || toastVisible).toBe(true);
-
-    const listPage = new EmployeeListPage(auth);
-    await listPage.navigate();
-    await listPage.waitForReady();
-
-    await listPage.searchEmployee(employeeName);
-    await expect(auth.locator('.oxd-table')).toContainText(employeeName);
-
-    const detailsPage = new EmployeeDetailsPage(auth);
-    await listPage.navigateToEmployee(employeeName);
-    await detailsPage.waitForReady();
-
-    await expect(auth.getByPlaceholder('First Name')).toHaveValue(employeeName);
+    expect(createdEmployee.id).toBe(employeeId);
+    expect(createdEmployee.fullName).toContain(firstName);
+    expect(detailsOpened).toBe(true);
   });
 });

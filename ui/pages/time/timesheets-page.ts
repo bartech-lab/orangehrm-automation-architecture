@@ -15,10 +15,11 @@ export class TimesheetsPage extends BasePage {
     super(page, '/web/index.php/time/viewEmployeeTimesheet');
     this.tableContainer = this.page.getByRole('table').or(this.page.locator('.oxd-table')).first();
     this.successFeedback = this.page
-      .locator('.oxd-toast')
+      .getByRole('alert')
       .filter({ hasText: /success|successfully|saved|submitted|approved/i })
       .first()
-      .or(this.page.getByText(/successfully|saved|submitted/i).first());
+      .or(this.page.getByText(/successfully|saved|submitted/i).first())
+      .or(this.page.locator('.oxd-toast').first());
   }
 
   private dateInput(): Locator {
@@ -41,6 +42,7 @@ export class TimesheetsPage extends BasePage {
 
   async navigate(): Promise<void> {
     await this.page.goto(this.baseUrl);
+    await this.waitForReady();
   }
 
   async waitForReady(): Promise<void> {

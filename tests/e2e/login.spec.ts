@@ -1,14 +1,12 @@
 import { test, expect } from '../../infra/test-runner/fixtures.js';
-import { LoginPage } from '../../ui/pages/login-page.js';
 import type { Credentials } from '../../domain/auth/types.js';
+import { HRMSystem } from '../../domain/hrm-system.js';
 
 test.describe('Login Functionality', () => {
-  let loginPage: LoginPage;
+  let hrmSystem: HRMSystem;
 
   test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.goto();
-    await loginPage.waitForReady();
+    hrmSystem = new HRMSystem(page);
   });
 
   test('@auth @smoke - Valid login with Admin credentials', async () => {
@@ -17,10 +15,9 @@ test.describe('Login Functionality', () => {
       password: 'admin123',
     };
 
-    await loginPage.login(credentials);
+    const loginAttempt = await hrmSystem.attemptLogin(credentials);
 
-    const isLoggedIn = await loginPage.isLoggedIn();
-    expect(isLoggedIn).toBe(true);
+    expect(loginAttempt.isLoggedIn).toBe(true);
   });
 
   test('@auth - Invalid credentials show error message', async () => {
@@ -29,13 +26,11 @@ test.describe('Login Functionality', () => {
       password: 'wrongpassword',
     };
 
-    await loginPage.login(credentials);
+    const loginAttempt = await hrmSystem.attemptLogin(credentials);
 
-    const hasError = await loginPage.hasError();
-    expect(hasError).toBe(true);
+    expect(loginAttempt.hasError).toBe(true);
 
-    const errorMessage = await loginPage.getErrorMessage();
-    expect(errorMessage).toContain('Invalid');
+    expect(loginAttempt.errorMessage).toContain('Invalid');
   });
 
   test('@auth - Empty fields validation', async () => {
@@ -44,12 +39,10 @@ test.describe('Login Functionality', () => {
       password: '',
     };
 
-    await loginPage.login(credentials);
+    const loginAttempt = await hrmSystem.attemptLogin(credentials);
 
-    const currentUrl = await loginPage.getCurrentUrl();
-    expect(currentUrl).toContain('/auth/login');
+    expect(loginAttempt.currentUrl).toContain('/auth/login');
 
-    const isStillOnLogin = await loginPage.isReady();
-    expect(isStillOnLogin).toBe(true);
+    expect(loginAttempt.isLoginPageReady).toBe(true);
   });
 });

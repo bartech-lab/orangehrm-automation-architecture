@@ -39,9 +39,9 @@ export class ModalComponent extends BaseComponent {
 
   async getMessage(): Promise<string> {
     const body = this.root
-      .locator(
-        '.oxd-dialog-content-text, .oxd-dialog-content, .oxd-dialog-body, [role="document"] p'
-      )
+      .getByRole('document')
+      .or(this.root.locator('[role="document"] p'))
+      .or(this.root.locator('.oxd-dialog-content-text, .oxd-dialog-content, .oxd-dialog-body'))
       .first();
     return ((await body.textContent()) ?? '').trim();
   }

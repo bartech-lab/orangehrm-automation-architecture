@@ -17,12 +17,18 @@ export class ApplyLeavePage extends BasePage {
   constructor(page: Page) {
     super(page, '/web/index.php/leave/applyLeave');
     this.leaveFormContainer = this.page.locator('.orangehrm-card-container').first();
-    this.leaveForm = this.page.locator('.oxd-form').first();
+    this.leaveForm = this.page.getByRole('form').or(this.page.locator('.oxd-form')).first();
     this.formLoader = this.page.locator('.oxd-form-loader').first();
     this.successFeedback = this.page
-      .locator('.oxd-toast')
+      .getByRole('alert')
       .filter({ hasText: /success|successfully|saved|submitted/i })
       .first()
+      .or(
+        this.page
+          .locator('.oxd-toast')
+          .filter({ hasText: /success|successfully|saved|submitted/i })
+          .first()
+      )
       .or(this.page.getByText(/successfully saved|success/i).first());
   }
 
@@ -49,9 +55,13 @@ export class ApplyLeavePage extends BasePage {
 
   async selectLeaveType(type: string): Promise<void> {
     const leaveTypeGroup = this.leaveForm
-      .locator('.oxd-input-group')
-      .filter({ hasText: 'Leave Type' });
-    const dropdown = leaveTypeGroup.locator('.oxd-select-text');
+      .getByRole('group', { name: /leave type/i })
+      .or(this.leaveForm.locator('.oxd-input-group').filter({ hasText: 'Leave Type' }))
+      .first();
+    const dropdown = leaveTypeGroup
+      .getByRole('combobox')
+      .or(leaveTypeGroup.locator('.oxd-select-text'))
+      .first();
     await dropdown.waitFor({ state: 'visible', timeout: 5000 });
     await this.formLoader.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
 
@@ -92,7 +102,7 @@ export class ApplyLeavePage extends BasePage {
     await this.formLoader.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
 
     const applyButton = this.page
-      .locator('.oxd-form')
+      .getByRole('form')
       .getByRole('button', { name: /apply/i })
       .first()
       .or(this.page.locator('.oxd-form button[type="submit"]').first());

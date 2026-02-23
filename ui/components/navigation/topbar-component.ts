@@ -11,9 +11,17 @@ export class TopbarComponent extends BaseComponent {
     const topbar = page.getByRole('banner');
     super(page, topbar);
     this.searchInput = page.getByPlaceholder('Search', { exact: false });
-    this.userDropdown = page.locator('.oxd-userdropdown-tab');
-    this.userDropdownName = page.locator('.oxd-userdropdown-name');
-    this.userMenu = page.locator('.oxd-dropdown-menu');
+    this.userDropdown = page
+      .getByRole('button')
+      .filter({ has: page.locator('.oxd-userdropdown-name') })
+      .or(page.locator('.oxd-userdropdown-tab'))
+      .first();
+    this.userDropdownName = page
+      .locator('.oxd-userdropdown')
+      .getByText(/./)
+      .or(page.locator('.oxd-userdropdown-name'))
+      .first();
+    this.userMenu = page.getByRole('menu').or(page.locator('.oxd-dropdown-menu')).first();
   }
 
   async waitForReady(): Promise<void> {

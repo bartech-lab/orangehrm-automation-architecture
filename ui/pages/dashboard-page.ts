@@ -29,16 +29,22 @@ export class DashboardPage extends BasePage {
     super(page, baseUrl);
 
     this.topbarHeader = this.page.getByRole('banner');
-    this.welcomeMessage = this.page.locator('.oxd-topbar-header-title');
+    this.welcomeMessage = this.page
+      .getByRole('heading')
+      .or(this.page.locator('.oxd-topbar-header-title'));
     this.quickActionButtons = this.page.getByRole('button');
     this.sidebar = this.page.getByRole('navigation', { name: /sidepanel/i });
     this.sidebarMenuItems = this.sidebar.getByRole('link');
-    this.userDropdown = this.page.locator('.oxd-userdropdown-tab');
-    this.userDropdownMenu = this.page.locator('.oxd-dropdown-menu');
+    this.userDropdown = this.page
+      .getByRole('button', { name: /user|profile|account/i })
+      .or(this.page.locator('.oxd-userdropdown-tab'));
+    this.userDropdownMenu = this.page.getByRole('menu').or(this.page.locator('.oxd-dropdown-menu'));
     this.logoutLink = this.userDropdownMenu
       .locator('a:has-text("Logout"), [role="menuitem"]:has-text("Logout")')
       .first();
-    this.userNameText = this.page.locator('.oxd-userdropdown-name');
+    this.userNameText = this.page
+      .getByRole('button', { name: /user|profile|account/i })
+      .or(this.page.locator('.oxd-userdropdown-name'));
   }
 
   async navigate(): Promise<void> {

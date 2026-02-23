@@ -18,7 +18,7 @@ export class AssignLeavePage extends BasePage {
 
   constructor(page: Page) {
     super(page, '/web/index.php/leave/assignLeave');
-    this.assignForm = this.page.locator('.oxd-form').first();
+    this.assignForm = this.page.getByRole('form').or(this.page.locator('.oxd-form')).first();
     this.employeeHintInput = this.page.getByPlaceholder(/type for hints/i).first();
     this.leaveTypeField = this.page
       .getByRole('combobox', { name: /leave type/i })
@@ -32,9 +32,15 @@ export class AssignLeavePage extends BasePage {
     this.assignButton = this.page.getByRole('button', { name: /assign/i }).first();
     this.formLoader = this.page.locator('.oxd-form-loader').first();
     this.successFeedback = this.page
-      .locator('.oxd-toast')
+      .getByRole('alert')
       .filter({ hasText: /success|assigned|saved/i })
       .first()
+      .or(
+        this.page
+          .locator('.oxd-toast')
+          .filter({ hasText: /success|assigned|saved/i })
+          .first()
+      )
       .or(this.page.getByText(/successfully saved|success/i).first());
   }
 

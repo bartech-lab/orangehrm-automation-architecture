@@ -19,7 +19,10 @@ export class LeaveListPage extends BasePage {
 
   constructor(page: Page) {
     super(page, '/web/index.php/leave/viewLeaveList');
-    this.dataTable = new DataTableComponent(page, '.oxd-table');
+    this.dataTable = new DataTableComponent(
+      page,
+      page.getByRole('table').or(page.locator('.oxd-table'))
+    );
     this.statusFilterGroup = this.page
       .locator('.oxd-input-group')
       .filter({ hasText: 'Status' })
@@ -46,13 +49,24 @@ export class LeaveListPage extends BasePage {
   }
 
   async filterByStatus(status: string): Promise<void> {
-    await this.statusFilterGroup.locator('.oxd-select-text').click();
+    const statusDropdown = this.statusFilterGroup
+      .getByRole('combobox')
+      .or(this.statusFilterGroup.locator('.oxd-select-text'))
+      .first();
+    await statusDropdown.click();
     await this.page.getByRole('option', { name: new RegExp(status, 'i') }).click();
   }
 
   async filterByType(type: string): Promise<void> {
-    await this.leaveTypeFilterGroup.locator('.oxd-select-text').click();
-    const dropdown = this.page.locator('.oxd-select-dropdown').last();
+    const leaveTypeDropdown = this.leaveTypeFilterGroup
+      .getByRole('combobox')
+      .or(this.leaveTypeFilterGroup.locator('.oxd-select-text'))
+      .first();
+    await leaveTypeDropdown.click();
+    const dropdown = this.page
+      .getByRole('listbox')
+      .last()
+      .or(this.page.locator('.oxd-select-dropdown').last());
     const escapedType = type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const exactOption = dropdown.getByRole('option', {
       name: new RegExp(`^\\s*${escapedType}\\s*$`, 'i'),
@@ -71,7 +85,10 @@ export class LeaveListPage extends BasePage {
 
   async searchEmployee(name: string): Promise<void> {
     await this.employeeSearchInput.fill(name);
-    const option = this.page.locator('.oxd-autocomplete-option, .oxd-dropdown-option').first();
+    const option = this.page
+      .getByRole('option', { name: new RegExp(name, 'i') })
+      .or(this.page.locator('.oxd-autocomplete-option, .oxd-dropdown-option').first())
+      .first();
     await option.waitFor({ state: 'visible' });
     await option.click();
   }

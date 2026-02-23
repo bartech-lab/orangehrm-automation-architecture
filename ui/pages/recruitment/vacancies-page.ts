@@ -16,7 +16,10 @@ export class VacanciesPage extends BasePage {
         break;
       }
 
-      const switchControl = this.page.locator('.oxd-switch-wrapper, .oxd-switch-input').first();
+      const switchControl = this.page
+        .getByRole('switch')
+        .or(this.page.locator('.oxd-switch-wrapper, .oxd-switch-input'))
+        .first();
       try {
         await switchControl.click({ timeout: 5000 });
       } catch {
@@ -56,7 +59,10 @@ export class VacanciesPage extends BasePage {
 
   constructor(page: Page) {
     super(page, '/web/index.php/recruitment/viewJobVacancy');
-    this.dataTable = new DataTableComponent(page, '.oxd-table');
+    this.dataTable = new DataTableComponent(
+      page,
+      page.getByRole('table').or(page.locator('.oxd-table'))
+    );
   }
 
   async navigate(): Promise<void> {
@@ -78,15 +84,23 @@ export class VacanciesPage extends BasePage {
     positions: number;
   }): Promise<void> {
     await this.page.getByRole('button', { name: 'Add' }).click();
-    const form = this.page.locator('.oxd-form');
+    const form = this.page.getByRole('form').or(this.page.locator('.oxd-form')).first();
     await form.waitFor({ state: 'visible' });
 
     const nameGroup = form.locator('.oxd-input-group').filter({ hasText: 'Vacancy Name' });
     await nameGroup.getByRole('textbox').fill(vacancy.name);
 
     const jobTitleGroup = form.locator('.oxd-input-group').filter({ hasText: 'Job Title' });
-    await jobTitleGroup.locator('.oxd-select-text').click();
-    const jobTitleOptions = this.page.locator('.oxd-select-dropdown .oxd-select-option');
+    await jobTitleGroup
+      .getByRole('combobox')
+      .or(jobTitleGroup.locator('.oxd-select-text'))
+      .first()
+      .click();
+    const jobTitleOptions = this.page
+      .getByRole('listbox')
+      .last()
+      .getByRole('option')
+      .or(this.page.locator('.oxd-select-dropdown .oxd-select-option'));
     await jobTitleOptions.first().waitFor({ state: 'visible', timeout: 5000 });
     const requestedOption = jobTitleOptions
       .filter({ hasText: new RegExp(`^\\s*${vacancy.jobTitle}\\s*$`, 'i') })
@@ -100,11 +114,47 @@ export class VacanciesPage extends BasePage {
 
     const managerGroup = form.locator('.oxd-input-group').filter({ hasText: 'Hiring Manager' });
     const managerInput = managerGroup.getByPlaceholder(/type for hints/i);
-    await managerInput.click();
-    await managerInput.fill('a');
-    await this.page.waitForTimeout(2000);
-    await managerInput.press('ArrowDown').catch(() => {});
-    await managerInput.press('Enter').catch(() => {});
+
+    const searchPrefixes = ['a', 'j', 'm', 's', 't', 'b', 'c', 'd'];
+    let selectedManager = false;
+
+    for (const prefix of searchPrefixes) {
+      if (selectedManager) break;
+
+      await managerInput.click();
+      await managerInput.fill('');
+      await this.page.waitForTimeout(100);
+      await managerInput.fill(prefix);
+      await this.page.waitForTimeout(2500);
+
+      const dropdown = this.page.locator('.oxd-autocomplete-dropdown');
+      const hasDropdown = await dropdown
+        .waitFor({ state: 'visible', timeout: 3000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (hasDropdown) {
+        const options = dropdown.locator('.oxd-autocomplete-option, [role="option"]');
+        const optionCount = await options.count();
+        if (optionCount > 0) {
+          await options.first().click();
+          await this.page.waitForTimeout(800);
+
+          await form.click();
+          await this.page.waitForTimeout(300);
+
+          const invalidLabel = managerGroup.locator(':text-is("Invalid")');
+          const stillInvalid = await invalidLabel.isVisible().catch(() => false);
+          if (!stillInvalid) {
+            selectedManager = true;
+          }
+        }
+      }
+    }
+
+    if (!selectedManager) {
+      throw new Error('Could not select a valid hiring manager from autocomplete');
+    }
 
     const positionsGroup = form
       .locator('.oxd-input-group')
@@ -133,10 +183,20 @@ export class VacanciesPage extends BasePage {
       }
     }
 
-    await Promise.race([
-      this.page.locator('.oxd-toast--success').waitFor({ state: 'visible', timeout: 10000 }),
-      this.page.locator('.oxd-toast').waitFor({ state: 'visible', timeout: 10000 }),
-    ]).catch(() => {});
+    const successToast = this.page
+      .getByRole('alert')
+      .filter({ hasText: /success|saved/i })
+      .first()
+      .or(this.page.locator('.oxd-toast--success').first())
+      .or(this.page.locator('.oxd-toast').first());
+
+    await successToast.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+
+    const editVacancyIndicator = this.page
+      .getByRole('heading', { name: /edit vacancy/i })
+      .or(this.page.getByText('Edit Vacancy'))
+      .first();
+    await editVacancyIndicator.waitFor({ state: 'visible', timeout: 15000 });
   }
 
   private vacancyRow(title: string) {
@@ -144,7 +204,12 @@ export class VacanciesPage extends BasePage {
     return this.page
       .getByRole('row')
       .filter({ hasText: new RegExp(escapedTitle, 'i') })
-      .or(this.page.locator('.oxd-table-card').filter({ hasText: new RegExp(escapedTitle, 'i') }))
+      .or(
+        this.page
+          .getByRole('table')
+          .locator('.oxd-table-card')
+          .filter({ hasText: new RegExp(escapedTitle, 'i') })
+      )
       .first();
   }
 
@@ -174,9 +239,16 @@ export class VacanciesPage extends BasePage {
 
   async searchVacancy(name: string): Promise<void> {
     const vacancyGroup = this.page.locator('.oxd-input-group').filter({ hasText: 'Vacancy' });
-    await vacancyGroup.locator('.oxd-select-text').click();
+    await vacancyGroup
+      .getByRole('combobox')
+      .or(vacancyGroup.locator('.oxd-select-text'))
+      .first()
+      .click();
 
-    const dropdown = this.page.locator('.oxd-select-dropdown').last();
+    const dropdown = this.page
+      .getByRole('listbox')
+      .last()
+      .or(this.page.locator('.oxd-select-dropdown').last());
     const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const exactOption = dropdown.getByRole('option', {
       name: new RegExp(`^\\s*${escapedName}\\s*$`, 'i'),
@@ -203,7 +275,11 @@ export class VacanciesPage extends BasePage {
   async toggleVacancyStatus(name: string, active: boolean): Promise<void> {
     await this.searchVacancy(name);
 
-    const targetRow = this.page.locator('.oxd-table-card').filter({ hasText: name }).first();
+    const targetRow = this.page
+      .getByRole('row')
+      .filter({ hasText: name })
+      .or(this.page.getByRole('table').locator('.oxd-table-card').filter({ hasText: name }))
+      .first();
     const hasTargetRow = await targetRow
       .waitFor({ state: 'visible', timeout: 10000 })
       .then(() => true)

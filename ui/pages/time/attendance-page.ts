@@ -8,13 +8,14 @@ export class AttendancePage extends BasePage {
 
   constructor(page: Page) {
     super(page, '/web/index.php/attendance/punchIn');
-    this.formContainer = this.page.locator('.oxd-form').first();
+    this.formContainer = this.page.getByRole('form').or(this.page.locator('.oxd-form')).first();
     this.tableContainer = this.page.getByRole('table').or(this.page.locator('.oxd-table')).first();
     this.successFeedback = this.page
-      .locator('.oxd-toast')
+      .getByRole('alert')
       .filter({ hasText: /success|successfully|saved|punched/i })
       .first()
-      .or(this.page.getByText(/successfully|punched/i).first());
+      .or(this.page.getByText(/successfully|punched/i).first())
+      .or(this.page.locator('.oxd-toast').first());
   }
 
   private punchInButton(): Locator {

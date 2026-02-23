@@ -19,7 +19,7 @@ export class LoginPage extends BasePage {
     this.usernameInput = page.getByPlaceholder('Username');
     this.passwordInput = page.getByPlaceholder('Password');
     this.loginButton = page.getByRole('button', { name: /login/i });
-    this.errorAlert = page.locator('.oxd-alert-content-text');
+    this.errorAlert = page.getByRole('alert').or(page.locator('.oxd-alert-content-text')).first();
     this.rememberMeCheckbox = page.getByRole('checkbox', { name: /remember me/i });
   }
 
@@ -57,7 +57,9 @@ export class LoginPage extends BasePage {
       this.page.waitForURL(/.*dashboard.*/, { timeout: 10000 }),
       this.errorAlert.waitFor({ state: 'visible', timeout: 10000 }),
       this.page
-        .locator('.oxd-input-field-error-message')
+        .getByRole('alert')
+        .filter({ hasText: /required|invalid/i })
+        .or(this.page.locator('.oxd-input-field-error-message'))
         .first()
         .waitFor({ state: 'visible', timeout: 10000 }),
     ]);
@@ -111,7 +113,10 @@ export class LoginPage extends BasePage {
   async getFieldValidationErrors(): Promise<string[]> {
     const errors: string[] = [];
 
-    const requiredErrors = this.page.locator('.oxd-input-field-error-message');
+    const requiredErrors = this.page
+      .getByRole('alert')
+      .filter({ hasText: /required|invalid/i })
+      .or(this.page.locator('.oxd-input-field-error-message'));
     const count = await requiredErrors.count();
 
     for (let i = 0; i < count; i++) {

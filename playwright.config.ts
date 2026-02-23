@@ -17,6 +17,12 @@ dotenv.config({ path: fileURLToPath(new URL('.env', import.meta.url)) });
 const isCI = !!process.env.CI;
 
 /**
+ * Root output directory for all test artifacts
+ * Can be overridden via PLAYWRIGHT_OUTPUT_DIR environment variable
+ */
+const REPORTS_DIR = process.env.PLAYWRIGHT_OUTPUT_DIR || 'test-output';
+
+/**
  * Playwright configuration
  * @see https://playwright.dev/docs/test-configuration
  */
@@ -27,6 +33,9 @@ export default defineConfig({
     baseURL: 'https://opensource-demo.orangehrmlive.com',
     trace: 'on-first-retry',
     viewport: { width: 1280, height: 720 },
+
+    /* Output directory for test artifacts (traces, videos, screenshots) */
+    outputDir: `${REPORTS_DIR}/test-artifacts`,
   },
 
   /* Run tests in files in parallel */
@@ -46,12 +55,12 @@ export default defineConfig({
   /* Reporter to use */
   reporter: [
     ['line'],
-    ['json', { outputFile: 'playwright-report/report.json' }],
-    ['html', { outputFolder: 'playwright-report/html' }],
+    ['json', { outputFile: `${REPORTS_DIR}/report.json` }],
+    ['html', { outputFolder: `${REPORTS_DIR}/html` }],
     [
       'allure-playwright',
       {
-        resultsDir: 'allure-results',
+        resultsDir: `${REPORTS_DIR}/allure-results`,
         detail: true,
         suiteTitle: true,
         environmentInfo: getAllureEnvironmentInfo(),

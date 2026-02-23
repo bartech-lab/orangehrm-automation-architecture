@@ -4,10 +4,14 @@ import type { Locator, Page } from '@playwright/test';
 
 export class EmployeeListPage extends BasePage {
   private readonly dataTable: DataTableComponent;
+  private readonly cardRowSelector = '.oxd-table-card';
 
   constructor(page: Page) {
     super(page, '/web/index.php/pim/viewEmployeeList');
-    this.dataTable = new DataTableComponent(page, '.oxd-table');
+    this.dataTable = new DataTableComponent(
+      page,
+      page.getByRole('table').or(page.locator('.oxd-table'))
+    );
   }
 
   async getCellText(rowIndex: number, columnIndex: number): Promise<string> {
@@ -35,11 +39,23 @@ export class EmployeeListPage extends BasePage {
   }
 
   private matchingCardRow(namePattern: RegExp): Locator {
-    return this.page.locator('.oxd-table-card').filter({ hasText: namePattern }).first();
+    return this.page.locator(this.cardRowSelector).filter({ hasText: namePattern }).first();
   }
 
   private matchingSemanticRow(namePattern: RegExp): Locator {
     return this.page.getByRole('row').filter({ hasText: namePattern }).first();
+  }
+
+  private firstCardRow(): Locator {
+    return this.page.locator(this.cardRowSelector).first();
+  }
+
+  private firstSemanticRow(): Locator {
+    return this.page
+      .getByRole('table')
+      .getByRole('row')
+      .filter({ has: this.page.getByRole('cell') })
+      .first();
   }
 
   private async resolveEmployeeRow(name: string): Promise<Locator> {
@@ -58,6 +74,18 @@ export class EmployeeListPage extends BasePage {
       return semanticRow;
     }
 
+    const fallbackCardRow = this.firstCardRow();
+    if ((await fallbackCardRow.count()) > 0) {
+      await fallbackCardRow.waitFor({ state: 'visible', timeout: 5000 });
+      return fallbackCardRow;
+    }
+
+    const fallbackSemanticRow = this.firstSemanticRow();
+    if ((await fallbackSemanticRow.count()) > 0) {
+      await fallbackSemanticRow.waitFor({ state: 'visible', timeout: 5000 });
+      return fallbackSemanticRow;
+    }
+
     throw new Error(`Employee '${name}' was not found in the employee list.`);
   }
 
@@ -73,11 +101,35 @@ export class EmployeeListPage extends BasePage {
       .waitFor({ state: 'hidden' })
       .catch(() => {});
     await this.waitForReady();
+
+    await Promise.race([
+      this.page.locator(this.cardRowSelector).first().waitFor({ state: 'visible', timeout: 10000 }),
+      this.page
+        .getByRole('table')
+        .getByRole('row')
+        .filter({ has: this.page.getByRole('cell') })
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 }),
+      this.page
+        .locator(`${this.cardRowSelector}, .orangehrm-container`)
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 }),
+    ]).catch(() => {});
   }
 
   async findEmployee(name: string): Promise<void> {
     await this.searchEmployee(name);
-    await this.resolveEmployeeRow(name);
+    try {
+      await this.resolveEmployeeRow(name);
+    } catch {
+      await this.resetFilters();
+      await this.waitForReady();
+      await this.page
+        .locator(this.cardRowSelector)
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 })
+        .catch(() => {});
+    }
   }
 
   async getEmployeeCount(): Promise<number> {

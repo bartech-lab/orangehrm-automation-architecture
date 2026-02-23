@@ -5,18 +5,21 @@ test.describe('Toast Component', () => {
   let toast: ToastComponent;
 
   test.beforeEach(async ({ hrmPage }) => {
-    // Initialize toast component with the OrangeHRM toast selector
-    toast = new ToastComponent(hrmPage, '.oxd-toast');
+    // CSS fallback: Toast container uses custom class structure
+    toast = new ToastComponent(
+      hrmPage,
+      hrmPage.getByRole('alert').or(hrmPage.locator('.oxd-toast'))
+    );
   });
 
   test.describe('Success Toast', () => {
     test('success toast appears after saving user data', async ({ hrmPage, testData }) => {
       // Navigate to PIM module where we can add an employee
       await hrmPage.goto('/web/index.php/pim/viewEmployeeList');
-      await hrmPage.locator('button:has-text("Add")').first().waitFor({ state: 'visible' });
+      await hrmPage.getByRole('button', { name: 'Add' }).first().waitFor({ state: 'visible' });
 
       // Click Add button to trigger add employee form
-      await hrmPage.locator('button:has-text("Add")').first().click();
+      await hrmPage.getByRole('button', { name: 'Add' }).first().click();
       await hrmPage.waitForURL(/addEmployee/);
 
       // Fill in employee form with unique data
@@ -24,6 +27,7 @@ test.describe('Toast Component', () => {
       await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
       await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
       const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
+      // CSS fallback: Input groups lack semantic role attribute
       const employeeIdGroup = hrmPage
         .locator('.oxd-input-group')
         .filter({ has: hrmPage.locator('label').filter({ hasText: /^Employee Id$/ }) })
@@ -37,7 +41,12 @@ test.describe('Toast Component', () => {
       await hrmPage.locator('button[type="submit"]').click();
 
       // Wait for toast to appear and verify it's visible
-      await hrmPage.locator('.oxd-toast').first().waitFor({ state: 'visible', timeout: 10000 });
+      // CSS fallback: Toast container uses custom class structure
+      await hrmPage
+        .getByRole('alert')
+        .or(hrmPage.locator('.oxd-toast'))
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 });
       const isVisible = await toast.isVisible();
       expect(isVisible).toBe(true);
 
@@ -60,6 +69,7 @@ test.describe('Toast Component', () => {
       await hrmPage.locator('input[name="lastName"]').fill(lastName);
 
       const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
+      // CSS fallback: Input groups lack semantic role attribute
       const employeeIdGroup = hrmPage
         .locator('.oxd-input-group')
         .filter({ has: hrmPage.locator('label').filter({ hasText: /^Employee Id$/ }) })
@@ -77,8 +87,10 @@ test.describe('Toast Component', () => {
               return true;
             }
 
+            // CSS fallback: Toast container uses custom class structure
             const text = await hrmPage
-              .locator('.oxd-toast')
+              .getByRole('alert')
+              .or(hrmPage.locator('.oxd-toast'))
               .first()
               .textContent()
               .catch(() => null);
@@ -89,8 +101,13 @@ test.describe('Toast Component', () => {
         .toBe(true);
 
       await hrmPage.goto('/web/index.php/pim/viewEmployeeList');
-      await hrmPage.locator('.oxd-table-body').waitFor({ state: 'visible' });
+      // CSS fallback: Table body uses custom class structure
+      await hrmPage
+        .getByRole('table')
+        .or(hrmPage.locator('.oxd-table-body'))
+        .waitFor({ state: 'visible' });
 
+      // CSS fallback: Input groups lack semantic role attribute
       const searchEmployeeIdGroup = hrmPage
         .locator('.oxd-input-group')
         .filter({ has: hrmPage.locator('label').filter({ hasText: /^Employee Id$/ }) })
@@ -101,6 +118,7 @@ test.describe('Toast Component', () => {
       await searchEmployeeIdInput.fill(uniqueEmployeeId);
       await hrmPage.getByRole('button', { name: /^Search$/ }).click();
 
+      // CSS fallback: Table cards use custom class structure
       const rows = hrmPage.locator('.oxd-table-card');
       await expect(rows.first()).toBeVisible({ timeout: 10000 });
 
@@ -108,6 +126,7 @@ test.describe('Toast Component', () => {
       await expect(targetRow).toBeVisible({ timeout: 10000 });
 
       const rowActionButtons = targetRow.getByRole('button');
+      // CSS fallback: Delete buttons use icon classes without accessible names
       const fallbackDeleteButton = targetRow
         .locator('button:has(i.bi-trash), .oxd-icon-button:has(i.bi-trash), i.bi-trash')
         .first();
@@ -144,8 +163,10 @@ test.describe('Toast Component', () => {
               .catch(() => false);
             if (dialogStillVisible) return false;
 
+            // CSS fallback: Toast container uses custom class structure
             const text = await hrmPage
-              .locator('.oxd-toast')
+              .getByRole('alert')
+              .or(hrmPage.locator('.oxd-toast'))
               .first()
               .textContent()
               .catch(() => null);
@@ -189,6 +210,7 @@ test.describe('Toast Component', () => {
       // Try to submit form without filling required fields
       await hrmPage.locator('button[type="submit"]').click();
 
+      // CSS fallback: Form container uses custom class structure
       const validationSignals = hrmPage
         .locator('.oxd-form')
         .getByRole('alert')
@@ -199,7 +221,11 @@ test.describe('Toast Component', () => {
         .catch(() => {});
 
       // Check for error toast or validation messages
-      const errorToast = hrmPage.locator('.oxd-toast--error');
+      // CSS fallback: Error toast uses custom class structure
+      const errorToast = hrmPage
+        .getByRole('alert')
+        .filter({ hasText: /error/i })
+        .or(hrmPage.locator('.oxd-toast--error'));
       const validationErrors = validationSignals;
 
       // Either an error toast or validation errors should be present
@@ -229,6 +255,7 @@ test.describe('Toast Component', () => {
       await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
       await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
       const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
+      // CSS fallback: Input groups lack semantic role attribute
       const employeeIdGroup = hrmPage
         .locator('.oxd-input-group')
         .filter({ has: hrmPage.locator('label').filter({ hasText: /^Employee Id$/ }) })
@@ -244,9 +271,11 @@ test.describe('Toast Component', () => {
       const hasToast = await expect
         .poll(
           async () => {
+            // CSS fallback: Toast container uses custom class structure
             if (
               await hrmPage
-                .locator('.oxd-toast')
+                .getByRole('alert')
+                .or(hrmPage.locator('.oxd-toast'))
                 .first()
                 .isVisible()
                 .catch(() => false)
@@ -265,7 +294,8 @@ test.describe('Toast Component', () => {
         .not.toBeNull()
         .then(() =>
           hrmPage
-            .locator('.oxd-toast')
+            .getByRole('alert')
+            .or(hrmPage.locator('.oxd-toast'))
             .first()
             .isVisible()
             .catch(() => false)
@@ -288,6 +318,7 @@ test.describe('Toast Component', () => {
       await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
       await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
       const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
+      // CSS fallback: Input groups lack semantic role attribute
       const employeeIdGroup = hrmPage
         .locator('.oxd-input-group')
         .filter({ has: hrmPage.locator('label').filter({ hasText: /^Employee Id$/ }) })
@@ -303,9 +334,11 @@ test.describe('Toast Component', () => {
       const hasToast = await expect
         .poll(
           async () => {
+            // CSS fallback: Toast container uses custom class structure
             if (
               await hrmPage
-                .locator('.oxd-toast')
+                .getByRole('alert')
+                .or(hrmPage.locator('.oxd-toast'))
                 .first()
                 .isVisible()
                 .catch(() => false)
@@ -322,7 +355,8 @@ test.describe('Toast Component', () => {
         .not.toBeNull()
         .then(() =>
           hrmPage
-            .locator('.oxd-toast')
+            .getByRole('alert')
+            .or(hrmPage.locator('.oxd-toast'))
             .first()
             .isVisible()
             .catch(() => false)
@@ -342,7 +376,10 @@ test.describe('Toast Component', () => {
         // Close the toast manually
         await toast.close();
 
-        await expect(hrmPage.locator('.oxd-toast')).not.toBeVisible();
+        // CSS fallback: Toast container uses custom class structure
+        await expect(
+          hrmPage.getByRole('alert').or(hrmPage.locator('.oxd-toast'))
+        ).not.toBeVisible();
       } else {
         await toast.waitForDisappearance();
         expect(await toast.isVisible()).toBe(false);
@@ -360,6 +397,7 @@ test.describe('Toast Component', () => {
       await hrmPage.locator('input[name="firstName"]').fill(employee.firstName);
       await hrmPage.locator('input[name="lastName"]').fill(employee.lastName);
       const uniqueEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
+      // CSS fallback: Input groups lack semantic role attribute
       const employeeIdInput = hrmPage
         .locator('.oxd-input-group')
         .filter({ hasText: 'Employee Id' })
@@ -373,8 +411,10 @@ test.describe('Toast Component', () => {
       await expect
         .poll(
           async () => {
+            // CSS fallback: Toast container uses custom class structure
             const className = await hrmPage
-              .locator('.oxd-toast')
+              .getByRole('alert')
+              .or(hrmPage.locator('.oxd-toast'))
               .first()
               .getAttribute('class')
               .catch(() => null);
@@ -414,8 +454,10 @@ test.describe('Toast Component', () => {
       await expect
         .poll(
           async () => {
+            // CSS fallback: Toast container uses custom class structure
             const text = await hrmPage
-              .locator('.oxd-toast')
+              .getByRole('alert')
+              .or(hrmPage.locator('.oxd-toast'))
               .first()
               .textContent()
               .catch(() => null);
@@ -424,6 +466,7 @@ test.describe('Toast Component', () => {
               return message.length;
             }
 
+            // CSS fallback: Validation messages use custom class structure
             const inlineErrors = await hrmPage
               .locator('.oxd-input-group__message, .oxd-input-field-error-message')
               .allTextContents()
@@ -441,6 +484,7 @@ test.describe('Toast Component', () => {
               return 0;
             }
 
+            // CSS fallback: Employee name display uses custom class structure
             const fallbackText = await hrmPage
               .locator('.orangehrm-edit-employee-name, .oxd-topbar-header-breadcrumb-module, h6')
               .first()
@@ -469,6 +513,7 @@ test.describe('Toast Component', () => {
       await hrmPage.locator('input[name="firstName"]').fill(employee1.firstName);
       await hrmPage.locator('input[name="lastName"]').fill(employee1.lastName);
       const firstEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
+      // CSS fallback: Input groups lack semantic role attribute
       const firstEmployeeIdInput = hrmPage
         .locator('.oxd-input-group')
         .filter({ has: hrmPage.locator('label').filter({ hasText: /^Employee Id$/ }) })
@@ -483,9 +528,11 @@ test.describe('Toast Component', () => {
       const firstHasToast = await expect
         .poll(
           async () => {
+            // CSS fallback: Toast container uses custom class structure
             if (
               await hrmPage
-                .locator('.oxd-toast')
+                .getByRole('alert')
+                .or(hrmPage.locator('.oxd-toast'))
                 .first()
                 .isVisible()
                 .catch(() => false)
@@ -502,7 +549,8 @@ test.describe('Toast Component', () => {
         .not.toBeNull()
         .then(() =>
           hrmPage
-            .locator('.oxd-toast')
+            .getByRole('alert')
+            .or(hrmPage.locator('.oxd-toast'))
             .first()
             .isVisible()
             .catch(() => false)
@@ -522,6 +570,7 @@ test.describe('Toast Component', () => {
       await hrmPage.locator('input[name="firstName"]').fill(employee2.firstName);
       await hrmPage.locator('input[name="lastName"]').fill(employee2.lastName);
       const secondEmployeeId = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-10);
+      // CSS fallback: Input groups lack semantic role attribute
       const secondEmployeeIdInput = hrmPage
         .locator('.oxd-input-group')
         .filter({ has: hrmPage.locator('label').filter({ hasText: /^Employee Id$/ }) })
@@ -536,9 +585,11 @@ test.describe('Toast Component', () => {
       const secondHasToast = await expect
         .poll(
           async () => {
+            // CSS fallback: Toast container uses custom class structure
             if (
               await hrmPage
-                .locator('.oxd-toast')
+                .getByRole('alert')
+                .or(hrmPage.locator('.oxd-toast'))
                 .first()
                 .isVisible()
                 .catch(() => false)
@@ -555,7 +606,8 @@ test.describe('Toast Component', () => {
         .not.toBeNull()
         .then(() =>
           hrmPage
-            .locator('.oxd-toast')
+            .getByRole('alert')
+            .or(hrmPage.locator('.oxd-toast'))
             .first()
             .isVisible()
             .catch(() => false)

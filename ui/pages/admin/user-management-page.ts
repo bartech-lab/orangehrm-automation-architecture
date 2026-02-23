@@ -116,7 +116,7 @@ export class UserManagementPage extends BasePage {
     await deleteButton.click();
     await this.page
       .getByRole('button', { name: /yes,?\s*delete/i })
-      .or(this.page.locator('.oxd-dialog-container .oxd-button--label-danger'))
+      .or(this.page.getByRole('dialog').locator('.oxd-button--label-danger'))
       .click();
   }
 
