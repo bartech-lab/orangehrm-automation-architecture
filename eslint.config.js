@@ -48,20 +48,9 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'warn',
       '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
-
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['tests/**/*'],
-              message: 'Tests should not import from other test files. Use fixtures instead.',
-            },
-          ],
-        },
-      ],
     },
   },
+  // Tests must use domain layer, not import UI or infra directly
   {
     files: ['tests/**/*.ts', 'tests/**/*.spec.ts'],
 
@@ -72,24 +61,29 @@ export default [
           patterns: [
             {
               group: ['../ui/**', '../../ui/**', '**/ui/**'],
-              message:
-                'LAYER VIOLATION: Tests must not import from UI layer. Tests should only import from domain layer for types. Use fixtures from infra/test-runner for page objects.',
+              message: 'Tests must not import UI directly. Use domain/workflow layer instead.',
             },
             {
               group: ['../infra/**', '../../infra/**', '**/infra/**'],
               message:
-                'LAYER VIOLATION: Tests must not import from infra layer directly. Use the custom test fixtures from infra/test-runner/fixtures.js instead.',
+                'Tests must not import infra directly. Use the custom test fixtures from infra/test-runner/fixtures.js instead.',
             },
             {
               group: ['../data/**', '../../data/**', '**/data/**'],
               message:
-                'LAYER VIOLATION: Tests must not import from data layer. Test data should be created via domain builders or passed through fixtures.',
+                'Tests must not import data layer directly. Use domain builders through fixtures.',
+            },
+            {
+              group: ['tests/**/*'],
+              message: 'Tests should not import from other test files.',
             },
           ],
         },
       ],
     },
   },
+  // Domain (workflows) can import UI - this is the intended architecture
+  // tests → domain → ui → playwright
   {
     files: ['domain/**/*.ts'],
 
@@ -101,32 +95,23 @@ export default [
             {
               group: ['@playwright/test', '@playwright/test/*'],
               message:
-                'LAYER VIOLATION: Domain layer must not depend on Playwright. Domain types should be pure TypeScript with no framework dependencies.',
-            },
-            {
-              group: ['../ui/**', '../../ui/**', '**/ui/**'],
-              message:
-                'LAYER VIOLATION: Domain layer must not import from UI layer. Domain is the core layer with no upward dependencies.',
+                'Domain layer must not depend on Playwright test APIs. Page objects from UI layer should encapsulate Playwright.',
             },
             {
               group: ['../infra/**', '../../infra/**', '**/infra/**'],
               message:
-                'LAYER VIOLATION: Domain layer must not import from infrastructure layer. Domain is the core layer with no upward dependencies.',
-            },
-            {
-              group: ['../data/**', '../../data/**', '**/data/**'],
-              message:
-                'LAYER VIOLATION: Domain layer must not import from data layer. Domain defines types; data layer implements builders for those types.',
+                'Domain layer must not import from infrastructure layer. Use fixtures from infra/test-runner instead.',
             },
             {
               group: ['../tests/**', '../../tests/**', '**/tests/**'],
-              message: 'LAYER VIOLATION: Domain layer must not import from tests layer.',
+              message: 'Domain layer must not import from tests layer.',
             },
           ],
         },
       ],
     },
   },
+  // UI layer must not import domain (enforces separation)
   {
     files: ['ui/**/*.ts'],
 
@@ -138,17 +123,18 @@ export default [
             {
               group: ['../domain/**', '../../domain/**', '**/domain/**'],
               message:
-                'LAYER VIOLATION: UI layer must not import from domain layer. Page objects should accept primitive types or define their own interfaces. This enforces UI/domain separation.',
+                'UI layer must not import from domain layer. Page objects should accept primitive types or define their own interfaces.',
             },
             {
               group: ['../tests/**', '../../tests/**', '**/tests/**'],
-              message: 'LAYER VIOLATION: UI layer must not import from tests layer.',
+              message: 'UI layer must not import from tests layer.',
             },
           ],
         },
       ],
     },
   },
+  // Infrastructure layer protections
   {
     files: ['infra/**/*.ts'],
 
@@ -159,13 +145,14 @@ export default [
           patterns: [
             {
               group: ['../tests/**', '../../tests/**', '**/tests/**'],
-              message: 'LAYER VIOLATION: Infrastructure layer must not import from tests layer.',
+              message: 'Infrastructure layer must not import from tests layer.',
             },
           ],
         },
       ],
     },
   },
+  // Data layer protections
   {
     files: ['data/**/*.ts'],
 
@@ -176,15 +163,15 @@ export default [
           patterns: [
             {
               group: ['../ui/**', '../../ui/**', '**/ui/**'],
-              message: 'LAYER VIOLATION: Data layer must not import from UI layer.',
+              message: 'Data layer must not import from UI layer.',
             },
             {
               group: ['../infra/**', '../../infra/**', '**/infra/**'],
-              message: 'LAYER VIOLATION: Data layer must not import from infrastructure layer.',
+              message: 'Data layer must not import from infrastructure layer.',
             },
             {
               group: ['../tests/**', '../../tests/**', '**/tests/**'],
-              message: 'LAYER VIOLATION: Data layer must not import from tests layer.',
+              message: 'Data layer must not import from tests layer.',
             },
           ],
         },
