@@ -1,10 +1,14 @@
 const { chromium } = require('playwright');
+const fs = require('fs');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
-  
+
+  // Ensure output directory exists
+  fs.mkdirSync('./explore-output', { recursive: true });
+
   // Navigate to login page
   await page.goto('https://opensource-demo.orangehrmlive.com/');
   await page.waitForLoadState('networkidle');
@@ -23,7 +27,7 @@ const { chromium } = require('playwright');
   console.log('URL:', page.url());
   
   // Take screenshot
-  await page.screenshot({ path: '/Users/mimac/Projects/orangehrm-explore/02-dashboard.png', fullPage: true });
+  await page.screenshot({ path: './explore-output/02-dashboard.png', fullPage: true });
   
   // Analyze main navigation - try different selectors
   console.log('\n=== MAIN NAVIGATION ===');

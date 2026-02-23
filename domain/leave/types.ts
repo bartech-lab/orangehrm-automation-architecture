@@ -69,7 +69,7 @@ export interface LeaveEntitlement {
   validFrom: Date;
   validTo: Date;
   carriedOverDays?: number;
- 备注?: string;
+
 }
 
 export interface LeavePeriod {

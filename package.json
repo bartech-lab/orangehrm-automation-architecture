@@ -10,14 +10,14 @@
     "test:chromium": "playwright test --project=chromium",
     "test:firefox": "playwright test --project=firefox",
     "test:webkit": "playwright test --project=webkit",
-    "test:allure": "playwright test && allure generate allure-results --clean -o allure-report && allure open allure-report",
+    "test:allure": "playwright test && allure generate test-output/allure-results --clean -o allure-report && allure open allure-report",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"**/*.ts\"",
     "format:check": "prettier --check \"**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "report": "npx playwright show-report playwright-report/html",
-    "report:allure": "allure generate allure-results --clean -o allure-report && allure open allure-report"
+    "report:allure": "allure generate test-output/allure-results --clean -o allure-report && allure open allure-report"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +31,8 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^25.2.3",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",

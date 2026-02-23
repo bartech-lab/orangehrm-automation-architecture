@@ -1,10 +1,14 @@
 const { chromium } = require('playwright');
+const fs = require('fs');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
-  
+
+  // Ensure output directory exists
+  fs.mkdirSync('./explore-output', { recursive: true });
+
   // Navigate to login page
   await page.goto('https://opensource-demo.orangehrmlive.com/');
   await page.waitForLoadState('networkidle');
@@ -21,7 +25,7 @@ const { chromium } = require('playwright');
   const loginButton = await page.locator('button[type="submit"]').count();
   
   // Take screenshot
-  await page.screenshot({ path: '/Users/mimac/Projects/orangehrm-explore/01-login-page.png' });
+  await page.screenshot({ path: './explore-output/01-login-page.png' });
   
   console.log('=== LOGIN PAGE ANALYSIS ===');
   console.log('Title:', title);
